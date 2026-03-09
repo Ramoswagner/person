@@ -1,936 +1,1070 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Open3D — IA Gratuita Multi-Provider</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-  }
-}
-</script>
-<style>
-:root {
-  --bg:     #060810;
-  --s1:     #0b0e17;
-  --s2:     #10141f;
-  --s3:     #171c2a;
-  --border: rgba(255,255,255,0.07);
-  --b2:     rgba(255,255,255,0.13);
-  --text:   #dde1f0;
-  --muted:  #5a6280;
-  --m2:     #8590b0;
-  --cyan:   #00e5ff;
-  --violet: #7c3aed;
-  --green:  #00e5a0;
-  --red:    #ff4560;
-  --amber:  #ffb020;
-  --r:      14px;
-}
-*{margin:0;padding:0;box-sizing:border-box;}
-html,body{height:100%;overflow:hidden;}
-body{
-  font-family:'Outfit',sans-serif;
-  background:var(--bg);color:var(--text);
-  display:grid;
-  grid-template-rows:52px 1fr;
-  grid-template-columns:360px 1fr;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧱 VOXEL ENGINE 3D - Gerador de Modelos Pixelados</title>
+    
+    <!-- Three.js -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+            }
+        }
+    </script>
+    
+    <!-- Estilos -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-/* ─── TOPBAR ─── */
-.topbar{
-  grid-column:1/-1;
-  background:var(--s1);
-  border-bottom:1px solid var(--border);
-  display:flex;align-items:center;
-  padding:0 20px;gap:20px;
-}
-.logo{
-  font-size:16px;font-weight:800;letter-spacing:-.3px;
-  display:flex;align-items:center;gap:8px;
-}
-.logo-mark{
-  width:28px;height:28px;
-  background:linear-gradient(135deg,var(--cyan),var(--violet));
-  border-radius:7px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:13px;
-}
-.topbar-pills{
-  display:flex;gap:8px;margin-left:auto;
-}
-.pill{
-  font-family:'IBM Plex Mono',monospace;
-  font-size:10px;font-weight:700;
-  padding:4px 11px;border-radius:100px;
-  border:1px solid var(--border);
-  color:var(--muted);
-  display:flex;align-items:center;gap:5px;
-}
-.pill.live{border-color:rgba(0,229,160,.3);color:var(--green);}
-.pill .dot{width:5px;height:5px;border-radius:50%;background:currentColor;animation:blink 1.8s infinite;}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background: #1a1a2e;
+            color: white;
+            overflow: hidden;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
 
-/* ─── SIDEBAR ─── */
-.sidebar{
-  background:var(--s1);
-  border-right:1px solid var(--border);
-  display:flex;flex-direction:column;
-  overflow:hidden;
-}
-.sb-scroll{
-  flex:1;overflow-y:auto;
-  scrollbar-width:thin;
-  scrollbar-color:var(--s3) transparent;
-}
+        /* Fundo com gradiente pixelado */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                45deg,
+                #0f0f1f 0px,
+                #0f0f1f 4px,
+                #1a1a2e 4px,
+                #1a1a2e 8px
+            );
+            z-index: -2;
+        }
 
-/* ─── SECTION ─── */
-.sec{padding:18px 20px;border-bottom:1px solid var(--border);}
-.sec-label{
-  font-family:'IBM Plex Mono',monospace;
-  font-size:9px;font-weight:700;letter-spacing:1.5px;
-  color:var(--muted);text-transform:uppercase;
-  margin-bottom:12px;
-}
+        /* Overlay de grade */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 0, 255, 0.03) 1px, transparent 1px);
+            background-size: 32px 32px;
+            pointer-events: none;
+            z-index: -1;
+        }
 
-/* ─── DROPZONE ─── */
-.dz{
-  border:2px dashed var(--border);
-  border-radius:var(--r);
-  padding:28px 16px;
-  text-align:center;cursor:pointer;
-  transition:.25s;background:var(--s2);
-  position:relative;
-}
-.dz input{display:none;}
-.dz:hover,.dz.over{border-color:var(--cyan);background:rgba(0,229,255,.04);}
-.dz-ico{
-  width:44px;height:44px;margin:0 auto 10px;
-  background:var(--s3);border-radius:10px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:20px;border:1px solid var(--border);
-}
-.dz-t{font-size:13px;font-weight:600;margin-bottom:3px;}
-.dz-s{font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;}
+        .container {
+            display: flex;
+            height: 100vh;
+            padding: 20px;
+            gap: 20px;
+        }
 
-.img-thumb{
-  display:none;border-radius:10px;overflow:hidden;
-  border:1px solid var(--border);margin-top:12px;
-}
-.img-thumb.show{display:block;}
-.img-thumb img{width:100%;height:140px;object-fit:cover;display:block;}
-.img-thumb-bar{
-  background:var(--s3);padding:8px 12px;
-  display:flex;justify-content:space-between;align-items:center;
-}
-.img-fn{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--m2);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;}
-.btn-rm{background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px;transition:.2s;}
-.btn-rm:hover{color:var(--red);}
+        /* Painel Esquerdo - Controles */
+        .left-panel {
+            width: 380px;
+            background: rgba(10, 10, 20, 0.9);
+            backdrop-filter: blur(10px);
+            border: 4px solid #00ffff;
+            border-radius: 0px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+            image-rendering: pixelated;
+        }
 
-/* ─── PROVIDER QUEUE ─── */
-.queue{display:flex;flex-direction:column;gap:6px;}
-.qitem{
-  background:var(--s2);border:1px solid var(--border);
-  border-radius:10px;padding:10px 12px;
-  display:flex;align-items:center;gap:10px;
-  transition:.2s;position:relative;overflow:hidden;
-}
-.qitem::before{
-  content:'';position:absolute;left:0;top:0;bottom:0;
-  width:3px;background:var(--c,var(--muted));
-  opacity:.4;transition:.2s;
-}
-.qitem.active{border-color:rgba(0,229,255,.35);background:rgba(0,229,255,.04);}
-.qitem.active::before{opacity:1;background:var(--cyan);}
-.qitem.ok{border-color:rgba(0,229,160,.35);background:rgba(0,229,160,.04);}
-.qitem.ok::before{opacity:1;background:var(--green);}
-.qitem.fail{opacity:.4;}
-.qitem.fail::before{background:var(--red);opacity:.6;}
-.qi-ico{font-size:18px;width:28px;text-align:center;flex-shrink:0;}
-.qi-info{flex:1;min-width:0;}
-.qi-name{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.qi-sub{font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;}
-.qi-badge{
-  font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;
-  padding:2px 7px;border-radius:100px;flex-shrink:0;
-}
-.badge-ok{background:rgba(0,229,160,.12);color:var(--green);border:1px solid rgba(0,229,160,.2);}
-.badge-wait{background:rgba(90,98,128,.12);color:var(--muted);border:1px solid var(--border);}
-.badge-run{background:rgba(0,229,255,.12);color:var(--cyan);border:1px solid rgba(0,229,255,.2);animation:blink 1s infinite;}
-.badge-fail{background:rgba(255,69,96,.1);color:var(--red);border:1px solid rgba(255,69,96,.2);}
+        /* Título Pixel */
+        .pixel-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 16px;
+            color: #ffff00;
+            text-shadow: 
+                3px 3px 0 #ff00ff,
+                6px 6px 0 rgba(0, 0, 0, 0.5);
+            margin-bottom: 20px;
+            line-height: 1.4;
+            word-break: break-word;
+        }
 
-/* ─── GENERATE BTN ─── */
-.sb-footer{padding:16px 20px;border-top:1px solid var(--border);}
-.btn-gen{
-  width:100%;padding:15px;
-  background:linear-gradient(135deg,var(--cyan),var(--violet));
-  border:none;border-radius:var(--r);
-  color:white;font-family:'Outfit',sans-serif;
-  font-size:15px;font-weight:800;letter-spacing:.3px;
-  cursor:pointer;transition:.25s;
-  position:relative;overflow:hidden;
-}
-.btn-gen::after{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(135deg,white,transparent);
-  opacity:0;transition:.2s;
-}
-.btn-gen:hover:not(:disabled)::after{opacity:.07;}
-.btn-gen:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 8px 28px rgba(0,229,255,.25);}
-.btn-gen:disabled{opacity:.35;cursor:not-allowed;transform:none;}
-.btn-sec{
-  width:100%;padding:11px;
-  background:var(--s2);border:1px solid var(--border);
-  border-radius:var(--r);
-  color:var(--m2);font-family:'Outfit',sans-serif;
-  font-size:13px;font-weight:700;cursor:pointer;
-  transition:.2s;margin-top:8px;
-}
-.btn-sec:hover:not(:disabled){border-color:var(--b2);color:var(--text);}
-.btn-sec:disabled{opacity:.3;cursor:not-allowed;}
+        /* Área de Upload Pixelada */
+        .pixel-upload {
+            background: #0f0f1f;
+            border: 4px solid #00ffff;
+            padding: 30px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.1s step-end;
+            position: relative;
+            image-rendering: pixelated;
+        }
 
-/* ─── VIEWPORT ─── */
-.vp{
-  position:relative;
-  background:radial-gradient(ellipse at 40% 30%,#0d1628 0%,#060810 70%);
-  overflow:hidden;
-}
-#c3{width:100%;height:100%;display:block;outline:none;}
+        .pixel-upload:hover {
+            border-color: #ffff00;
+            transform: translate(-2px, -2px);
+            box-shadow: 5px 5px 0 #ff00ff;
+        }
 
-/* ─── GRID LINES ─── */
-.vp::before{
-  content:'';position:absolute;inset:0;pointer-events:none;
-  background-image:
-    linear-gradient(rgba(0,229,255,.04) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(0,229,255,.04) 1px,transparent 1px);
-  background-size:60px 60px;
-  mask-image:radial-gradient(ellipse 70% 70% at 50% 50%,black,transparent);
-}
+        .pixel-upload i {
+            font-size: 48px;
+            color: #00ffff;
+            margin-bottom: 15px;
+            display: block;
+        }
 
-/* ─── OVERLAY STATES ─── */
-.ov{
-  position:absolute;inset:0;
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  gap:16px;pointer-events:none;
-}
-.ov.hide{display:none;}
+        .pixel-upload p {
+            font-size: 12px;
+            color: white;
+            margin-bottom: 10px;
+        }
 
-/* empty */
-.ov-empty .ov-ico{
-  width:72px;height:72px;
-  background:var(--s2);border:1px solid var(--border);
-  border-radius:18px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:30px;opacity:.5;
-}
-.ov-empty .ov-t{font-size:18px;font-weight:700;opacity:.3;}
-.ov-empty .ov-s{font-size:12px;color:var(--muted);text-align:center;
-  max-width:260px;line-height:1.7;font-family:'IBM Plex Mono',monospace;}
+        .pixel-upload small {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 8px;
+            color: #888;
+        }
 
-/* loading */
-.ov-load{pointer-events:all;background:rgba(6,8,16,.82);backdrop-filter:blur(12px);}
-.ring{
-  width:60px;height:60px;
-  border:3px solid rgba(0,229,255,.15);
-  border-top-color:var(--cyan);
-  border-radius:50%;
-  animation:spin .9s linear infinite;
-}
-@keyframes spin{to{transform:rotate(360deg)}}
-.ov-load .ov-t{font-size:15px;font-weight:700;color:var(--cyan);}
-.ov-load .ov-s{font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;text-align:center;max-width:320px;line-height:1.7;}
+        #file-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
 
-/* progress track */
-.prog-wrap{width:280px;}
-.prog-bg{width:100%;height:6px;background:var(--s3);border-radius:3px;overflow:hidden;border:1px solid var(--border);}
-.prog-fill{
-  height:100%;width:0%;
-  background:linear-gradient(90deg,var(--cyan),var(--violet));
-  border-radius:3px;transition:width .4s ease;
-  position:relative;overflow:hidden;
-}
-.prog-fill::after{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);
-  animation:shim 1.2s infinite;
-}
-@keyframes shim{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}}
+        /* Preview Pixel */
+        .pixel-preview {
+            border: 4px solid #ff00ff;
+            background: #0f0f1f;
+            padding: 10px;
+            display: none;
+        }
 
-/* result */
-.ov-result{pointer-events:all;background:rgba(6,8,16,.9);backdrop-filter:blur(16px);}
-.ov-result .result-ico{
-  width:80px;height:80px;
-  background:rgba(0,229,160,.08);border:2px solid rgba(0,229,160,.25);
-  border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:36px;
-  box-shadow:0 0 40px rgba(0,229,160,.12);
-}
-.ov-result .ov-t{font-size:20px;font-weight:800;color:var(--green);}
-.ov-result .ov-s{font-size:12px;color:var(--muted);text-align:center;font-family:'IBM Plex Mono',monospace;}
-.result-actions{display:flex;gap:10px;pointer-events:all;}
-.btn-dl{
-  padding:12px 22px;
-  background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.3);
-  border-radius:10px;color:var(--green);
-  font-family:'Outfit',sans-serif;font-size:13px;font-weight:800;
-  cursor:pointer;transition:.2s;
-}
-.btn-dl:hover{background:rgba(0,229,160,.18);}
-.btn-new{
-  padding:12px 18px;
-  background:var(--s2);border:1px solid var(--border);
-  border-radius:10px;color:var(--m2);
-  font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;
-  cursor:pointer;transition:.2s;
-}
-.btn-new:hover{color:var(--text);border-color:var(--b2);}
+        .pixel-preview.active {
+            display: block;
+        }
 
-/* ─── HINT BAR ─── */
-.hint-bar{
-  position:absolute;bottom:18px;left:50%;transform:translateX(-50%);
-  display:none;
-  background:rgba(11,14,23,.85);backdrop-filter:blur(10px);
-  border:1px solid var(--border);border-radius:100px;
-  padding:7px 18px;gap:16px;
-  font-size:11px;color:var(--muted);
-}
-.hint-bar.show{display:flex;}
-.hk{
-  display:flex;align-items:center;gap:5px;
-  font-family:'IBM Plex Mono',monospace;
-}
-.hk span{
-  background:var(--s3);border:1px solid var(--border);
-  padding:1px 6px;border-radius:4px;color:var(--m2);font-size:10px;
-}
+        .pixel-preview img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            border: 2px solid #00ffff;
+        }
 
-/* ─── ATTEMPT BADGE ─── */
-.attempt-badge{
-  position:absolute;top:18px;right:18px;
-  font-family:'IBM Plex Mono',monospace;font-size:11px;
-  padding:6px 14px;border-radius:100px;
-  background:rgba(11,14,23,.85);backdrop-filter:blur(8px);
-  border:1px solid var(--border);
-  color:var(--muted);
-  display:none;
-}
-.attempt-badge.show{display:block;}
-</style>
+        .preview-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 10px;
+            color: #ffff00;
+        }
+
+        /* Controles de Voxel */
+        .voxel-controls {
+            background: #0f0f1f;
+            border: 4px solid #ffff00;
+            padding: 15px;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-label {
+            font-size: 10px;
+            color: #ff00ff;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Slider Estilo Pixel */
+        .pixel-slider {
+            width: 100%;
+            height: 20px;
+            background: #1a1a2e;
+            border: 2px solid #00ffff;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .pixel-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 30px;
+            background: #ffff00;
+            border: 2px solid #ff00ff;
+            cursor: pointer;
+            image-rendering: pixelated;
+        }
+
+        .pixel-slider::-webkit-slider-thumb:hover {
+            background: #ff00ff;
+            border-color: #00ffff;
+        }
+
+        /* Select Pixel */
+        .pixel-select {
+            width: 100%;
+            padding: 12px;
+            background: #1a1a2e;
+            border: 2px solid #ff00ff;
+            color: white;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 10px;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        /* Botão Gerar Pixel */
+        .pixel-button {
+            background: #ff00ff;
+            border: 4px solid #00ffff;
+            padding: 20px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 14px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.1s step-end;
+            text-shadow: 2px 2px 0 #000;
+            width: 100%;
+        }
+
+        .pixel-button:hover:not(:disabled) {
+            background: #ffff00;
+            border-color: #ff00ff;
+            transform: translate(-2px, -2px);
+            box-shadow: 5px 5px 0 #00ffff;
+        }
+
+        .pixel-button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* Barra de Progresso Pixel */
+        .pixel-progress {
+            width: 100%;
+            height: 30px;
+            background: #0f0f1f;
+            border: 4px solid #00ffff;
+            margin: 10px 0;
+            display: none;
+        }
+
+        .pixel-progress.active {
+            display: block;
+        }
+
+        .pixel-progress-fill {
+            height: 100%;
+            background: repeating-linear-gradient(
+                45deg,
+                #ffff00 0px,
+                #ffff00 10px,
+                #ff00ff 10px,
+                #ff00ff 20px
+            );
+            width: 0%;
+            transition: width 0.3s steps(10);
+        }
+
+        /* Stats Pixel */
+        .pixel-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .pixel-stat {
+            background: #0f0f1f;
+            border: 2px solid #ff00ff;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .pixel-stat .label {
+            font-size: 8px;
+            color: #00ffff;
+            margin-bottom: 5px;
+        }
+
+        .pixel-stat .value {
+            font-size: 14px;
+            color: #ffff00;
+            font-weight: bold;
+        }
+
+        /* Painel Direito - Visualizador */
+        .right-panel {
+            flex: 1;
+            background: rgba(10, 10, 20, 0.9);
+            border: 4px solid #ff00ff;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.3);
+        }
+
+        #canvas-container {
+            flex: 1;
+            background: #0a0a14;
+            border: 4px solid #00ffff;
+            position: relative;
+            overflow: hidden;
+            image-rendering: pixelated;
+        }
+
+        /* Grid Overlay */
+        .grid-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 0, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* Loading Overlay Pixel */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 20, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            z-index: 20;
+            display: none;
+            backdrop-filter: blur(4px);
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .pixel-loader {
+            width: 80px;
+            height: 80px;
+            background: repeating-linear-gradient(
+                45deg,
+                #ffff00 0px,
+                #ffff00 8px,
+                #ff00ff 8px,
+                #ff00ff 16px
+            );
+            animation: pixelSpin 0.5s steps(8) infinite;
+            border: 4px solid #00ffff;
+        }
+
+        @keyframes pixelSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 12px;
+            color: #ffff00;
+            text-shadow: 2px 2px 0 #ff00ff;
+        }
+
+        /* Ações */
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .pixel-button-small {
+            flex: 1;
+            padding: 12px;
+            background: #0f0f1f;
+            border: 2px solid #00ffff;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.1s step-end;
+        }
+
+        .pixel-button-small:hover:not(:disabled) {
+            background: #ffff00;
+            border-color: #ff00ff;
+            color: black;
+        }
+
+        .pixel-button-small:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* Hint Bar */
+        .hint-bar {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #0f0f1f;
+            border: 2px solid #ff00ff;
+            padding: 8px 16px;
+            display: flex;
+            gap: 20px;
+            z-index: 30;
+            display: none;
+        }
+
+        .hint-bar.show {
+            display: flex;
+        }
+
+        .hint-item {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 8px;
+            color: #00ffff;
+        }
+
+        .hint-item span {
+            background: #1a1a2e;
+            padding: 3px 6px;
+            border: 1px solid #ffff00;
+            margin-right: 5px;
+        }
+
+        /* Mouse Tracking */
+        .mouse-pos {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 8px;
+            color: #ff00ff;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 5px;
+            border: 1px solid #00ffff;
+            z-index: 40;
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <!-- Painel Esquerdo -->
+        <div class="left-panel">
+            <div class="pixel-title">
+                🔷 VOXEL ENGINE 3D 🔷
+                <div style="font-size: 8px; margin-top: 10px; color: #00ffff;">PIXEL EDITION</div>
+            </div>
 
-<!-- TOPBAR -->
-<div class="topbar">
-  <div class="logo"><div class="logo-mark">⬡</div>OPEN 3D</div>
-  <div style="font-size:12px;color:var(--muted);font-family:'IBM Plex Mono',monospace;">
-    Hugging Face · Gratuito · Sem API Key
-  </div>
-  <div class="topbar-pills">
-    <div class="pill live"><div class="dot"></div>HF Spaces</div>
-    <div class="pill" id="pill-count">10 modelos</div>
-    <div class="pill" id="pill-status">idle</div>
-  </div>
-</div>
+            <!-- Upload -->
+            <div class="pixel-upload" id="upload-area">
+                <i>🖼️</i>
+                <p>CARREGAR IMAGEM</p>
+                <small>PNG / JPG / GIF</small>
+                <input type="file" id="file-input" accept="image/*">
+            </div>
 
-<!-- SIDEBAR -->
-<div class="sidebar">
-  <div class="sb-scroll">
+            <!-- Preview -->
+            <div class="pixel-preview" id="image-preview">
+                <img id="preview-img" src="" alt="preview">
+                <div class="preview-info">
+                    <span id="img-name">—</span>
+                    <span id="img-size">0x0</span>
+                </div>
+            </div>
 
-    <!-- Upload -->
-    <div class="sec">
-      <div class="sec-label">Imagem de entrada</div>
-      <div class="dz" id="dz">
-        <input type="file" id="fi" accept="image/jpeg,image/png,image/webp"/>
-        <div class="dz-ico">🖼️</div>
-        <div class="dz-t">Arraste ou clique</div>
-        <div class="dz-s">JPG · PNG · WEBP</div>
-      </div>
-      <div class="img-thumb" id="ithumb">
-        <img id="ipreview" alt=""/>
-        <div class="img-thumb-bar">
-          <span class="img-fn" id="ifn">—</span>
-          <button class="btn-rm" id="brm">✕</button>
+            <!-- Controles Voxel -->
+            <div class="voxel-controls">
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>RESOLUÇÃO VOXEL</span>
+                        <span id="resolution-value">32³</span>
+                    </div>
+                    <input type="range" class="pixel-slider" id="voxel-resolution" min="8" max="64" value="32" step="8">
+                </div>
+
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>PROFUNDIDADE</span>
+                        <span id="depth-value">16</span>
+                    </div>
+                    <input type="range" class="pixel-slider" id="voxel-depth" min="4" max="32" value="16" step="2">
+                </div>
+
+                <div class="control-group">
+                    <div class="control-label">ESTILO PIXEL</div>
+                    <select class="pixel-select" id="pixel-style">
+                        <option value="minecraft">🎮 Minecraft</option>
+                        <option value="fortnite" selected>⚡ Fortnite</option>
+                        <option value="retro">🕹️ Retro 8-bit</option>
+                        <option value="rgb">🌈 RGB Wave</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Botão Gerar -->
+            <button class="pixel-button" id="generate-btn" disabled>
+                🧱 GERAR VOXEL 3D 🧱
+            </button>
+
+            <!-- Progresso -->
+            <div class="pixel-progress" id="progress-bar">
+                <div class="pixel-progress-fill" id="progress-fill"></div>
+            </div>
+
+            <!-- Stats -->
+            <div class="pixel-stats">
+                <div class="pixel-stat">
+                    <div class="label">VOXELS</div>
+                    <div class="value" id="stat-voxels">0</div>
+                </div>
+                <div class="pixel-stat">
+                    <div class="label">TAMANHO</div>
+                    <div class="value" id="stat-size">32³</div>
+                </div>
+                <div class="pixel-stat">
+                    <div class="label">CORES</div>
+                    <div class="value" id="stat-colors">0</div>
+                </div>
+                <div class="pixel-stat">
+                    <div class="label">POLIGONOS</div>
+                    <div class="value" id="stat-poly">0</div>
+                </div>
+            </div>
+
+            <!-- Ações -->
+            <div class="action-buttons">
+                <button class="pixel-button-small" id="download-btn" disabled>
+                    ⬇️ GLB
+                </button>
+                <button class="pixel-button-small" id="export-obj" disabled>
+                    📦 OBJ
+                </button>
+                <button class="pixel-button-small" id="reset-btn">
+                    🔄 RESET
+                </button>
+            </div>
         </div>
-      </div>
+
+        <!-- Painel Direito -->
+        <div class="right-panel">
+            <div id="canvas-container">
+                <div class="grid-overlay"></div>
+                <div class="mouse-pos" id="mouse-pos">X: 0 Y: 0 Z: 0</div>
+                
+                <!-- Loading -->
+                <div class="loading-overlay" id="loading-overlay">
+                    <div class="pixel-loader"></div>
+                    <div class="loading-text" id="generation-status">GERANDO VOXELS...</div>
+                </div>
+
+                <!-- Hint Bar -->
+                <div class="hint-bar" id="hint-bar">
+                    <div class="hint-item"><span>🖱️</span> ROTACIONAR</div>
+                    <div class="hint-item"><span>⚡</span> ZOOM</div>
+                    <div class="hint-item"><span>🎮</span> MODO PIXEL</div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Queue -->
-    <div class="sec">
-      <div class="sec-label">Fila de Providers <span id="qlabel" style="font-weight:400;color:var(--muted);">(10 prontos)</span></div>
-      <div class="queue" id="queue"></div>
-    </div>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 
-  </div>
+        // ==================== CONFIGURAÇÃO THREE.JS ====================
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0a0a14);
 
-  <!-- Footer -->
-  <div class="sb-footer">
-    <button class="btn-gen" id="bgen" disabled>⬡ &nbsp;GERAR MODELO 3D</button>
-    <button class="btn-sec" id="bskip" disabled>→ Pular para próximo</button>
-  </div>
-</div>
+        // Câmera estilo voxel (isométrica)
+        const camera = new THREE.OrthographicCamera(-5, 5, 5, -5, 0.1, 1000);
+        camera.position.set(8, 6, 8);
+        camera.lookAt(0, 0, 0);
+        camera.zoom = 1.5;
 
-<!-- VIEWPORT -->
-<div class="vp" id="vp">
-  <canvas id="c3"></canvas>
+        // Renderizador com configurações pixeladas
+        const renderer = new THREE.WebGLRenderer({ 
+            antialias: false,
+            powerPreference: "high-performance"
+        });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(1); // Sem anti-aliasing para efeito pixel
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        container.appendChild(renderer.domElement);
 
-  <!-- empty -->
-  <div class="ov ov-empty" id="ov-empty">
-    <div class="ov-ico">⬡</div>
-    <div class="ov-t">Visualizador 3D</div>
-    <div class="ov-s">Faça upload de uma imagem e clique em Gerar.<br/>O sistema tenta automaticamente até obter o modelo.</div>
-  </div>
+        // Controles (mais lentos para sensação pixel)
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.1;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 1.0;
+        controls.enableZoom = true;
+        controls.maxPolarAngle = Math.PI / 2;
+        controls.target.set(0, 1, 0);
 
-  <!-- loading -->
-  <div class="ov ov-load hide" id="ov-load">
-    <div class="ring"></div>
-    <div class="ov-t" id="load-t">Conectando…</div>
-    <div class="prog-wrap">
-      <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
-    </div>
-    <div class="ov-s" id="load-s">Aguarde enquanto o modelo é gerado.</div>
-  </div>
+        // Iluminação estilo Minecraft
+        const ambientLight = new THREE.AmbientLight(0x404060);
+        scene.add(ambientLight);
 
-  <!-- result -->
-  <div class="ov ov-result hide" id="ov-result">
-    <div class="result-ico">✅</div>
-    <div class="ov-t">Modelo 3D Pronto!</div>
-    <div class="ov-s" id="result-s">Gerado com sucesso.</div>
-    <div class="result-actions">
-      <button class="btn-dl" id="bdl">⬇ Download GLB</button>
-      <button class="btn-new" id="bnew">↺ Nova geração</button>
-    </div>
-  </div>
+        // Luz principal com sombras pixeladas
+        const mainLight = new THREE.DirectionalLight(0xffeedd, 1.5);
+        mainLight.position.set(5, 10, 7);
+        mainLight.castShadow = true;
+        mainLight.receiveShadow = true;
+        mainLight.shadow.mapSize.width = 1024;
+        mainLight.shadow.mapSize.height = 1024;
+        mainLight.shadow.camera.near = 1;
+        mainLight.shadow.camera.far = 20;
+        mainLight.shadow.camera.left = -5;
+        mainLight.shadow.camera.right = 5;
+        mainLight.shadow.camera.top = 5;
+        mainLight.shadow.camera.bottom = -5;
+        mainLight.shadow.bias = -0.0005;
+        scene.add(mainLight);
 
-  <div class="attempt-badge" id="abadge"></div>
-  <div class="hint-bar" id="hintbar">
-    <div class="hk"><span>Drag</span> Rotacionar</div>
-    <div class="hk"><span>Scroll</span> Zoom</div>
-    <div class="hk"><span>Right</span> Mover</div>
-  </div>
-</div>
+        // Grid pixelado
+        const gridHelper = new THREE.GridHelper(10, 20, 0x00ffff, 0xff00ff);
+        gridHelper.position.y = -0.5;
+        scene.add(gridHelper);
 
-<script type="module">
-import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        // Cubos de luz coloridos
+        const lightColors = [0xff0000, 0x00ff00, 0x0000ff, 0xffff00];
+        lightColors.forEach((color, i) => {
+            const lightCube = new THREE.Mesh(
+                new THREE.BoxGeometry(0.2, 0.2, 0.2),
+                new THREE.MeshBasicMaterial({ color: color })
+            );
+            const angle = (i / lightColors.length) * Math.PI * 2;
+            lightCube.position.set(Math.sin(angle) * 3, 1, Math.cos(angle) * 3);
+            scene.add(lightCube);
+        });
 
-// ─────────────────────────────────────────────────────────────────────────────
-// PROVIDERS — 10 Hugging Face Spaces reais, do mais confiável ao mais lento
-// Cada um tem: space (HF space slug), api (endpoint gradio), 
-// input_builder (fn que retorna o array de params), output_parser (fn que extrai URL do GLB)
-// ─────────────────────────────────────────────────────────────────────────────
-const PROVIDERS = [
-  {
-    id:'sf3d',
-    name:'Stable Fast 3D',
-    org:'Stability AI',
-    icon:'🔷',
-    color:'#00e5ff',
-    space:'stabilityai/stable-fast-3d',
-    note:'~5–15s · melhor qualidade',
-    // SF3D: predict("/run", [image_blob, foreground_ratio, texture_resolution, remesh_option])
-    call: async (blob) => {
-      const fd = new FormData();
-      fd.append('data', JSON.stringify([null, 0.85, 1024, 'none']));
-      // use gradio REST directly
-      return await callGradioRest('stabilityai/stable-fast-3d', '/run', blob, [0.85, 1024, 'none']);
-    }
-  },
-  {
-    id:'triposr',
-    name:'TripoSR',
-    org:'Stability AI × Tripo',
-    icon:'🔶',
-    color:'#ff9500',
-    space:'stabilityai/TripoSR',
-    note:'~10s · rápido e estável',
-    call: async (blob) => {
-      return await callGradioRest('stabilityai/TripoSR', '/generate', blob, [true, 256]);
-    }
-  },
-  {
-    id:'instantmesh',
-    name:'InstantMesh',
-    org:'Tencent ARC',
-    icon:'🟣',
-    color:'#a855f7',
-    space:'TencentARC/InstantMesh',
-    note:'~30s · alta qualidade',
-    call: async (blob) => {
-      return await callGradioRest('TencentARC/InstantMesh', '/make_3d', blob, [42, true]);
-    }
-  },
-  {
-    id:'triposg',
-    name:'TripoSG',
-    org:'VAST AI',
-    icon:'⚡',
-    color:'#f0c040',
-    space:'VAST-AI/TripoSG',
-    note:'~20s · textura realista',
-    call: async (blob) => {
-      return await callGradioRest('VAST-AI/TripoSG', '/generate_3d', blob, [42, 6, 50]);
-    }
-  },
-  {
-    id:'hunyuan',
-    name:'Hunyuan3D',
-    org:'Tencent',
-    icon:'🐉',
-    color:'#00e5a0',
-    space:'tencent/Hunyuan3D-2',
-    note:'~60s · qualidade excepcional',
-    call: async (blob) => {
-      return await callGradioRest('tencent/Hunyuan3D-2', '/generation_all', blob, [null, '', 5, 1, 0.5, 42]);
-    }
-  },
-  {
-    id:'trellis',
-    name:'TRELLIS',
-    org:'Microsoft',
-    icon:'🪟',
-    color:'#0078d4',
-    space:'microsoft/TRELLIS',
-    note:'~30s · geometria complexa',
-    call: async (blob) => {
-      return await callGradioRest('microsoft/TRELLIS', '/image_to_3d', blob, [7.5, 12, 3.0, 12, 42]);
-    }
-  },
-  {
-    id:'lgm',
-    name:'LGM · Large 3D',
-    org:'THU LGM Team',
-    icon:'🔵',
-    color:'#3b82f6',
-    space:'ashawkey/LGM',
-    note:'~20s · multi-view',
-    call: async (blob) => {
-      return await callGradioRest('ashawkey/LGM', '/process', blob, [true]);
-    }
-  },
-  {
-    id:'wonder3d',
-    name:'Wonder3D',
-    org:'Xianglong Liu',
-    icon:'✨',
-    color:'#ec4899',
-    space:'flamehaze1115/Wonder3D-demo',
-    note:'~45s · detalhado',
-    call: async (blob) => {
-      return await callGradioRest('flamehaze1115/Wonder3D-demo', '/run_wonder3d', blob, [42, 6, 1]);
-    }
-  },
-  {
-    id:'era3d',
-    name:'Era3D',
-    org:'HKUST',
-    icon:'🌐',
-    color:'#10b981',
-    space:'pengHTYX/Era3D',
-    note:'~40s · multi-view HR',
-    call: async (blob) => {
-      return await callGradioRest('pengHTYX/Era3D', '/run_demo', blob, [42, 5, 30, 3.0]);
-    }
-  },
-  {
-    id:'craftsman',
-    name:'CraftsMan 3D',
-    org:'Xuanyang Zhang',
-    icon:'🔨',
-    color:'#f97316',
-    space:'wyysf/CraftsMan',
-    note:'~25s · topologia limpa',
-    call: async (blob) => {
-      return await callGradioRest('wyysf/CraftsMan', '/generate', blob, [42, true, 64]);
-    }
-  }
-];
+        // Partículas pixeladas
+        const pixelParticles = new THREE.BufferGeometry();
+        const particleCount = 500;
+        const positions = new Float32Array(particleCount * 3);
+        const colors = new Float32Array(particleCount * 3);
+        
+        for (let i = 0; i < particleCount; i++) {
+            positions[i*3] = (Math.random() - 0.5) * 20;
+            positions[i*3+1] = (Math.random() - 0.5) * 10;
+            positions[i*3+2] = (Math.random() - 0.5) * 20;
+            
+            // Cores vibrantes pixeladas
+            const color = new THREE.Color().setHSL(Math.random(), 0.8, 0.6);
+            colors[i*3] = color.r;
+            colors[i*3+1] = color.g;
+            colors[i*3+2] = color.b;
+        }
+        
+        pixelParticles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        pixelParticles.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        
+        const particleMaterial = new THREE.PointsMaterial({
+            size: 0.1,
+            vertexColors: true,
+            sizeAttenuation: false // Tamanho fixo para efeito pixel
+        });
+        
+        const particles = new THREE.Points(pixelParticles, particleMaterial);
+        scene.add(particles);
 
-// ─────────────────────────────────────────────────────────────────────────────
-// GRADIO REST CALLER
-// Usa a API REST do HF Spaces (sem SDK) para evitar problemas de bundler
-// ─────────────────────────────────────────────────────────────────────────────
-async function callGradioRest(space, endpoint, imageBlob, extraParams) {
-  const base = `https://${space.replace('/', '-')}.hf.space`;
+        // ==================== VARIÁVEIS GLOBAIS ====================
+        let currentModel = null;
+        let uploadedImage = null;
+        let imageData = null;
+        
+        // Elementos DOM
+        const fileInput = document.getElementById('file-input');
+        const uploadArea = document.getElementById('upload-area');
+        const imagePreview = document.getElementById('image-preview');
+        const previewImg = document.getElementById('preview-img');
+        const imgName = document.getElementById('img-name');
+        const imgSize = document.getElementById('img-size');
+        const generateBtn = document.getElementById('generate-btn');
+        const downloadBtn = document.getElementById('download-btn');
+        const exportObj = document.getElementById('export-obj');
+        const resetBtn = document.getElementById('reset-btn');
+        const progressBar = document.getElementById('progress-bar');
+        const progressFill = document.getElementById('progress-fill');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const generationStatus = document.getElementById('generation-status');
+        const hintBar = document.getElementById('hint-bar');
+        const mousePos = document.getElementById('mouse-pos');
+        
+        // Stats elements
+        const statVoxels = document.getElementById('stat-voxels');
+        const statSize = document.getElementById('stat-size');
+        const statColors = document.getElementById('stat-colors');
+        const statPoly = document.getElementById('stat-poly');
+        
+        // Sliders
+        const resolutionSlider = document.getElementById('voxel-resolution');
+        const resolutionValue = document.getElementById('resolution-value');
+        const depthSlider = document.getElementById('voxel-depth');
+        const depthValue = document.getElementById('depth-value');
+        const pixelStyle = document.getElementById('pixel-style');
 
-  // 1) Upload da imagem para o space
-  const uploadFd = new FormData();
-  uploadFd.append('files', imageBlob, 'image.jpg');
+        // ==================== UTILITÁRIOS ====================
+        resolutionSlider.addEventListener('input', (e) => {
+            resolutionValue.textContent = e.target.value + '³';
+        });
+        
+        depthSlider.addEventListener('input', (e) => {
+            depthValue.textContent = e.target.value;
+        });
 
-  const uploadRes = await fetch(`${base}/upload`, {
-    method:'POST', body: uploadFd
-  });
-  if (!uploadRes.ok) throw new Error(`Upload falhou: ${uploadRes.status}`);
-  const uploaded = await uploadRes.json();
-  // uploaded pode ser array de paths ou objetos
-  const filePath = Array.isArray(uploaded) 
-    ? (uploaded[0]?.name || uploaded[0]) 
-    : uploaded;
+        // Mouse tracking
+        renderer.domElement.addEventListener('mousemove', (e) => {
+            const rect = renderer.domElement.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+            const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+            
+            // Raycaster para pegar posição 3D
+            const raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera({x, y}, camera);
+            
+            // Posição aproximada no grid
+            const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+            const point = new THREE.Vector3();
+            raycaster.ray.intersectPlane(plane, point);
+            
+            if (point) {
+                mousePos.textContent = `X: ${Math.round(point.x)} Y: ${Math.round(point.y)} Z: ${Math.round(point.z)}`;
+            }
+        });
 
-  // 2) Chama o endpoint gradio
-  const payload = {
-    data: [{ path: filePath, orig_name:'image.jpg' }, ...extraParams]
-  };
+        // ==================== UPLOAD DE IMAGEM ====================
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    previewImg.src = e.target.result;
+                    imagePreview.classList.add('active');
+                    uploadedImage = e.target.result;
+                    imgName.textContent = file.name.substring(0, 15) + '...';
+                    
+                    // Carregar imagem para análise
+                    const img = new Image();
+                    img.onload = () => {
+                        imgSize.textContent = img.width + 'x' + img.height;
+                        analyzeImage(img);
+                    };
+                    img.src = e.target.result;
+                    
+                    generateBtn.disabled = false;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
 
-  const predRes = await fetch(`${base}/api${endpoint}`, {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify(payload)
-  });
-  if (!predRes.ok) throw new Error(`Predict falhou: ${predRes.status}`);
-  const result = await predRes.json();
+        // Analisar cores da imagem
+        function analyzeImage(img) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 64;
+            canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, 64, 64);
+            imageData = ctx.getImageData(0, 0, 64, 64);
+            
+            // Contar cores únicas (aproximado)
+            const colors = new Set();
+            for (let i = 0; i < imageData.data.length; i += 4) {
+                const r = Math.floor(imageData.data[i] / 16) * 16;
+                const g = Math.floor(imageData.data[i+1] / 16) * 16;
+                const b = Math.floor(imageData.data[i+2] / 16) * 16;
+                colors.add(`${r},${g},${b}`);
+            }
+            statColors.textContent = Math.min(colors.size, 64);
+        }
 
-  // 3) Extrair URL do GLB do resultado
-  return extractGLB(result, base);
-}
+        // ==================== GERAR VOXELS ====================
+        generateBtn.addEventListener('click', async () => {
+            if (!uploadedImage || !imageData) return;
+            
+            generateBtn.disabled = true;
+            downloadBtn.disabled = true;
+            exportObj.disabled = true;
+            progressBar.classList.add('active');
+            loadingOverlay.classList.add('active');
+            hintBar.classList.remove('show');
+            
+            const resolution = parseInt(resolutionSlider.value);
+            const depth = parseInt(depthSlider.value);
+            const style = pixelStyle.value;
+            
+            // Simular progresso
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 5;
+                if (progress <= 90) {
+                    progressFill.style.width = progress + '%';
+                    generationStatus.textContent = `GERANDO VOXELS... ${progress}%`;
+                }
+            }, 100);
+            
+            try {
+                // Pequeno delay para efeito
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // Remover modelo anterior
+                if (currentModel) {
+                    scene.remove(currentModel);
+                }
+                
+                // Gerar voxels
+                const voxelModel = generateVoxels(imageData, resolution, depth, style);
+                scene.add(voxelModel);
+                currentModel = voxelModel;
+                
+                // Atualizar stats
+                const voxelCount = resolution * resolution * depth;
+                statVoxels.textContent = voxelCount.toLocaleString();
+                statSize.textContent = resolution + '³';
+                statPoly.textContent = (voxelCount * 6).toLocaleString();
+                
+                clearInterval(interval);
+                progressFill.style.width = '100%';
+                generationStatus.textContent = 'VOXELS GERADOS!';
+                
+                setTimeout(() => {
+                    progressBar.classList.remove('active');
+                    loadingOverlay.classList.remove('active');
+                    generateBtn.disabled = false;
+                    downloadBtn.disabled = false;
+                    exportObj.disabled = false;
+                    hintBar.classList.add('show');
+                    controls.autoRotate = true;
+                }, 500);
+                
+            } catch (error) {
+                console.error('Erro:', error);
+                clearInterval(interval);
+                progressBar.classList.remove('active');
+                loadingOverlay.classList.remove('active');
+                generateBtn.disabled = false;
+            }
+        });
 
-function extractGLB(result, base) {
-  // Percorre recursivamente o resultado procurando qualquer URL de .glb ou path
-  const data = result?.data || result;
-  
-  const scan = (obj) => {
-    if (!obj) return null;
-    if (typeof obj === 'string') {
-      if (obj.endsWith('.glb') || obj.includes('.glb')) return obj;
-      return null;
-    }
-    if (typeof obj === 'object') {
-      // objeto gradio file
-      if (obj.url) return obj.url.startsWith('http') ? obj.url : `${base}${obj.url}`;
-      if (obj.path && obj.path.endsWith('.glb')) return `${base}/file=${obj.path}`;
-      // varrer propriedades
-      for (const v of Object.values(obj)) {
-        const found = scan(v);
-        if (found) return found;
-      }
-    }
-    if (Array.isArray(obj)) {
-      for (const v of obj) {
-        const found = scan(v);
-        if (found) return found;
-      }
-    }
-    return null;
-  };
+        // Função principal de geração de voxels
+        function generateVoxels(imageData, resolution, depth, style) {
+            const group = new THREE.Group();
+            const step = 64 / resolution;
+            const colors = [];
+            
+            // Mapear cores baseado no estilo
+            for (let y = 0; y < resolution; y++) {
+                for (let x = 0; x < resolution; x++) {
+                    const ix = Math.floor(x * step);
+                    const iy = Math.floor(y * step);
+                    const idx = (iy * 64 + ix) * 4;
+                    
+                    const r = imageData.data[idx];
+                    const g = imageData.data[idx + 1];
+                    const b = imageData.data[idx + 2];
+                    const a = imageData.data[idx + 3];
+                    
+                    // Pular pixels transparentes
+                    if (a < 128) continue;
+                    
+                    // Calcular altura baseada na cor
+                    let height = Math.floor((r + g + b) / (3 * 8));
+                    
+                    // Ajustar altura baseada no estilo
+                    switch(style) {
+                        case 'fortnite':
+                            height = Math.floor(height * 1.5);
+                            break;
+                        case 'retro':
+                            height = Math.floor(height / 2);
+                            break;
+                        case 'rgb':
+                            height = Math.floor((r + g + b) / 3 / 8);
+                            break;
+                        default: // minecraft
+                            height = Math.floor(height * 1.2);
+                    }
+                    
+                    // Limitar profundidade
+                    height = Math.min(height, depth);
+                    
+                    // Gerar voxels empilhados
+                    for (let z = 0; z < height; z++) {
+                        // Calcular cor com base no estilo
+                        let color;
+                        switch(style) {
+                            case 'fortnite':
+                                // Cores vibrantes
+                                color = new THREE.Color(
+                                    Math.min(1, r / 128 + 0.5),
+                                    Math.min(1, g / 128 + 0.5),
+                                    Math.min(1, b / 128 + 0.5)
+                                );
+                                break;
+                            case 'rgb':
+                                // Gradiente RGB baseado em altura
+                                const hue = (z / depth) * 0.8 + 0.2;
+                                color = new THREE.Color().setHSL(hue, 0.9, 0.6);
+                                break;
+                            case 'retro':
+                                // Cores reduzidas (16 bits)
+                                color = new THREE.Color(
+                                    Math.floor(r / 64) / 4,
+                                    Math.floor(g / 64) / 4,
+                                    Math.floor(b / 64) / 4
+                                );
+                                break;
+                            default: // minecraft
+                                color = new THREE.Color(r / 255, g / 255, b / 255);
+                        }
+                        
+                        // Criar cubo voxel
+                        const geometry = new THREE.BoxGeometry(0.9, 0.9, 0.9);
+                        const material = new THREE.MeshStandardMaterial({
+                            color: color,
+                            emissive: style === 'rgb' ? color : 0x000000,
+                            roughness: 0.3,
+                            metalness: 0.1
+                        });
+                        
+                        const cube = new THREE.Mesh(geometry, material);
+                        
+                        // Posicionar voxel
+                        const offsetX = (x - resolution/2) * 1.0;
+                        const offsetY = z * 1.0;
+                        const offsetZ = (y - resolution/2) * 1.0;
+                        
+                        cube.position.set(offsetX, offsetY, offsetZ);
+                        cube.castShadow = true;
+                        cube.receiveShadow = true;
+                        
+                        group.add(cube);
+                    }
+                }
+            }
+            
+            return group;
+        }
 
-  const url = scan(data);
-  if (!url) throw new Error('GLB não encontrado no resultado do modelo');
-  return url;
-}
+        // ==================== DOWNLOAD ====================
+        downloadBtn.addEventListener('click', async () => {
+            if (!currentModel) return;
+            
+            const exporter = new GLTFExporter();
+            const options = {
+                binary: true,
+                trs: false,
+                onlyVisible: true,
+                includeCustomExtensions: false
+            };
+            
+            exporter.parse(
+                currentModel,
+                (result) => {
+                    const blob = new Blob([result], { type: 'application/octet-stream' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `voxel-model-${Date.now()}.glb`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                },
+                options
+            );
+        });
 
-// ─────────────────────────────────────────────────────────────────────────────
-// THREE.JS SETUP
-// ─────────────────────────────────────────────────────────────────────────────
-const vp    = document.getElementById('vp');
-const c3    = document.getElementById('c3');
-const scene = new THREE.Scene();
+        // ==================== RESET ====================
+        resetBtn.addEventListener('click', () => {
+            fileInput.value = '';
+            imagePreview.classList.remove('active');
+            previewImg.src = '';
+            uploadedImage = null;
+            imageData = null;
+            generateBtn.disabled = true;
+            downloadBtn.disabled = true;
+            exportObj.disabled = true;
+            progressBar.classList.remove('active');
+            progressFill.style.width = '0%';
+            
+            if (currentModel) {
+                scene.remove(currentModel);
+                currentModel = null;
+            }
+            
+            // Reset stats
+            statVoxels.textContent = '0';
+            statColors.textContent = '0';
+            statPoly.textContent = '0';
+            
+            controls.autoRotate = true;
+            hintBar.classList.remove('show');
+        });
 
-const renderer = new THREE.WebGLRenderer({canvas:c3, antialias:true, alpha:true});
-renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.3;
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        // ==================== ANIMAÇÃO ====================
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            controls.update();
+            
+            // Animar partículas
+            particles.rotation.y += 0.001;
+            
+            renderer.render(scene, camera);
+        }
+        
+        animate();
 
-const camera = new THREE.PerspectiveCamera(42, 1, .01, 1000);
-camera.position.set(0, 1.2, 3.5);
-
-const controls = new OrbitControls(camera, c3);
-controls.enableDamping = true; controls.dampingFactor = .06;
-controls.autoRotate = false; controls.autoRotateSpeed = 1.2;
-controls.target.set(0,.4,0);
-
-// lights
-scene.add(new THREE.AmbientLight(0xffffff, .5));
-const key = new THREE.DirectionalLight(0xfff0e8, 2.2);
-key.position.set(4,8,5); key.castShadow = true;
-key.shadow.mapSize.set(2048,2048);
-scene.add(key);
-const fill = new THREE.DirectionalLight(0xb0c8ff, .9);
-fill.position.set(-5,3,-3); scene.add(fill);
-const rim = new THREE.DirectionalLight(0xffd080,.4);
-rim.position.set(0,-2,-6); scene.add(rim);
-
-// ground
-const gm = new THREE.Mesh(
-  new THREE.CircleGeometry(5,64),
-  new THREE.MeshStandardMaterial({color:0x0d1020,roughness:.9})
-);
-gm.rotation.x=-Math.PI/2; gm.receiveShadow=true; scene.add(gm);
-scene.add(new THREE.GridHelper(10,40,0x1a2040,0x111828));
-
-function resize(){
-  const w=vp.clientWidth, h=vp.clientHeight;
-  renderer.setSize(w,h);
-  camera.aspect=w/h; camera.updateProjectionMatrix();
-}
-resize(); window.addEventListener('resize',resize);
-
-(function loop(){requestAnimationFrame(loop);controls.update();renderer.render(scene,camera);})();
-
-// ─────────────────────────────────────────────────────────────────────────────
-// STATE
-// ─────────────────────────────────────────────────────────────────────────────
-let file = null;
-let glbUrl = null;
-let running = false;
-let currentIdx = -1;
-
-// ─────────────────────────────────────────────────────────────────────────────
-// DOM REFS
-// ─────────────────────────────────────────────────────────────────────────────
-const dz      = document.getElementById('dz');
-const fi      = document.getElementById('fi');
-const ithumb  = document.getElementById('ithumb');
-const ipreview= document.getElementById('ipreview');
-const ifn     = document.getElementById('ifn');
-const brm     = document.getElementById('brm');
-const bgen    = document.getElementById('bgen');
-const bskip   = document.getElementById('bskip');
-const queueEl = document.getElementById('queue');
-const ovEmpty = document.getElementById('ov-empty');
-const ovLoad  = document.getElementById('ov-load');
-const ovResult= document.getElementById('ov-result');
-const loadT   = document.getElementById('load-t');
-const loadS   = document.getElementById('load-s');
-const progFill= document.getElementById('prog-fill');
-const resultS = document.getElementById('result-s');
-const bdl     = document.getElementById('bdl');
-const bnew    = document.getElementById('bnew');
-const abadge  = document.getElementById('abadge');
-const hintbar = document.getElementById('hintbar');
-const pillStatus = document.getElementById('pill-status');
-
-// ─────────────────────────────────────────────────────────────────────────────
-// RENDER QUEUE
-// ─────────────────────────────────────────────────────────────────────────────
-function renderQueue() {
-  queueEl.innerHTML = '';
-  PROVIDERS.forEach((p,i) => {
-    const el = document.createElement('div');
-    el.className = 'qitem';
-    el.id = 'qi-'+p.id;
-    el.style.setProperty('--c', p.color);
-    el.innerHTML = `
-      <div class="qi-ico">${p.icon}</div>
-      <div class="qi-info">
-        <div class="qi-name">${p.name}</div>
-        <div class="qi-sub">${p.note}</div>
-      </div>
-      <div class="qi-badge badge-wait" id="qb-${p.id}">#${i+1}</div>`;
-    queueEl.appendChild(el);
-  });
-}
-renderQueue();
-
-function setQState(id, state, label) {
-  const el = document.getElementById('qi-'+id);
-  const badge = document.getElementById('qb-'+id);
-  if (!el) return;
-  el.className = 'qitem ' + (state==='active'?'active':state==='ok'?'ok':state==='fail'?'fail':'');
-  if (badge) {
-    badge.className = 'qi-badge ' + (
-      state==='active'?'badge-run':
-      state==='ok'?'badge-ok':
-      state==='fail'?'badge-fail':'badge-wait'
-    );
-    badge.textContent = label || badge.textContent;
-  }
-  if (state==='active') el.scrollIntoView({behavior:'smooth',block:'nearest'});
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// FILE HANDLING
-// ─────────────────────────────────────────────────────────────────────────────
-dz.addEventListener('click',()=>fi.click());
-dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over');});
-dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
-dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');const f=e.dataTransfer.files[0];if(f)handleFile(f);});
-fi.addEventListener('change',()=>{if(fi.files[0])handleFile(fi.files[0]);});
-
-function handleFile(f) {
-  if(!f.type.startsWith('image/')){alert('Use JPG, PNG ou WEBP');return;}
-  file = f;
-  ipreview.src = URL.createObjectURL(f);
-  ifn.textContent = f.name;
-  ithumb.classList.add('show');
-  dz.style.display = 'none';
-  bgen.disabled = false;
-}
-brm.addEventListener('click',()=>{
-  file=null;fi.value='';
-  ithumb.classList.remove('show');
-  dz.style.display='';
-  bgen.disabled=true;
-});
-
-// ─────────────────────────────────────────────────────────────────────────────
-// PROGRESS
-// ─────────────────────────────────────────────────────────────────────────────
-function setLoad(title, sub, pct) {
-  loadT.textContent = title;
-  loadS.textContent = sub;
-  progFill.style.width = pct + '%';
-}
-
-function show(which) {
-  ovEmpty.classList.add('hide');
-  ovLoad.classList.add('hide');
-  ovResult.classList.add('hide');
-  if (which === 'empty')  ovEmpty.classList.remove('hide');
-  if (which === 'load')   ovLoad.classList.remove('hide');
-  if (which === 'result') ovResult.classList.remove('hide');
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// GENERATE — FALLBACK CHAIN
-// ─────────────────────────────────────────────────────────────────────────────
-bgen.addEventListener('click', startChain);
-bskip.addEventListener('click', () => {
-  if (!running) return;
-  setQState(PROVIDERS[currentIdx].id, 'fail', '✕');
-  tryNext();
-});
-
-async function startChain() {
-  running = true;
-  currentIdx = -1;
-  bgen.disabled = true;
-  bskip.disabled = false;
-  pillStatus.textContent = 'running';
-  glbUrl = null;
-
-  // reset queue badges
-  PROVIDERS.forEach((p,i) => setQState(p.id, '', `#${i+1}`));
-
-  show('load');
-  abadge.classList.add('show');
-  hintbar.classList.remove('show');
-
-  await tryNext();
-}
-
-async function tryNext() {
-  currentIdx++;
-  if (currentIdx >= PROVIDERS.length) {
-    allFailed(); return;
-  }
-  const p = PROVIDERS[currentIdx];
-  setQState(p.id, 'active', '▶');
-  abadge.textContent = `${p.icon} ${p.name} — tentativa ${currentIdx+1}/${PROVIDERS.length}`;
-  const pct = (currentIdx / PROVIDERS.length) * 85;
-  setLoad(
-    `${p.icon} ${p.name}`,
-    `Tentativa ${currentIdx+1} de ${PROVIDERS.length} — ${p.note}`,
-    pct
-  );
-
-  try {
-    const imageBlob = new Blob([await file.arrayBuffer()], {type: file.type});
-    
-    setLoad(`${p.icon} ${p.name}`, `Conectando ao HF Space…`, pct);
-    const url = await p.call(imageBlob);
-
-    if (!url) throw new Error('URL vazia');
-
-    glbUrl = url;
-    setQState(p.id, 'ok', '✓');
-    setLoad('Carregando modelo…', 'Importando GLB no visualizador…', 95);
-    await loadModel(url);
-    onSuccess(p);
-
-  } catch(err) {
-    console.warn(`[${p.name}] falhou:`, err.message);
-    setQState(p.id, 'fail', '✕');
-    // auto fallback
-    await tryNext();
-  }
-}
-
-function onSuccess(p) {
-  running = false;
-  bgen.disabled = false;
-  bskip.disabled = true;
-  pillStatus.textContent = 'success';
-  abadge.classList.remove('show');
-  hintbar.classList.add('show');
-  controls.autoRotate = true;
-  show('result');
-  resultS.textContent = `Gerado por ${p.name} (${p.org}) — tentativa ${currentIdx+1}/${PROVIDERS.length}`;
-}
-
-function allFailed() {
-  running = false;
-  bgen.disabled = false;
-  bskip.disabled = true;
-  pillStatus.textContent = 'all-failed';
-  abadge.classList.remove('show');
-  show('empty');
-  ovEmpty.querySelector('.ov-t').textContent = '⚠ Todos falharam';
-  ovEmpty.querySelector('.ov-s').textContent =
-    'Nenhum provider conseguiu gerar o modelo.\nTente uma imagem diferente (fundo neutro funciona melhor)\nou tente novamente em alguns minutos.';
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// LOAD MODEL
-// ─────────────────────────────────────────────────────────────────────────────
-async function loadModel(url) {
-  return new Promise((resolve, reject) => {
-    scene.children.filter(c=>c.userData.model).forEach(c=>scene.remove(c));
-    const loader = new GLTFLoader();
-    loader.load(url, gltf => {
-      const m = gltf.scene;
-      m.userData.model = true;
-      const box = new THREE.Box3().setFromObject(m);
-      const size = box.getSize(new THREE.Vector3());
-      const center = box.getCenter(new THREE.Vector3());
-      const s = 2.2 / Math.max(size.x,size.y,size.z);
-      m.scale.setScalar(s);
-      m.position.sub(center.multiplyScalar(s));
-      m.position.y += size.y*s*.5;
-      m.traverse(c=>{if(c.isMesh){c.castShadow=true;c.receiveShadow=true;}});
-      scene.add(m);
-      controls.target.set(0,size.y*s*.35,0);
-      controls.update();
-      resolve();
-    }, undefined, reject);
-  });
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// ACTIONS
-// ─────────────────────────────────────────────────────────────────────────────
-bdl.addEventListener('click', async () => {
-  if (!glbUrl) return;
-  try {
-    const res = await fetch(glbUrl);
-    const blob = await res.blob();
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `open3d-${Date.now()}.glb`;
-    a.click();
-  } catch { alert('Erro no download.'); }
-});
-
-bnew.addEventListener('click', () => {
-  glbUrl = null;
-  controls.autoRotate = false;
-  show('empty');
-  ovEmpty.querySelector('.ov-t').textContent = 'Visualizador 3D';
-  ovEmpty.querySelector('.ov-s').textContent = 'Faça upload de uma imagem e clique em Gerar.\nO sistema tenta automaticamente até obter o modelo.';
-  hintbar.classList.remove('show');
-  abadge.classList.remove('show');
-  pillStatus.textContent = 'idle';
-  renderQueue();
-});
-</script>
+        // ==================== RESIZE ====================
+        window.addEventListener('resize', () => {
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            
+            renderer.setSize(width, height);
+            
+            // Ajustar câmera ortográfica
+            const aspect = width / height;
+            const frustumSize = 10;
+            
+            camera.left = -frustumSize * aspect / 2;
+            camera.right = frustumSize * aspect / 2;
+            camera.top = frustumSize / 2;
+            camera.bottom = -frustumSize / 2;
+            camera.updateProjectionMatrix();
+        });
+    </script>
 </body>
 </html>
