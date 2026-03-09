@@ -1,1188 +1,296 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>3D FORGE — Multi-Provider Image to 3D</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
-<style>
-:root {
-  --bg: #07080c;
-  --s1: #0d0f16;
-  --s2: #13161f;
-  --s3: #1a1e2b;
-  --border: rgba(255,255,255,0.06);
-  --border2: rgba(255,255,255,0.12);
-  --text: #e2e4ed;
-  --muted: #555a6e;
-  --muted2: #8890aa;
-  --accent: #3d7eff;
-  --accent-glow: rgba(61,126,255,0.2);
-  --green: #2deba8;
-  --green-glow: rgba(45,235,168,0.15);
-  --yellow: #f0c040;
-  --red: #ff4d5e;
-  --orange: #ff8c42;
-  --r: 12px;
-}
-*{margin:0;padding:0;box-sizing:border-box;}
-html,body{height:100%;overflow:hidden;}
-body{
-  font-family:'Syne',sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  display:flex;flex-direction:column;
-}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Open3D — IA Generativa Gratuita</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "@gradio/client": "https://cdn.jsdelivr.net/npm/@gradio/client@0.1.4/dist/index.min.js"
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --bg: #05070a;
+      --surface: #0f1117;
+      --surface2: #161922;
+      --border: rgba(255,255,255,0.08);
+      --accent: #00f2ff;
+      --accent2: #7000ff;
+      --text: #e8eaf0;
+      --muted: #8b949e;
+      --radius: 12px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 360px 1fr;
+    }
 
-/* ── SCANLINE OVERLAY ── */
-body::after{
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
-  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);
-}
+    /* --- SIDEBAR --- */
+    .sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      z-index: 10;
+      overflow-y: auto;
+    }
+    .logo { font-weight: 700; font-size: 20px; letter-spacing: -1px; display: flex; align-items: center; gap: 10px; }
+    .logo span { color: var(--accent); }
 
-/* ── HEADER ── */
-.hdr{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 28px;height:56px;
-  background:var(--s1);
-  border-bottom:1px solid var(--border);
-  flex-shrink:0;z-index:10;
-}
-.hdr-logo{
-  display:flex;align-items:center;gap:12px;
-  font-size:15px;font-weight:800;letter-spacing:0.5px;
-}
-.logo-hex{
-  width:34px;height:34px;
-  background:linear-gradient(135deg,var(--accent),#8b5cf6);
-  clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
-  display:flex;align-items:center;justify-content:center;
-  font-size:15px;
-}
-.hdr-center{
-  font-family:'JetBrains Mono',monospace;
-  font-size:11px;color:var(--muted);letter-spacing:1px;
-  display:flex;gap:24px;
-}
-.hdr-stat{display:flex;align-items:center;gap:6px;}
-.hdr-stat b{color:var(--text);font-weight:700;}
-.pulse-dot{
-  width:6px;height:6px;border-radius:50%;
-  background:var(--green);
-  box-shadow:0 0 8px var(--green);
-  animation:pulse 2s infinite;
-}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+    .upload-box {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.3s;
+      background: var(--surface2);
+    }
+    .upload-box:hover { border-color: var(--accent); background: rgba(0, 242, 255, 0.05); }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: white;
+      border: none;
+      padding: 16px;
+      border-radius: var(--radius);
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(112, 0, 255, 0.3); }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
 
-/* ── LAYOUT ── */
-.layout{
-  display:grid;
-  grid-template-columns:320px 1fr 300px;
-  flex:1;overflow:hidden;
-}
+    /* --- VIEWPORT --- */
+    .viewport-container { position: relative; background: #000; }
+    #canvas-3d { width: 100%; height: 100%; outline: none; }
 
-/* ── PANEL BASE ── */
-.panel{
-  border-right:1px solid var(--border);
-  overflow-y:auto;
-  scrollbar-width:thin;
-  scrollbar-color:var(--s3) transparent;
-}
-.panel:last-child{border-right:none;border-left:1px solid var(--border);}
+    .loader-overlay {
+      position: absolute; inset: 0;
+      background: rgba(5, 7, 10, 0.8);
+      backdrop-filter: blur(10px);
+      display: none;
+      flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 5;
+    }
+    .loader-overlay.active { display: flex; }
 
-/* ── SECTION ── */
-.sec{padding:20px;border-bottom:1px solid var(--border);}
-.sec-title{
-  font-family:'JetBrains Mono',monospace;
-  font-size:10px;letter-spacing:1.5px;font-weight:700;
-  color:var(--muted);text-transform:uppercase;
-  margin-bottom:14px;
-  display:flex;align-items:center;gap:8px;
-}
-.sec-title::before{
-  content:'';width:3px;height:12px;
-  background:var(--accent);border-radius:2px;
-  flex-shrink:0;
-}
+    .status-badge {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--accent);
+      background: rgba(0, 242, 255, 0.1);
+      padding: 4px 12px;
+      border-radius: 100px;
+      border: 1px solid var(--accent);
+    }
 
-/* ── UPLOAD ── */
-.dropzone{
-  border:2px dashed var(--border2);
-  border-radius:var(--r);
-  padding:28px 16px;
-  text-align:center;
-  cursor:pointer;
-  transition:all .25s;
-  background:var(--s2);
-  position:relative;
-}
-.dropzone:hover,.dropzone.over{
-  border-color:var(--accent);
-  background:rgba(61,126,255,0.04);
-  box-shadow:inset 0 0 20px rgba(61,126,255,0.05);
-}
-.dropzone input{display:none;}
-.dz-icon{
-  width:48px;height:48px;margin:0 auto 12px;
-  background:var(--s3);border-radius:10px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:22px;border:1px solid var(--border2);
-}
-.dz-title{font-size:13px;font-weight:700;margin-bottom:4px;}
-.dz-sub{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
-
-.img-card{
-  border-radius:var(--r);overflow:hidden;
-  border:1px solid var(--border2);
-  position:relative;display:none;
-  margin-top:0;
-}
-.img-card.show{display:block;}
-.img-card img{width:100%;height:160px;object-fit:cover;display:block;}
-.img-card-footer{
-  background:var(--s3);padding:10px 12px;
-  display:flex;align-items:center;justify-content:space-between;
-}
-.img-fn{font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;}
-.btn-rm{
-  background:none;border:none;cursor:pointer;
-  color:var(--muted);font-size:16px;transition:color .2s;
-  padding:2px 6px;
-}
-.btn-rm:hover{color:var(--red);}
-
-/* ── PROVIDER GRID ── */
-.provider-list{display:flex;flex-direction:column;gap:8px;}
-
-.prov-card{
-  background:var(--s2);
-  border:1px solid var(--border);
-  border-radius:var(--r);
-  padding:12px 14px;
-  cursor:pointer;
-  transition:all .2s;
-  position:relative;
-  overflow:hidden;
-  user-select:none;
-}
-.prov-card::before{
-  content:'';position:absolute;left:0;top:0;bottom:0;
-  width:3px;background:var(--color,var(--muted));
-  border-radius:2px 0 0 2px;
-  transition:opacity .2s;
-  opacity:.5;
-}
-.prov-card:hover{border-color:var(--border2);background:var(--s3);}
-.prov-card.active{
-  border-color:rgba(61,126,255,0.4);
-  background:rgba(61,126,255,0.06);
-}
-.prov-card.active::before{opacity:1;}
-.prov-card.success{border-color:rgba(45,235,168,0.4);background:rgba(45,235,168,0.05);}
-.prov-card.success::before{background:var(--green);opacity:1;}
-.prov-card.failed{border-color:rgba(255,77,94,0.3);opacity:.5;}
-.prov-card.failed::before{background:var(--red);opacity:.5;}
-.prov-card.skipped{opacity:.4;}
-
-.prov-top{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
-.prov-icon{font-size:20px;width:32px;text-align:center;}
-.prov-name{font-size:13px;font-weight:700;flex:1;}
-.prov-badge{
-  font-family:'JetBrains Mono',monospace;
-  font-size:9px;font-weight:700;
-  padding:2px 7px;border-radius:100px;
-  text-transform:uppercase;letter-spacing:.5px;
-}
-.badge-free{background:rgba(45,235,168,0.15);color:var(--green);border:1px solid rgba(45,235,168,0.25);}
-.badge-paid{background:rgba(240,192,64,0.12);color:var(--yellow);border:1px solid rgba(240,192,64,0.2);}
-.badge-open{background:rgba(139,92,246,0.15);color:#a78bfa;border:1px solid rgba(139,92,246,0.25);}
-
-.prov-desc{font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:8px;}
-
-.prov-meta{display:flex;gap:12px;}
-.meta-item{
-  font-family:'JetBrains Mono',monospace;
-  font-size:10px;color:var(--muted);
-  display:flex;align-items:center;gap:4px;
-}
-.meta-item span{color:var(--muted2);}
-
-.prov-status{
-  position:absolute;top:12px;right:12px;
-  font-family:'JetBrains Mono',monospace;
-  font-size:10px;font-weight:700;
-  padding:2px 8px;border-radius:100px;
-  display:none;
-}
-.prov-card.active .prov-status{display:block;background:rgba(61,126,255,0.2);color:var(--accent);}
-.prov-card.success .prov-status{display:block;background:rgba(45,235,168,0.2);color:var(--green);}
-.prov-card.failed .prov-status{display:block;background:rgba(255,77,94,0.15);color:var(--red);}
-
-/* ── LAUNCH BTN ── */
-.btn-launch{
-  width:100%;padding:16px;
-  background:linear-gradient(135deg,var(--accent),#7c3aed);
-  border:none;border-radius:var(--r);
-  color:white;
-  font-family:'Syne',sans-serif;
-  font-size:15px;font-weight:800;
-  letter-spacing:.5px;cursor:pointer;
-  transition:all .25s;
-  position:relative;overflow:hidden;
-}
-.btn-launch::after{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(135deg,white,transparent);
-  opacity:0;transition:opacity .2s;
-}
-.btn-launch:hover:not(:disabled)::after{opacity:.07;}
-.btn-launch:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 8px 28px rgba(61,126,255,0.35);}
-.btn-launch:disabled{opacity:.35;cursor:not-allowed;transform:none;}
-
-.btn-secondary{
-  width:100%;padding:11px;
-  background:var(--s2);border:1px solid var(--border2);
-  border-radius:var(--r);
-  color:var(--muted2);
-  font-family:'Syne',sans-serif;
-  font-size:13px;font-weight:700;
-  cursor:pointer;transition:all .2s;
-}
-.btn-secondary:hover:not(:disabled){border-color:var(--border2);color:var(--text);background:var(--s3);}
-.btn-secondary:disabled{opacity:.3;cursor:not-allowed;}
-
-/* ── CENTER PANEL ── */
-.center-panel{
-  background:var(--bg);
-  display:flex;flex-direction:column;
-  overflow:hidden;
-}
-.center-top{
-  padding:20px 24px 16px;
-  border-bottom:1px solid var(--border);
-  flex-shrink:0;
-}
-.center-title{font-size:22px;font-weight:800;margin-bottom:4px;}
-.center-sub{font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
-
-/* ── PROGRESS TRACK ── */
-.track-wrap{
-  padding:20px 24px;
-  border-bottom:1px solid var(--border);
-  flex-shrink:0;
-  display:none;
-}
-.track-wrap.show{display:block;}
-.track-bar-bg{
-  width:100%;height:8px;
-  background:var(--s2);border-radius:4px;
-  overflow:hidden;margin-bottom:10px;
-  border:1px solid var(--border);
-}
-.track-bar-fill{
-  height:100%;width:0%;
-  background:linear-gradient(90deg,var(--accent),#7c3aed,var(--green));
-  background-size:200% 100%;
-  border-radius:4px;
-  transition:width .5s cubic-bezier(.4,0,.2,1);
-  animation:grad 3s linear infinite;
-}
-@keyframes grad{0%{background-position:0% 50%}100%{background-position:200% 50%}}
-.track-info{
-  display:flex;align-items:center;justify-content:space-between;
-}
-.track-label{font-size:12px;color:var(--muted2);font-family:'JetBrains Mono',monospace;}
-.track-pct{font-size:12px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--accent);}
-
-/* ── INSTRUCTION AREA ── */
-.instr-area{
-  flex:1;overflow-y:auto;
-  padding:24px;
-  display:flex;flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:0;
-}
-
-/* ── EMPTY STATE ── */
-.empty-state{text-align:center;max-width:340px;}
-.empty-hex{
-  width:72px;height:72px;margin:0 auto 20px;
-  background:var(--s2);
-  clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
-  display:flex;align-items:center;justify-content:center;
-  font-size:28px;border:1px solid var(--border2);
-}
-.empty-title{font-size:20px;font-weight:800;margin-bottom:8px;opacity:.4;}
-.empty-sub{font-size:12px;color:var(--muted);line-height:1.7;font-family:'JetBrains Mono',monospace;}
-
-/* ── ACTIVE CARD ── */
-.active-card{
-  width:100%;max-width:560px;
-  background:var(--s1);
-  border:1px solid var(--border2);
-  border-radius:16px;
-  overflow:hidden;
-  display:none;
-}
-.active-card.show{display:block;}
-.ac-header{
-  padding:20px 24px 16px;
-  border-bottom:1px solid var(--border);
-  display:flex;align-items:center;gap:14px;
-}
-.ac-icon{font-size:28px;}
-.ac-name{font-size:18px;font-weight:800;margin-bottom:2px;}
-.ac-status{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--accent);}
-
-.ac-body{padding:20px 24px;}
-.ac-desc{font-size:13px;color:var(--muted2);line-height:1.7;margin-bottom:20px;}
-
-.ac-steps{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;}
-.step-row{
-  display:flex;align-items:flex-start;gap:12px;
-  padding:12px 14px;
-  background:var(--s2);border-radius:10px;
-  border:1px solid var(--border);
-}
-.step-n{
-  width:22px;height:22px;border-radius:50%;
-  background:var(--accent);
-  display:flex;align-items:center;justify-content:center;
-  font-family:'JetBrains Mono',monospace;
-  font-size:11px;font-weight:700;color:white;
-  flex-shrink:0;margin-top:1px;
-}
-.step-text{font-size:12px;line-height:1.6;color:var(--muted2);}
-.step-text b{color:var(--text);}
-
-.ac-cta{
-  display:flex;gap:10px;
-}
-.btn-open{
-  flex:1;padding:13px;
-  background:linear-gradient(135deg,var(--accent),#7c3aed);
-  border:none;border-radius:10px;
-  color:white;font-family:'Syne',sans-serif;
-  font-size:14px;font-weight:800;cursor:pointer;
-  transition:all .2s;
-  display:flex;align-items:center;justify-content:center;gap:8px;
-}
-.btn-open:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(61,126,255,0.3);}
-.btn-skip{
-  padding:13px 18px;
-  background:var(--s3);border:1px solid var(--border2);
-  border-radius:10px;
-  color:var(--muted);font-family:'Syne',sans-serif;
-  font-size:13px;font-weight:700;cursor:pointer;
-  transition:all .2s;
-}
-.btn-skip:hover{color:var(--red);border-color:rgba(255,77,94,0.3);}
-
-/* ── SUCCESS CARD ── */
-.success-card{
-  width:100%;max-width:560px;
-  text-align:center;
-  display:none;
-}
-.success-card.show{display:block;}
-.sc-icon{
-  width:80px;height:80px;margin:0 auto 20px;
-  background:rgba(45,235,168,0.1);
-  border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:36px;
-  border:2px solid rgba(45,235,168,0.3);
-  box-shadow:0 0 40px rgba(45,235,168,0.1);
-}
-.sc-title{font-size:22px;font-weight:800;color:var(--green);margin-bottom:8px;}
-.sc-sub{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:24px;font-family:'JetBrains Mono',monospace;}
-.sc-provider{
-  display:inline-block;
-  padding:6px 16px;
-  background:rgba(45,235,168,0.1);
-  border:1px solid rgba(45,235,168,0.25);
-  border-radius:100px;
-  font-size:12px;color:var(--green);
-  font-family:'JetBrains Mono',monospace;
-  margin-bottom:24px;
-}
-.btn-restart{
-  display:inline-flex;align-items:center;gap:8px;
-  padding:12px 24px;
-  background:var(--s2);border:1px solid var(--border2);
-  border-radius:10px;
-  color:var(--muted2);font-family:'Syne',sans-serif;
-  font-size:13px;font-weight:700;cursor:pointer;
-  transition:all .2s;
-}
-.btn-restart:hover{border-color:var(--border2);color:var(--text);}
-
-/* ── RIGHT LOG PANEL ── */
-.log-area{
-  display:flex;flex-direction:column;
-  height:100%;
-}
-.log-scroll{
-  flex:1;overflow-y:auto;
-  padding:16px;
-  display:flex;flex-direction:column;
-  gap:6px;
-}
-.log-entry{
-  font-family:'JetBrains Mono',monospace;
-  font-size:11px;line-height:1.6;
-  padding:8px 10px;
-  border-radius:8px;
-  background:var(--s2);
-  border-left:2px solid var(--muted);
-  color:var(--muted2);
-  animation:logIn .2s ease;
-}
-@keyframes logIn{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:translateX(0)}}
-.log-entry.info{border-left-color:var(--accent);color:var(--text);}
-.log-entry.ok{border-left-color:var(--green);color:var(--green);}
-.log-entry.warn{border-left-color:var(--orange);color:var(--orange);}
-.log-entry.err{border-left-color:var(--red);color:var(--red);}
-.log-time{opacity:.4;margin-right:6px;}
-
-.log-empty{
-  flex:1;display:flex;align-items:center;justify-content:center;
-  flex-direction:column;gap:8px;
-  color:var(--muted);
-  font-family:'JetBrains Mono',monospace;font-size:11px;
-  opacity:.5;
-}
-
-/* ── FALLBACK SETTINGS ── */
-.toggle-row{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:10px 0;
-  border-bottom:1px solid var(--border);
-  font-size:12px;
-}
-.toggle-row:last-child{border-bottom:none;}
-.tgl-label{color:var(--muted2);}
-.tgl{
-  position:relative;width:36px;height:20px;cursor:pointer;
-}
-.tgl input{display:none;}
-.tgl-track{
-  position:absolute;inset:0;
-  background:var(--s3);border-radius:10px;
-  border:1px solid var(--border2);
-  transition:.2s;
-}
-.tgl input:checked+.tgl-track{background:rgba(61,126,255,0.3);border-color:rgba(61,126,255,0.5);}
-.tgl-thumb{
-  position:absolute;top:3px;left:3px;
-  width:12px;height:12px;
-  background:var(--muted);border-radius:50%;
-  transition:.2s;
-}
-.tgl input:checked~.tgl-thumb{left:19px;background:var(--accent);}
-
-/* ── QUALITY STARS ── */
-.stars{color:#f0c040;font-size:11px;letter-spacing:1px;}
-
-@media(max-width:900px){
-  .layout{grid-template-columns:280px 1fr;}
-  .panel:last-child{display:none;}
-}
-</style>
+    .preview-img {
+      width: 100%; border-radius: 8px; margin-top: 10px; display: none;
+      border: 1px solid var(--border);
+    }
+  </style>
 </head>
 <body>
 
-<!-- HEADER -->
-<div class="hdr">
-  <div class="hdr-logo">
-    <div class="logo-hex">⬡</div>
-    3D FORGE
-    <span style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--muted);font-weight:400;">MULTI-PROVIDER</span>
-  </div>
-  <div class="hdr-center">
-    <div class="hdr-stat"><div class="pulse-dot"></div> <b id="hdr-providers">10</b> providers</div>
-    <div class="hdr-stat">status <b id="hdr-status">idle</b></div>
-    <div class="hdr-stat">tentativa <b id="hdr-attempt">—</b></div>
-  </div>
-  <div style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;">
-    fallback automático ativo
-  </div>
-</div>
-
-<!-- LAYOUT -->
-<div class="layout">
-
-  <!-- LEFT: upload + settings -->
-  <div class="panel" id="left-panel">
-
-    <div class="sec">
-      <div class="sec-title">Imagem de entrada</div>
-      <div class="dropzone" id="dropzone">
-        <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp"/>
-        <div class="dz-icon">🖼️</div>
-        <div class="dz-title">Arraste ou clique</div>
-        <div class="dz-sub">JPG · PNG · WEBP</div>
+  <aside class="sidebar">
+    <div class="logo"><span>⬢</span> OPEN 3D </div>
+    
+    <div>
+      <p style="font-size: 12px; color: var(--muted); margin-bottom: 8px;">ENTRADA</p>
+      <div class="upload-box" id="drop-area">
+        <input type="file" id="file-input" hidden accept="image/*">
+        <div style="font-size: 24px;">☁️</div>
+        <p style="font-size: 14px; margin-top: 10px;">Arraste uma imagem</p>
       </div>
-      <div class="img-card" id="img-card" style="margin-top:12px;">
-        <img id="preview-img" alt="preview"/>
-        <div class="img-card-footer">
-          <span class="img-fn" id="img-fn">—</span>
-          <button class="btn-rm" id="btn-rm" title="Remover">✕</button>
-        </div>
-      </div>
+      <img id="img-preview" class="preview-img">
     </div>
 
-    <div class="sec">
-      <div class="sec-title">Configurações</div>
-      <div class="toggle-row">
-        <span class="tgl-label">Fallback automático</span>
-        <label class="tgl"><input type="checkbox" id="opt-fallback" checked/><div class="tgl-track"></div><div class="tgl-thumb"></div></label>
-      </div>
-      <div class="toggle-row">
-        <span class="tgl-label">Abrir automaticamente</span>
-        <label class="tgl"><input type="checkbox" id="opt-auto-open"/><div class="tgl-track"></div><div class="tgl-thumb"></div></label>
-      </div>
-      <div class="toggle-row">
-        <span class="tgl-label">Mostrar apenas gratuitos</span>
-        <label class="tgl"><input type="checkbox" id="opt-free-only"/><div class="tgl-track"></div><div class="tgl-thumb"></div></label>
-      </div>
+    <div>
+      <p style="font-size: 12px; color: var(--muted); margin-bottom: 8px;">CONFIGURAÇÕES</p>
+      <select id="model-quality" style="width:100%; background: var(--surface2); color:white; border: 1px solid var(--border); padding: 10px; border-radius: 8px;">
+        <option value="sf3d">Stable Fast 3D (Mais Rápido)</option>
+        <option value="instantmesh">InstantMesh (Alta Qualidade)</option>
+      </select>
     </div>
 
-    <div class="sec" style="padding-bottom:24px;">
-      <button class="btn-launch" id="btn-launch" disabled>⬡ &nbsp;INICIAR SEQUÊNCIA</button>
-      <div style="height:8px;"></div>
-      <button class="btn-secondary" id="btn-reset">↺ &nbsp;Reset completo</button>
+    <button class="btn-primary" id="gen-button" disabled>GERAR MODELO GRATUITO</button>
+
+    <div id="info-panel" style="display:none; font-size: 13px; border-top: 1px solid var(--border); pt-20">
+        <p style="color: var(--muted)">Status: <span id="status-text" style="color: var(--accent)">Pronto</span></p>
+        <button id="download-glb" class="btn-primary" style="margin-top: 10px; width: 100%; background: var(--surface2); border: 1px solid var(--border);">Baixar GLB</button>
     </div>
+  </aside>
 
-  </div>
-
-  <!-- CENTER: main display -->
-  <div class="center-panel">
-    <div class="center-top">
-      <div class="center-title">Gerador 3D Multi-Provider</div>
-      <div class="center-sub">Tenta automaticamente até encontrar o que funciona</div>
+  <main class="viewport-container">
+    <div class="loader-overlay" id="loader">
+        <div style="width: 40px; height: 40px; border: 3px solid var(--accent); border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+        <p style="margin-top: 20px; font-weight: 500;" id="loader-text">Processando Geometria...</p>
+        <p style="font-size: 12px; color: var(--muted); margin-top: 8px;">Isso pode levar até 60s em servidores gratuitos</p>
     </div>
+    <canvas id="canvas-3d"></canvas>
+  </main>
 
-    <div class="track-wrap" id="track-wrap">
-      <div class="track-bar-bg">
-        <div class="track-bar-fill" id="track-fill"></div>
-      </div>
-      <div class="track-info">
-        <span class="track-label" id="track-label">Aguardando…</span>
-        <span class="track-pct" id="track-pct">0%</span>
-      </div>
-    </div>
+  <style> @keyframes spin { to { transform: rotate(360deg); } } </style>
 
-    <div class="instr-area" id="instr-area">
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { client } from "@gradio/client";
 
-      <!-- empty -->
-      <div class="empty-state" id="empty-state">
-        <div class="empty-hex">⬡</div>
-        <div class="empty-title">Pronto para gerar</div>
-        <div class="empty-sub">Faça upload de uma imagem e clique em<br/>INICIAR SEQUÊNCIA para começar.<br/><br/>O sistema tentará 10 plataformas automaticamente<br/>até uma funcionar.</div>
-      </div>
+// --- STATE ---
+let selectedFile = null;
+let currentGLBUrl = null;
 
-      <!-- active provider card -->
-      <div class="active-card" id="active-card">
-        <div class="ac-header">
-          <div class="ac-icon" id="ac-icon">🤖</div>
-          <div>
-            <div class="ac-name" id="ac-name">Provider</div>
-            <div class="ac-status" id="ac-status">▶ em andamento</div>
-          </div>
-        </div>
-        <div class="ac-body">
-          <div class="ac-desc" id="ac-desc">Descrição do provider.</div>
-          <div class="ac-steps" id="ac-steps"></div>
-          <div class="ac-cta">
-            <button class="btn-open" id="btn-open-provider">🔗 Abrir Plataforma</button>
-            <button class="btn-skip" id="btn-skip">Pular →</button>
-          </div>
-        </div>
-      </div>
+// --- THREE.JS ENGINE ---
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('canvas-3d'), antialias: true });
+renderer.setSize(window.innerWidth - 360, window.innerHeight);
+renderer.toneMapping = THREE.ReinhardToneMapping;
 
-      <!-- success -->
-      <div class="success-card" id="success-card">
-        <div class="sc-icon">✅</div>
-        <div class="sc-title">Modelo Gerado!</div>
-        <div class="sc-sub" id="sc-sub">Seu modelo 3D foi criado com sucesso.</div>
-        <div class="sc-provider" id="sc-provider">provider: —</div>
-        <button class="btn-restart" id="btn-restart">↺ &nbsp;Nova geração</button>
-      </div>
+// Post Processing (O toque "avançado")
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.4, 0.4, 0.85);
+composer.addPass(bloomPass);
 
-    </div>
-  </div>
+// Lights
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+scene.add(ambientLight);
+const spotLight = new THREE.SpotLight(0xffffff, 50);
+spotLight.position.set(5, 5, 5);
+scene.add(spotLight);
 
-  <!-- RIGHT: provider list + log -->
-  <div class="panel">
+camera.position.set(2, 2, 2);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
 
-    <div class="sec" style="padding-bottom:16px;">
-      <div class="sec-title">Providers <span style="margin-left:4px;font-weight:400;color:var(--muted);" id="queue-info">(10 na fila)</span></div>
-      <div class="provider-list" id="provider-list"></div>
-    </div>
+function animate() {
+    requestAnimationFrame(animate);
+    controls.update();
+    composer.render();
+}
+animate();
 
-    <div class="sec" style="flex:1;min-height:0;padding:0;border-bottom:none;">
-      <div style="padding:16px 20px 12px;border-bottom:1px solid var(--border);">
-        <div class="sec-title" style="margin-bottom:0;">Log de execução</div>
-      </div>
-      <div class="log-area">
-        <div class="log-scroll" id="log-scroll">
-          <div class="log-empty" id="log-empty">
-            <span style="font-size:20px;">📋</span>
-            <span>sem atividade</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-</div>
-
-<script>
-// ─────────────────────────────────────────────────────────────────────────────
-// PROVIDERS DATA
-// ─────────────────────────────────────────────────────────────────────────────
-const PROVIDERS = [
-  {
-    id:'tripo',
-    name:'Tripo3D Studio',
-    icon:'🔷',
-    tier:'free',
-    color:'#3d7eff',
-    quality:4,
-    speed:'~30s',
-    url:'https://studio.tripo3d.ai',
-    desc:'Plataforma completa com segmentação, retopologia e rigging. Resultados muito sólidos para personagens e objetos.',
-    steps:[
-      {n:'1', t:'Acesse <b>studio.tripo3d.ai</b> e faça login (Google)'},
-      {n:'2', t:'Clique em <b>Image to 3D</b> no menu lateral'},
-      {n:'3', t:'Arraste sua imagem ou clique em Upload'},
-      {n:'4', t:'Selecione qualidade <b>Detailed</b> e clique em <b>Generate</b>'},
-      {n:'5', t:'Aguarde ~30s e baixe o arquivo <b>.GLB</b>'},
-    ]
-  },
-  {
-    id:'meshy',
-    name:'Meshy AI',
-    icon:'🟣',
-    tier:'free',
-    color:'#a855f7',
-    quality:4,
-    speed:'~45s',
-    url:'https://www.meshy.ai',
-    desc:'Muito popular entre game devs. Gera meshes limpas com boa topologia. Exporta FBX, GLB, OBJ, STL.',
-    steps:[
-      {n:'1', t:'Acesse <b>meshy.ai</b> e crie conta gratuita'},
-      {n:'2', t:'Clique em <b>Image to 3D</b> na barra superior'},
-      {n:'3', t:'Faça upload da imagem e ajuste o prompt se quiser'},
-      {n:'4', t:'Clique em <b>Generate</b> (modo Preview é grátis)'},
-      {n:'5', t:'Quando pronto, clique em <b>Refine</b> para textura e baixe'},
-    ]
-  },
-  {
-    id:'rodin',
-    name:'Hyper3D Rodin',
-    icon:'⚡',
-    tier:'free',
-    color:'#f0c040',
-    quality:5,
-    speed:'~90s',
-    url:'https://hyperhuman.deemos.com/rodin',
-    desc:'Melhor qualidade do mercado (modelo de 10B parâmetros). Texturas PBR 4K. Ideal para personagens realistas.',
-    steps:[
-      {n:'1', t:'Acesse <b>hyperhuman.deemos.com/rodin</b>'},
-      {n:'2', t:'Faça login com Google ou crie conta gratuita'},
-      {n:'3', t:'Clique em <b>Image to 3D</b> e faça upload'},
-      {n:'4', t:'Para a imagem com 3 ângulos, envie <b>cada vista separada</b>'},
-      {n:'5', t:'Clique em <b>Generate</b> — aguarde ~90s e baixe GLB/FBX'},
-    ]
-  },
-  {
-    id:'hunyuan',
-    name:'Hunyuan3D 2.5',
-    icon:'🐉',
-    tier:'free',
-    color:'#2deba8',
-    quality:5,
-    speed:'~60s',
-    url:'https://3d.hunyuan.tencent.com',
-    desc:'Da Tencent. Um dos melhores modelos open-source. Textura PBR. Recentemente atualizado para v2.5 com resultados excelentes.',
-    steps:[
-      {n:'1', t:'Acesse <b>3d.hunyuan.tencent.com</b> e registre com email'},
-      {n:'2', t:'Clique em <b>Image to 3D</b> na homepage'},
-      {n:'3', t:'Faça upload da imagem (fundo neutro funciona melhor)'},
-      {n:'4', t:'Escolha <b>Standard</b> ou <b>High Quality</b>'},
-      {n:'5', t:'Baixe o modelo em GLB quando a geração concluir'},
-    ]
-  },
-  {
-    id:'copilot3d',
-    name:'Microsoft Copilot 3D',
-    icon:'🪟',
-    tier:'free',
-    color:'#00b4d8',
-    quality:3,
-    speed:'~20s',
-    url:'https://copilot.microsoft.com/labs/experiments/3d-generations',
-    desc:'100% gratuito, sem cadastro necessário. Simples e rápido. Baseado no modelo TRELLIS da Microsoft Research.',
-    steps:[
-      {n:'1', t:'Acesse o link — <b>não precisa de cadastro</b>'},
-      {n:'2', t:'Clique em <b>Upload Image</b>'},
-      {n:'3', t:'Aguarde a geração automática (~20s)'},
-      {n:'4', t:'Clique em <b>Download</b> para baixar o GLB'},
-    ]
-  },
-  {
-    id:'threedium',
-    name:'Threedium AI Studio',
-    icon:'🌐',
-    tier:'free',
-    color:'#ff6b6b',
-    quality:5,
-    speed:'~60s',
-    url:'https://threedium.io/ai-studio',
-    desc:'Estado da arte em segmentação por componentes. Resultados comparáveis ao Rodin. Ótimo para objetos detalhados.',
-    steps:[
-      {n:'1', t:'Acesse <b>threedium.io/ai-studio</b>'},
-      {n:'2', t:'Crie conta gratuita (trial disponível)'},
-      {n:'3', t:'Selecione <b>Image to 3D</b> no dashboard'},
-      {n:'4', t:'Faça upload e configure qualidade de textura'},
-      {n:'5', t:'Baixe o modelo finalizado em GLB ou FBX'},
-    ]
-  },
-  {
-    id:'luma',
-    name:'Luma AI Genie',
-    icon:'✨',
-    tier:'free',
-    color:'#ff8c42',
-    quality:3,
-    speed:'~10s',
-    url:'https://lumalabs.ai/genie',
-    desc:'O mais rápido — gera em segundos. Gratuito sem limite. Qualidade menor que os outros, mas excelente para protótipos rápidos.',
-    steps:[
-      {n:'1', t:'Acesse <b>lumalabs.ai/genie</b>'},
-      {n:'2', t:'Clique em <b>Upload Image</b> ou use texto'},
-      {n:'3', t:'Resultado em ~10 segundos, sem cadastro'},
-      {n:'4', t:'Clique em <b>Download GLB</b>'},
-    ]
-  },
-  {
-    id:'csm',
-    name:'CSM.ai',
-    icon:'🔵',
-    tier:'free',
-    color:'#60a5fa',
-    quality:3,
-    speed:'~45s',
-    url:'https://3d.csm.ai',
-    desc:'Suporte a multi-view e materiais PBR. Controle de contagem de polígonos. Bom para quem quer ajustar nível de detalhe.',
-    steps:[
-      {n:'1', t:'Acesse <b>3d.csm.ai</b> e faça login com Google'},
-      {n:'2', t:'Escolha <b>Image to 3D</b>'},
-      {n:'3', t:'Faça upload — para melhores resultados use <b>multi-view</b>'},
-      {n:'4', t:'Configure polygon count e clique em <b>Generate</b>'},
-      {n:'5', t:'Baixe OBJ, GLB ou FBX'},
-    ]
-  },
-  {
-    id:'alpha3d',
-    name:'Alpha3D',
-    icon:'🅰️',
-    tier:'paid',
-    color:'#e879f9',
-    quality:4,
-    speed:'~60s',
-    url:'https://www.alpha3d.io',
-    desc:'Focado em e-commerce e product visualization. Ótima fidelidade a objetos físicos. Trial disponível.',
-    steps:[
-      {n:'1', t:'Acesse <b>alpha3d.io</b> e crie conta (trial grátis)'},
-      {n:'2', t:'Clique em <b>+ New Asset</b>'},
-      {n:'3', t:'Faça upload da imagem do produto/personagem'},
-      {n:'4', t:'Aguarde o processamento e baixe em GLB/OBJ'},
-    ]
-  },
-  {
-    id:'3daistudio',
-    name:'3D AI Studio',
-    icon:'🎯',
-    tier:'paid',
-    color:'#34d399',
-    quality:5,
-    speed:'~40s',
-    url:'https://www.3daistudio.com',
-    desc:'Agregador: acesso a Meshy, Rodin, Tripo e outros num só lugar. 2000 créditos por $29 permanentes. Melhor custo-benefício.',
-    steps:[
-      {n:'1', t:'Acesse <b>3daistudio.com</b> e crie conta'},
-      {n:'2', t:'Plano pay-as-you-go — sem assinatura obrigatória'},
-      {n:'3', t:'Escolha o modelo de IA (Rodin, Meshy, Tripo)'},
-      {n:'4', t:'Faça upload e gere. Baixe em qualquer formato'},
-    ]
-  }
-];
-
-// ─────────────────────────────────────────────────────────────────────────────
-// STATE
-// ─────────────────────────────────────────────────────────────────────────────
-let uploadedFile = null;
-let sequence = [];
-let currentIdx = -1;
-let running = false;
-
-// ─────────────────────────────────────────────────────────────────────────────
-// DOM REFS
-// ─────────────────────────────────────────────────────────────────────────────
-const dropzone = document.getElementById('dropzone');
+// --- LOGICA DE UI ---
 const fileInput = document.getElementById('file-input');
-const imgCard   = document.getElementById('img-card');
-const previewImg= document.getElementById('preview-img');
-const imgFn     = document.getElementById('img-fn');
-const btnRm     = document.getElementById('btn-rm');
-const btnLaunch = document.getElementById('btn-launch');
-const btnReset  = document.getElementById('btn-reset');
-const provList  = document.getElementById('provider-list');
-const logScroll = document.getElementById('log-scroll');
-const logEmpty  = document.getElementById('log-empty');
-const trackWrap = document.getElementById('track-wrap');
-const trackFill = document.getElementById('track-fill');
-const trackLabel= document.getElementById('track-label');
-const trackPct  = document.getElementById('track-pct');
-const emptyState= document.getElementById('empty-state');
-const activeCard= document.getElementById('active-card');
-const successCard=document.getElementById('success-card');
-const acIcon    = document.getElementById('ac-icon');
-const acName    = document.getElementById('ac-name');
-const acStatus  = document.getElementById('ac-status');
-const acDesc    = document.getElementById('ac-desc');
-const acSteps   = document.getElementById('ac-steps');
-const btnOpen   = document.getElementById('btn-open-provider');
-const btnSkip   = document.getElementById('btn-skip');
-const btnRestart= document.getElementById('btn-restart');
-const scSub     = document.getElementById('sc-sub');
-const scProvider= document.getElementById('sc-provider');
-const hdrStatus = document.getElementById('hdr-status');
-const hdrAttempt= document.getElementById('hdr-attempt');
-const queueInfo = document.getElementById('queue-info');
-const optFallback=document.getElementById('opt-fallback');
-const optAutoOpen=document.getElementById('opt-auto-open');
-const optFreeOnly=document.getElementById('opt-free-only');
+const dropArea = document.getElementById('drop-area');
+const genButton = document.getElementById('gen-button');
+const imgPreview = document.getElementById('img-preview');
+const loader = document.getElementById('loader');
 
-// ─────────────────────────────────────────────────────────────────────────────
-// RENDER PROVIDERS
-// ─────────────────────────────────────────────────────────────────────────────
-function renderProviders() {
-  provList.innerHTML = '';
-  const freeOnly = optFreeOnly.checked;
-  const list = freeOnly ? PROVIDERS.filter(p=>p.tier==='free') : PROVIDERS;
-  queueInfo.textContent = `(${list.length} na fila)`;
-  document.getElementById('hdr-providers').textContent = list.length;
+dropArea.onclick = () => fileInput.click();
+fileInput.onchange = (e) => handleFile(e.target.files[0]);
 
-  list.forEach((p, i) => {
-    const el = document.createElement('div');
-    el.className = 'prov-card';
-    el.id = 'pcard-' + p.id;
-    el.style.setProperty('--color', p.color);
-    const stars = '★'.repeat(p.quality) + '☆'.repeat(5-p.quality);
-    const badgeCls = p.tier==='free'?'badge-free':p.tier==='paid'?'badge-paid':'badge-open';
-    const badgeTxt = p.tier==='free'?'FREE':p.tier==='paid'?'PAGO':'OPEN';
-    el.innerHTML = `
-      <div class="prov-status" id="pstatus-${p.id}">—</div>
-      <div class="prov-top">
-        <div class="prov-icon">${p.icon}</div>
-        <div class="prov-name">${p.name}</div>
-        <span class="prov-badge ${badgeCls}">${badgeTxt}</span>
-      </div>
-      <div class="prov-desc">${p.desc.substring(0,80)}…</div>
-      <div class="prov-meta">
-        <div class="meta-item">⚡ <span>${p.speed}</span></div>
-        <div class="meta-item">★ <span style="color:#f0c040;">${stars}</span></div>
-        <div class="meta-item">#<span>${i+1}</span></div>
-      </div>`;
-    el.addEventListener('click', () => {
-      if (!running) return;
+function handleFile(file) {
+    if (!file) return;
+    selectedFile = file;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        imgPreview.src = e.target.result;
+        imgPreview.style.display = 'block';
+        genButton.disabled = false;
+    };
+    reader.readAsDataURL(file);
+}
+
+// --- INTEGRAÇÃO COM MODELO OPEN SOURCE (SF3D) ---
+genButton.onclick = async () => {
+    loader.classList.add('active');
+    genButton.disabled = true;
+    document.getElementById('loader-text').innerText = "Conectando ao Hugging Face...";
+
+    try {
+        // Conecta ao espaço Stable Fast 3D oficial do Hugging Face (Gratuito)
+        const app = await client("https://zyclv-stable-fast-3d.hf.space/");
+        
+        // Converte o arquivo para Blob
+        const blob = new Blob([selectedFile], { type: selectedFile.type });
+        
+        document.getElementById('loader-text').innerText = "Gerando Malha 3D...";
+        
+        // Chama a predição (SF3D processa em ~1 segundo após subir)
+        const result = await app.predict("/process", [
+            blob,   // input_image
+            true,   // rembg (remover fundo automaticamente)
+            0.85    // threshold
+        ]);
+
+        // O resultado do SF3D é um vídeo e um arquivo GLB
+        const glbFile = result.data[1]; // O índice do GLB no output do SF3D
+        currentGLBUrl = glbFile.url;
+
+        loadModel(currentGLBUrl);
+        
+        document.getElementById('info-panel').style.display = 'block';
+        document.getElementById('status-text').innerText = "Sucesso!";
+    } catch (error) {
+        console.error(error);
+        alert("Erro na fila do servidor. Tente novamente em alguns segundos.");
+    } finally {
+        loader.classList.remove('active');
+        genButton.disabled = false;
+    }
+};
+
+function loadModel(url) {
+    // Limpar modelos antigos
+    scene.children.filter(c => c.isGroup).forEach(c => scene.remove(c));
+
+    const loader = new GLTFLoader();
+    loader.load(url, (gltf) => {
+        const model = gltf.scene;
+        
+        // Centralização Automática
+        const box = new THREE.Box3().setFromObject(model);
+        const center = box.getCenter(new THREE.Vector3());
+        model.position.sub(center);
+        
+        scene.add(model);
+        
+        // Zoom automático
+        const size = box.getSize(new THREE.Vector3());
+        const maxDim = Math.max(size.x, size.y, size.z);
+        camera.position.set(maxDim * 1.5, maxDim * 1.5, maxDim * 1.5);
+        controls.target.set(0, 0, 0);
     });
-    provList.appendChild(el);
-  });
 }
 
-optFreeOnly.addEventListener('change', () => { renderProviders(); updateSequence(); });
-renderProviders();
-
-function updateSequence() {
-  const freeOnly = optFreeOnly.checked;
-  sequence = freeOnly ? PROVIDERS.filter(p=>p.tier==='free') : [...PROVIDERS];
-}
-updateSequence();
-
-// ─────────────────────────────────────────────────────────────────────────────
-// FILE UPLOAD
-// ─────────────────────────────────────────────────────────────────────────────
-dropzone.addEventListener('click', ()=>fileInput.click());
-dropzone.addEventListener('dragover', e=>{e.preventDefault();dropzone.classList.add('over');});
-dropzone.addEventListener('dragleave', ()=>dropzone.classList.remove('over'));
-dropzone.addEventListener('drop', e=>{
-  e.preventDefault();dropzone.classList.remove('over');
-  const f = e.dataTransfer.files[0];
-  if(f) handleFile(f);
-});
-fileInput.addEventListener('change', ()=>{if(fileInput.files[0])handleFile(fileInput.files[0]);});
-
-function handleFile(f) {
-  if(!f.type.startsWith('image/')){log('Formato inválido — use JPG/PNG/WEBP','err');return;}
-  uploadedFile = f;
-  previewImg.src = URL.createObjectURL(f);
-  imgFn.textContent = f.name;
-  imgCard.classList.add('show');
-  dropzone.style.display = 'none';
-  btnLaunch.disabled = false;
-  log(`Imagem carregada: ${f.name} (${(f.size/1024).toFixed(0)}KB)`,'info');
-}
-
-btnRm.addEventListener('click', ()=>{
-  uploadedFile = null;
-  fileInput.value='';
-  imgCard.classList.remove('show');
-  dropzone.style.display='';
-  btnLaunch.disabled = true;
-  log('Imagem removida','warn');
-});
-
-// ─────────────────────────────────────────────────────────────────────────────
-// LOG
-// ─────────────────────────────────────────────────────────────────────────────
-function log(msg, type='') {
-  logEmpty.style.display='none';
-  const el = document.createElement('div');
-  el.className = `log-entry ${type}`;
-  const now = new Date();
-  const t = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
-  el.innerHTML = `<span class="log-time">${t}</span>${msg}`;
-  logScroll.appendChild(el);
-  logScroll.scrollTop = logScroll.scrollHeight;
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// PROGRESS
-// ─────────────────────────────────────────────────────────────────────────────
-function setProgress(pct, label) {
-  trackFill.style.width = pct + '%';
-  trackLabel.textContent = label;
-  trackPct.textContent = Math.round(pct) + '%';
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// LAUNCH SEQUENCE
-// ─────────────────────────────────────────────────────────────────────────────
-btnLaunch.addEventListener('click', startSequence);
-
-function startSequence() {
-  updateSequence();
-  currentIdx = -1;
-  running = true;
-  hdrStatus.textContent = 'running';
-
-  // reset all cards
-  PROVIDERS.forEach(p=>{
-    const c = document.getElementById('pcard-'+p.id);
-    const s = document.getElementById('pstatus-'+p.id);
-    if(c){c.className='prov-card';c.style.setProperty('--color',p.color);}
-    if(s){s.textContent='—';s.style.display='none';}
-  });
-
-  trackWrap.classList.add('show');
-  emptyState.style.display='none';
-  activeCard.classList.remove('show');
-  successCard.classList.remove('show');
-  btnLaunch.disabled = true;
-  
-  log('═══ SEQUÊNCIA INICIADA ═══','info');
-  log(`${sequence.length} providers na fila com fallback automático`);
-
-  nextProvider();
-}
-
-function nextProvider() {
-  currentIdx++;
-  if(currentIdx >= sequence.length) {
-    allFailed();
-    return;
-  }
-
-  const p = sequence[currentIdx];
-  const pct = (currentIdx / sequence.length) * 100;
-  setProgress(pct, `Tentando ${p.name}… (${currentIdx+1}/${sequence.length})`);
-  hdrAttempt.textContent = `${currentIdx+1}/${sequence.length}`;
-
-  // update provider card state
-  PROVIDERS.forEach(pr=>{
-    const c = document.getElementById('pcard-'+pr.id);
-    const s = document.getElementById('pstatus-'+pr.id);
-    if(!c) return;
-    const idx = sequence.findIndex(x=>x.id===pr.id);
-    if(idx < 0) return;
-    if(idx < currentIdx){
-      c.className='prov-card failed';
-      s.textContent='✕ Pulado';
-    } else if(idx === currentIdx){
-      c.className='prov-card active';
-      s.textContent='▶ Ativo';
-      c.scrollIntoView({behavior:'smooth',block:'nearest'});
-    } else {
-      c.className='prov-card';
+document.getElementById('download-glb').onclick = () => {
+    if(currentGLBUrl) {
+        const a = document.createElement('a');
+        a.href = currentGLBUrl;
+        a.download = "modelo_3d_gratuito.glb";
+        a.click();
     }
-  });
+};
 
-  log(`Tentando [${currentIdx+1}] ${p.name}…`,'info');
-
-  // Show active card
-  activeCard.classList.add('show');
-  successCard.classList.remove('show');
-  acIcon.textContent = p.icon;
-  acName.textContent = p.name;
-  acStatus.textContent = `▶ tentativa ${currentIdx+1} de ${sequence.length}`;
-  acDesc.textContent = p.desc;
-
-  acSteps.innerHTML = p.steps.map(s=>`
-    <div class="step-row">
-      <div class="step-n">${s.n}</div>
-      <div class="step-text">${s.t}</div>
-    </div>`).join('');
-
-  btnOpen.onclick = () => {
-    window.open(p.url, '_blank');
-    log(`Abrindo ${p.name} em nova aba…`,'info');
-    if(optAutoOpen.checked) {
-      // wait 3s then ask
-    }
-  };
-
-  btnSkip.onclick = () => {
-    const c = document.getElementById('pcard-'+p.id);
-    const s = document.getElementById('pstatus-'+p.id);
-    if(c){c.className='prov-card failed';c.style.opacity='0.4';}
-    if(s){s.textContent='✕ Pulado';}
-    log(`${p.name} pulado pelo usuário`,'warn');
-    if(optFallback.checked) {
-      nextProvider();
-    }
-  };
-
-  // Auto-open?
-  if(optAutoOpen.checked) {
-    setTimeout(()=>{ window.open(p.url,'_blank'); log(`Auto-aberto: ${p.name}`,'info'); }, 500);
-  }
-
-  // Show "funcionou?" buttons after opening
-  // For UX: user clicks "Funcionou" or "Falhou" (added below)
-  showFeedbackBtns(p);
-}
-
-function showFeedbackBtns(p) {
-  // add feedback row to active card if not exists
-  let fbRow = document.getElementById('fb-row');
-  if(fbRow) fbRow.remove();
-
-  fbRow = document.createElement('div');
-  fbRow.id = 'fb-row';
-  fbRow.style.cssText = `
-    display:flex;gap:10px;margin-top:12px;
-    padding:14px 24px;
-    background:rgba(255,255,255,0.03);
-    border-top:1px solid var(--border);
-  `;
-  fbRow.innerHTML = `
-    <button id="btn-worked" style="flex:1;padding:11px;background:rgba(45,235,168,0.1);border:1px solid rgba(45,235,168,0.3);border-radius:10px;color:#2deba8;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;cursor:pointer;transition:.2s;" onmouseover="this.style.background='rgba(45,235,168,0.2)'" onmouseout="this.style.background='rgba(45,235,168,0.1)'">
-      ✅ &nbsp;Funcionou!
-    </button>
-    <button id="btn-failed" style="flex:1;padding:11px;background:rgba(255,77,94,0.08);border:1px solid rgba(255,77,94,0.25);border-radius:10px;color:#ff4d5e;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;cursor:pointer;transition:.2s;" onmouseover="this.style.background='rgba(255,77,94,0.15)'" onmouseout="this.style.background='rgba(255,77,94,0.08)'">
-      ✕ &nbsp;Não funcionou
-    </button>
-  `;
-  document.getElementById('active-card').appendChild(fbRow);
-
-  document.getElementById('btn-worked').onclick = () => { markSuccess(p); };
-  document.getElementById('btn-failed').onclick = () => {
-    const c = document.getElementById('pcard-'+p.id);
-    const s = document.getElementById('pstatus-'+p.id);
-    if(c){c.className='prov-card failed';}
-    if(s){s.textContent='✕ Falhou';}
-    log(`${p.name} não funcionou — tentando próximo…`,'err');
-    fbRow.remove();
-    if(optFallback.checked) { nextProvider(); }
-    else {
-      hdrStatus.textContent='stopped';
-      running=false;
-      btnLaunch.disabled=false;
-    }
-  };
-}
-
-function markSuccess(p) {
-  running = false;
-  hdrStatus.textContent = 'success';
-  setProgress(100, `✅ Concluído com ${p.name}`);
-
-  const c = document.getElementById('pcard-'+p.id);
-  const s = document.getElementById('pstatus-'+p.id);
-  if(c){c.className='prov-card success';}
-  if(s){s.textContent='✓ Sucesso';}
-
-  activeCard.classList.remove('show');
-  successCard.classList.add('show');
-  scSub.textContent = `Seu modelo 3D foi gerado com sucesso na tentativa ${currentIdx+1} de ${sequence.length}.`;
-  scProvider.textContent = `provider: ${p.name}`;
-
-  log(`✅ SUCESSO com ${p.name} (tentativa ${currentIdx+1})`, 'ok');
-  log('═══ SEQUÊNCIA CONCLUÍDA ═══','ok');
-
-  btnLaunch.disabled = false;
-}
-
-function allFailed() {
-  running = false;
-  hdrStatus.textContent = 'all-failed';
-  setProgress(100, '⚠ Todos os providers falharam');
-  activeCard.classList.remove('show');
-  emptyState.style.display='';
-  emptyState.querySelector('.empty-title').textContent = 'Todos falharam';
-  emptyState.querySelector('.empty-sub').textContent = 'Nenhum provider funcionou nesta tentativa.\nTente novamente mais tarde ou com uma imagem diferente.';
-  log('⚠ Todos os providers foram tentados sem sucesso','err');
-  btnLaunch.disabled = false;
-}
-
-btnRestart.addEventListener('click', () => {
-  successCard.classList.remove('show');
-  emptyState.style.display='';
-  emptyState.querySelector('.empty-title').textContent='Pronto para gerar';
-  emptyState.querySelector('.empty-sub').textContent='Faça upload de uma imagem e clique em INICIAR SEQUÊNCIA para começar.\n\nO sistema tentará 10 plataformas automaticamente\naté uma funcionar.';
-  trackWrap.classList.remove('show');
-  hdrStatus.textContent='idle';
-  hdrAttempt.textContent='—';
-  renderProviders();
-  log('─── Reset manual ───','warn');
-});
-
-btnReset.addEventListener('click', ()=>{
-  btnRm.click();
-  running=false;
-  currentIdx=-1;
-  trackWrap.classList.remove('show');
-  emptyState.style.display='';
-  activeCard.classList.remove('show');
-  successCard.classList.remove('show');
-  hdrStatus.textContent='idle';
-  hdrAttempt.textContent='—';
-  btnLaunch.disabled=true;
-  logScroll.innerHTML='';
-  logEmpty.style.display='';
-  renderProviders();
-  log('Sistema resetado','warn');
-});
-
-log('Sistema 3D FORGE inicializado — 10 providers prontos','info');
-log('Faça upload de uma imagem para começar','');
+window.onresize = () => {
+    camera.aspect = (window.innerWidth - 360) / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth - 360, window.innerHeight);
+    composer.setSize(window.innerWidth - 360, window.innerHeight);
+};
 </script>
 </body>
 </html>
