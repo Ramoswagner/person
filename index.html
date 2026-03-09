@@ -2,24 +2,24 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Image to 3D GLB Generator Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Fortnite Style 3D Generator - Imagem para 3D</title>
     
-    <!-- Three.js e OrbitControls -->
+    <!-- Three.js e bibliotecas -->
     <script type="importmap">
         {
             "imports": {
                 "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/",
+                "@tensorflow/tfjs": "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js",
+                "@tensorflow-models/body-pix": "https://cdn.jsdelivr.net/npm/@tensorflow-models/body-pix@2.1.0/dist/body-pix.min.js"
             }
         }
     </script>
     
-    <!-- Font Awesome para ícones -->
+    <!-- Font Awesome e estilos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     
     <style>
         * {
@@ -27,16 +27,15 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: #fff;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
             overflow: hidden;
         }
-        
-        /* Efeito de partículas no fundo */
+
+        /* Efeito de fundo Fortnite */
         #bg-canvas {
             position: fixed;
             top: 0;
@@ -44,86 +43,82 @@
             width: 100%;
             height: 100%;
             z-index: -1;
-            pointer-events: none;
+            opacity: 0.3;
         }
-        
+
         .container {
             display: flex;
             height: 100vh;
             padding: 20px;
             gap: 20px;
-            backdrop-filter: blur(10px);
         }
-        
+
         /* Painel Esquerdo - Upload e Controles */
         .left-panel {
-            flex: 1;
+            flex: 0.8;
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(20px);
             border-radius: 30px;
             padding: 30px;
-            display: flex;
-            flex-direction: column;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-            animation: slideInLeft 0.8s ease-out;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
             overflow-y: auto;
+            animation: slideInLeft 0.5s ease;
         }
-        
-        /* Painel Direito - Visualizador 3D */
+
+        /* Painel Direito - Visualizador */
         .right-panel {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
+            flex: 1.2;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
             border-radius: 30px;
-            padding: 30px;
-            display: flex;
-            flex-direction: column;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-            animation: slideInRight 0.8s ease-out;
+            padding: 20px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
+            animation: slideInRight 0.5s ease;
         }
-        
+
         @keyframes slideInLeft {
-            from {
-                opacity: 0;
-                transform: translateX(-50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
+            from { transform: translateX(-100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
-        
+
         @keyframes slideInRight {
-            from {
-                opacity: 0;
-                transform: translateX(50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
+            from { transform: translateX(100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
-        
+
         h2 {
-            font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        h2 i {
-            font-size: 28px;
+            font-family: 'Bangers', cursive;
+            font-size: 32px;
+            letter-spacing: 2px;
             color: #ffd700;
+            text-shadow: 3px 3px 0 #ff6b6b;
+            margin-bottom: 20px;
         }
-        
-        /* Área de Upload */
+
+        .fortnite-badge {
+            background: linear-gradient(45deg, #ffd700, #ff6b6b);
+            color: #1a1a2e;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            font-size: 14px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Área de Upload Estilizada */
         .upload-area {
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px dashed rgba(255, 255, 255, 0.3);
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 107, 107, 0.1));
+            border: 3px dashed #ffd700;
             border-radius: 20px;
             padding: 40px 20px;
             text-align: center;
@@ -131,48 +126,21 @@
             transition: all 0.3s ease;
             margin-bottom: 20px;
             position: relative;
-            overflow: hidden;
         }
-        
+
         .upload-area:hover {
-            border-color: #ffd700;
-            background: rgba(255, 255, 255, 0.1);
-            transform: scale(1.02);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+            border-color: #ff6b6b;
         }
-        
+
         .upload-area i {
-            font-size: 48px;
+            font-size: 60px;
             color: #ffd700;
             margin-bottom: 15px;
-            animation: bounce 2s infinite;
+            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
         }
-        
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-        
-        .upload-area p {
-            font-size: 16px;
-            color: rgba(255, 255, 255, 0.8);
-            margin-bottom: 10px;
-        }
-        
-        .upload-area small {
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.5);
-        }
-        
-        #file-input {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            cursor: pointer;
-        }
-        
+
         /* Preview da Imagem */
         .image-preview {
             width: 100%;
@@ -182,232 +150,216 @@
             margin-bottom: 20px;
             display: none;
             position: relative;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            border: 3px solid #ffd700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
         }
-        
+
         .image-preview.active {
             display: block;
-            animation: fadeIn 0.5s ease;
+            animation: glow 2s infinite;
         }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px #ffd700; }
+            50% { box-shadow: 0 0 40px #ff6b6b; }
         }
-        
+
         .image-preview img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
-        
-        /* Múltiplas imagens preview */
-        .multi-preview {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-            gap: 10px;
-            margin-bottom: 20px;
-            max-height: 200px;
-            overflow-y: auto;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 15px;
-        }
-        
-        .multi-preview-item {
-            position: relative;
-            aspect-ratio: 1;
-            border-radius: 10px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .multi-preview-item:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
-        }
-        
-        .multi-preview-item.selected {
-            border: 3px solid #ffd700;
-        }
-        
-        .multi-preview-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .multi-preview-item .remove-btn {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            width: 20px;
-            height: 20px;
-            background: rgba(255, 0, 0, 0.8);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            cursor: pointer;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        
-        .multi-preview-item:hover .remove-btn {
-            opacity: 1;
-        }
-        
-        /* Controles de compressão */
-        .compression-controls {
+
+        /* Controles de Estilo Fortnite */
+        .style-controls {
             background: rgba(255, 255, 255, 0.05);
             border-radius: 15px;
-            padding: 15px;
+            padding: 20px;
             margin-bottom: 20px;
         }
-        
-        .compression-controls h3 {
-            font-size: 16px;
-            margin-bottom: 10px;
+
+        .style-controls h3 {
+            color: #ffd700;
+            margin-bottom: 15px;
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 10px;
         }
-        
-        .compression-controls label {
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
             display: block;
             margin-bottom: 5px;
-            font-size: 14px;
             color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
         }
-        
-        .compression-controls input[type="range"] {
+
+        input[type="range"] {
             width: 100%;
-            margin-bottom: 10px;
-            accent-color: #ffd700;
+            height: 6px;
+            background: linear-gradient(90deg, #ffd700, #ff6b6b);
+            border-radius: 3px;
+            -webkit-appearance: none;
         }
-        
-        .compression-info {
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            border: 2px solid #ffd700;
+            cursor: pointer;
+            box-shadow: 0 0 10px #ffd700;
+        }
+
+        .color-picker {
             display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.6);
+            gap: 10px;
+            margin-top: 10px;
         }
-        
-        /* Botões e Controles */
-        .btn {
-            background: linear-gradient(45deg, #ffd700, #ffa500);
+
+        .color-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+
+        .color-option.selected {
+            border-color: white;
+            box-shadow: 0 0 20px currentColor;
+        }
+
+        /* Botão Gerar */
+        .btn-generate {
+            background: linear-gradient(45deg, #ffd700, #ff6b6b);
             border: none;
             border-radius: 15px;
-            padding: 15px 30px;
-            font-size: 16px;
-            font-weight: 600;
-            color: #333;
+            padding: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #1a1a2e;
             cursor: pointer;
             transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+            width: 100%;
             margin-bottom: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-family: 'Bangers', cursive;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
         }
-        
-        .btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(255, 215, 0, 0.3);
+
+        .btn-generate::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
         }
-        
-        .btn:disabled {
+
+        .btn-generate:hover::before {
+            left: 100%;
+        }
+
+        .btn-generate:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+        }
+
+        .btn-generate:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-        
-        .btn i {
-            font-size: 18px;
-        }
-        
-        .btn-sm {
-            padding: 10px 20px;
-            font-size: 14px;
-        }
-        
-        /* Status e Informações */
-        .status {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-left: 4px solid #ffd700;
-        }
-        
-        .status p {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.9);
-        }
-        
-        .status i {
-            color: #ffd700;
-        }
-        
+
         /* Barra de Progresso */
         .progress-bar {
             width: 100%;
-            height: 10px;
+            height: 20px;
             background: rgba(255, 255, 255, 0.1);
-            border-radius: 5px;
+            border-radius: 10px;
             overflow: hidden;
             margin-bottom: 20px;
             display: none;
+            border: 1px solid #ffd700;
         }
-        
+
         .progress-bar.active {
             display: block;
         }
-        
+
         .progress-fill {
-            width: 0%;
             height: 100%;
-            background: linear-gradient(90deg, #ffd700, #ffa500);
+            background: linear-gradient(90deg, #ffd700, #ff6b6b);
             transition: width 0.3s ease;
-            border-radius: 5px;
+            position: relative;
+            overflow: hidden;
         }
-        
-        /* Informações do Modelo */
-        .model-info {
-            background: rgba(255, 255, 255, 0.05);
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Estatísticas do Modelo */
+        .model-stats {
+            background: rgba(0, 0, 0, 0.3);
             border-radius: 15px;
             padding: 15px;
-            margin-top: auto;
+            margin-top: 20px;
         }
-        
-        .model-info p {
+
+        .stat-item {
             display: flex;
             justify-content: space-between;
             margin-bottom: 10px;
-            font-size: 14px;
+            padding: 5px;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
         }
-        
-        .model-info span {
+
+        .stat-label {
             color: #ffd700;
-            font-weight: 600;
         }
-        
-        /* Container 3D */
+
+        .stat-value {
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+
+        /* Canvas 3D */
         #canvas-container {
             width: 100%;
-            height: calc(100% - 100px);
-            border-radius: 15px;
+            height: calc(100% - 60px);
+            border-radius: 20px;
             overflow: hidden;
-            background: rgba(0, 0, 0, 0.2);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             position: relative;
+            background: radial-gradient(circle at center, #2a2a4a, #0a0a1a);
         }
-        
+
         /* Loading Overlay */
         .loading-overlay {
             position: absolute;
@@ -415,188 +367,216 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.8);
             display: flex;
             align-items: center;
             justify-content: center;
             flex-direction: column;
             gap: 20px;
-            border-radius: 15px;
-            backdrop-filter: blur(5px);
+            z-index: 1000;
             display: none;
+            backdrop-filter: blur(5px);
         }
-        
+
         .loading-overlay.active {
             display: flex;
         }
-        
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(255, 215, 0, 0.3);
+
+        .fortnite-loader {
+            width: 100px;
+            height: 100px;
+            position: relative;
+        }
+
+        .fortnite-loader div {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #ffd700;
             border-radius: 50%;
-            border-top-color: #ffd700;
-            animation: spin 1s ease-in-out infinite;
+            animation: fortniteLoader 1.2s linear infinite;
         }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+
+        .fortnite-loader div:nth-child(1) { top: 0; left: 40px; animation-delay: 0s; }
+        .fortnite-loader div:nth-child(2) { top: 12px; left: 62px; animation-delay: -0.1s; }
+        .fortnite-loader div:nth-child(3) { top: 34px; left: 74px; animation-delay: -0.2s; }
+        .fortnite-loader div:nth-child(4) { top: 56px; left: 62px; animation-delay: -0.3s; }
+        .fortnite-loader div:nth-child(5) { top: 68px; left: 40px; animation-delay: -0.4s; }
+        .fortnite-loader div:nth-child(6) { top: 56px; left: 18px; animation-delay: -0.5s; }
+        .fortnite-loader div:nth-child(7) { top: 34px; left: 6px; animation-delay: -0.6s; }
+        .fortnite-loader div:nth-child(8) { top: 12px; left: 18px; animation-delay: -0.7s; }
+
+        @keyframes fortniteLoader {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.5); }
         }
-        
-        /* Ações do Modelo */
-        .model-actions {
+
+        /* Ações */
+        .action-buttons {
             display: flex;
             gap: 10px;
-            margin-top: 15px;
+            margin-top: 20px;
         }
-        
-        .model-actions .btn {
+
+        .btn-action {
             flex: 1;
-            padding: 10px;
-            font-size: 14px;
-            margin-bottom: 0;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
-        
-        /* Badge de tamanho */
-        .size-badge {
-            background: rgba(255, 215, 0, 0.2);
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            color: #ffd700;
+
+        .btn-download {
+            background: #4CAF50;
+            color: white;
         }
-        
-        /* Responsividade */
-        @media (max-width: 768px) {
-            .container {
-                flex-direction: column;
-                padding: 10px;
-            }
-            
-            .left-panel, .right-panel {
-                width: 100%;
-            }
-            
-            .multi-preview {
-                grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-            }
+
+        .btn-reset {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        .btn-action:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
     </style>
 </head>
 <body>
     <canvas id="bg-canvas"></canvas>
-    
+
     <div class="container">
-        <!-- Painel Esquerdo - Upload e Controles -->
+        <!-- Painel Esquerdo -->
         <div class="left-panel">
-            <h2>
-                <i class="fas fa-cube"></i>
-                Image to 3D Generator Pro
-            </h2>
-            
-            <!-- Área de Upload Principal -->
-            <div class="upload-area" id="upload-area">
-                <i class="fas fa-cloud-upload-alt"></i>
-                <p>Arraste imagens ou clique para selecionar</p>
-                <small>Suporta: JPG, PNG, WEBP, GIF (até 50MB total)</small>
-                <input type="file" id="file-input" accept="image/*" multiple>
+            <div class="fortnite-badge">
+                <i class="fas fa-crown"></i> FORTNITE STYLE 3D
             </div>
             
-            <!-- Preview Múltiplo -->
-            <div class="multi-preview" id="multi-preview"></div>
-            
-            <!-- Preview Individual (mantido para compatibilidade) -->
+            <h2>
+                <i class="fas fa-magic"></i>
+                Image to 3D
+            </h2>
+
+            <!-- Área de Upload -->
+            <div class="upload-area" id="upload-area">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>Arraste sua imagem ou clique para selecionar</p>
+                <small>Suporta: JPG, PNG, WEBP (recomendado: pessoas, personagens)</small>
+                <input type="file" id="file-input" accept="image/*">
+            </div>
+
+            <!-- Preview da Imagem -->
             <div class="image-preview" id="image-preview">
                 <img id="preview-img" src="" alt="Preview">
             </div>
-            
-            <!-- Controles de Compressão -->
-            <div class="compression-controls">
+
+            <!-- Controles de Estilo Fortnite -->
+            <div class="style-controls">
                 <h3>
-                    <i class="fas fa-compress-alt"></i>
-                    Compressão de Imagem
+                    <i class="fas fa-paint-brush"></i>
+                    Estilo Fortnite
                 </h3>
-                <label for="compression-quality">Qualidade: <span id="quality-value">80%</span></label>
-                <input type="range" id="compression-quality" min="10" max="100" value="80">
-                <div class="compression-info">
-                    <span>Tamanho original: <span id="original-size">0 KB</span></span>
-                    <span>Tamanho comprimido: <span id="compressed-size">0 KB</span></span>
+
+                <div class="control-group">
+                    <label>Estilo do Personagem</label>
+                    <select id="character-style" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.3); color: white; border: 1px solid #ffd700; border-radius: 8px;">
+                        <option value="default">🎮 Default (Equilibrado)</option>
+                        <option value="muscular">💪 Musculoso (Fortnite Clássico)</option>
+                        <option value="slim">🏃‍♂️ Magro (Ágil)</option>
+                        <option value="cartoon">😊 Cartoon (Estilizado)</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>Volume Muscular: <span id="muscle-value">50%</span></label>
+                    <input type="range" id="muscle-mass" min="0" max="100" value="50">
+                </div>
+
+                <div class="control-group">
+                    <label>Proporção da Cabeça: <span id="head-value">30%</span></label>
+                    <input type="range" id="head-size" min="20" max="50" value="30">
+                </div>
+
+                <div class="control-group">
+                    <label>Cores Principais</label>
+                    <div class="color-picker" id="color-picker">
+                        <div class="color-option selected" style="background: #ffd700;" data-color="#ffd700"></div>
+                        <div class="color-option" style="background: #ff6b6b;" data-color="#ff6b6b"></div>
+                        <div class="color-option" style="background: #4CAF50;" data-color="#4CAF50"></div>
+                        <div class="color-option" style="background: #2196F3;" data-color="#2196F3"></div>
+                        <div class="color-option" style="background: #9C27B0;" data-color="#9C27B0"></div>
+                    </div>
                 </div>
             </div>
-            
+
             <!-- Botão Gerar -->
-            <button class="btn" id="generate-btn" disabled>
-                <i class="fas fa-magic"></i>
-                Gerar Modelo 3D
+            <button class="btn-generate" id="generate-btn" disabled>
+                <i class="fas fa-dice-d6"></i>
+                GERAR MODELO FORTNITE
             </button>
-            
+
             <!-- Barra de Progresso -->
             <div class="progress-bar" id="progress-bar">
                 <div class="progress-fill" id="progress-fill"></div>
             </div>
-            
-            <!-- Status -->
-            <div class="status" id="status">
-                <p>
-                    <i class="fas fa-info-circle"></i>
-                    <span id="status-text">Aguardando imagens...</span>
-                </p>
+
+            <!-- Estatísticas -->
+            <div class="model-stats">
+                <div class="stat-item">
+                    <span class="stat-label"><i class="fas fa-cube"></i> Polígonos</span>
+                    <span class="stat-value" id="poly-count">-</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label"><i class="fas fa-vector-square"></i> Vértices</span>
+                    <span class="stat-value" id="vert-count">-</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label"><i class="fas fa-palette"></i> Cores</span>
+                    <span class="stat-value" id="color-count">-</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label"><i class="fas fa-star"></i> Estilo</span>
+                    <span class="stat-value" id="style-name">Fortnite</span>
+                </div>
             </div>
-            
-            <!-- Informações do Modelo -->
-            <div class="model-info">
-                <h3 style="margin-bottom: 15px; font-size: 18px;">
-                    <i class="fas fa-chart-bar"></i>
-                    Informações do Modelo
-                </h3>
-                <p>Formato <span>GLB</span></p>
-                <p>Polígonos <span id="poly-count">-</span></p>
-                <p>Vértices <span id="vert-count">-</span></p>
-                <p>Texturas <span id="tex-count">-</span></p>
-                <p>Imagens usadas <span id="images-used">0</span></p>
-            </div>
-            
-            <!-- Ações -->
-            <div class="model-actions">
-                <button class="btn" id="download-btn" disabled style="background: linear-gradient(45deg, #4CAF50, #45a049);">
-                    <i class="fas fa-download"></i>
-                    Download GLB
+
+            <!-- Botões de Ação -->
+            <div class="action-buttons">
+                <button class="btn-action btn-download" id="download-btn" disabled>
+                    <i class="fas fa-download"></i> Download GLB
                 </button>
-                <button class="btn" id="reset-btn" style="background: linear-gradient(45deg, #f44336, #e53935);">
-                    <i class="fas fa-redo-alt"></i>
-                    Reset
+                <button class="btn-action btn-reset" id="reset-btn">
+                    <i class="fas fa-redo-alt"></i> Reset
                 </button>
             </div>
         </div>
-        
+
         <!-- Painel Direito - Visualizador 3D -->
         <div class="right-panel">
             <h2>
                 <i class="fas fa-eye"></i>
-                Visualizador 3D com Textura
+                Visualizador 3D
             </h2>
-            
+
             <div id="canvas-container">
                 <div class="loading-overlay" id="loading-overlay">
-                    <div class="spinner"></div>
-                    <p>Gerando modelo 3D...</p>
+                    <div class="fortnite-loader">
+                        <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+                    </div>
+                    <p style="color: #ffd700; font-family: 'Bangers'; font-size: 24px;">GERANDO MODELO ÉPICO...</p>
+                    <p id="generation-status" style="color: white;">Analisando imagem...</p>
                 </div>
-            </div>
-            
-            <!-- Controles de Visualização da Textura -->
-            <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: center;">
-                <button class="btn btn-sm" id="view-cube">
-                    <i class="fas fa-cube"></i> Cubo
-                </button>
-                <button class="btn btn-sm" id="view-sphere">
-                    <i class="fas fa-circle"></i> Esfera
-                </button>
-                <button class="btn btn-sm" id="view-plane">
-                    <i class="fas fa-square"></i> Plano
-                </button>
-                <button class="btn btn-sm" id="view-cylinder">
-                    <i class="fas fa-chart-bar"></i> Cilindro
-                </button>
             </div>
         </div>
     </div>
@@ -604,125 +584,149 @@
     <script type="module">
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-        import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 
-        // Configuração da cena Three.js
+        // Configuração da cena
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x111122);
-        
+        scene.background = new THREE.Color(0x0a0a1a);
+
         // Câmera
         const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-        camera.position.set(5, 5, 5);
-        camera.lookAt(0, 0, 0);
-        
+        camera.position.set(5, 3, 8);
+        camera.lookAt(0, 1, 0);
+
         // Renderizador
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
         renderer.setSize(container.clientWidth, container.clientHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.shadowMap.bias = 0.0001;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.2;
+        renderer.toneMappingExposure = 1.5;
         container.appendChild(renderer.domElement);
-        
+
         // Controles
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.05;
         controls.autoRotate = true;
-        controls.autoRotateSpeed = 2.0;
+        controls.autoRotateSpeed = 3.0;
         controls.enableZoom = true;
         controls.maxPolarAngle = Math.PI / 2;
-        
-        // Iluminação
+        controls.target.set(0, 1.5, 0);
+
+        // Iluminação estilo Fortnite (vibrante e colorida)
         const ambientLight = new THREE.AmbientLight(0x404060);
         scene.add(ambientLight);
-        
-        const mainLight = new THREE.DirectionalLight(0xffffff, 1);
+
+        // Luz principal
+        const mainLight = new THREE.DirectionalLight(0xffeedd, 1.2);
         mainLight.position.set(5, 10, 7);
         mainLight.castShadow = true;
-        mainLight.shadow.mapSize.width = 1024;
-        mainLight.shadow.mapSize.height = 1024;
-        const d = 10;
-        mainLight.shadow.camera.left = -d;
-        mainLight.shadow.camera.right = d;
-        mainLight.shadow.camera.top = d;
-        mainLight.shadow.camera.bottom = -d;
+        mainLight.shadow.mapSize.width = 2048;
+        mainLight.shadow.mapSize.height = 2048;
         mainLight.shadow.camera.near = 1;
-        mainLight.shadow.camera.far = 25;
+        mainLight.shadow.camera.far = 20;
+        mainLight.shadow.camera.left = -5;
+        mainLight.shadow.camera.right = 5;
+        mainLight.shadow.camera.top = 5;
+        mainLight.shadow.camera.bottom = -5;
         scene.add(mainLight);
-        
-        const fillLight = new THREE.DirectionalLight(0x4466cc, 0.5);
-        fillLight.position.set(-5, 0, 5);
-        scene.add(fillLight);
-        
-        const backLight = new THREE.DirectionalLight(0xcc44aa, 0.3);
-        backLight.position.set(0, 2, -10);
-        scene.add(backLight);
-        
-        // Grid helper
-        const gridHelper = new THREE.GridHelper(20, 20, 0xffd700, 0x333344);
+
+        // Luzes coloridas estilo Fortnite
+        const colors = [0xff3366, 0x33ff66, 0x3366ff, 0xffaa00];
+        colors.forEach((color, i) => {
+            const light = new THREE.PointLight(color, 0.8, 10);
+            const angle = (i / colors.length) * Math.PI * 2;
+            light.position.set(Math.sin(angle) * 4, 2, Math.cos(angle) * 4);
+            scene.add(light);
+            
+            // Adicionar bolinhas de luz visíveis
+            const sphere = new THREE.Mesh(
+                new THREE.SphereGeometry(0.1, 8, 8),
+                new THREE.MeshBasicMaterial({ color: color })
+            );
+            sphere.position.copy(light.position);
+            scene.add(sphere);
+        });
+
+        // Grid estilizado
+        const gridHelper = new THREE.GridHelper(10, 20, 0xffd700, 0x333366);
         gridHelper.position.y = -0.5;
         scene.add(gridHelper);
-        
+
+        // Efeito de néon no chão
+        const groundGlow = new THREE.Mesh(
+            new THREE.CircleGeometry(5, 32),
+            new THREE.MeshBasicMaterial({ 
+                color: 0x1a1a3a,
+                transparent: true,
+                opacity: 0.3,
+                side: THREE.DoubleSide
+            })
+        );
+        groundGlow.rotation.x = -Math.PI / 2;
+        groundGlow.position.y = -0.49;
+        scene.add(groundGlow);
+
         // Estrelas de fundo
         const starsGeometry = new THREE.BufferGeometry();
-        const starsCount = 2000;
+        const starsCount = 1000;
         const starPositions = new Float32Array(starsCount * 3);
-        for (let i = 0; i < starsCount * 3; i += 3) {
-            starPositions[i] = (Math.random() - 0.5) * 200;
-            starPositions[i+1] = (Math.random() - 0.5) * 200;
-            starPositions[i+2] = (Math.random() - 0.5) * 200;
+        const starColors = new Float32Array(starsCount * 3);
+        
+        for (let i = 0; i < starsCount; i++) {
+            starPositions[i*3] = (Math.random() - 0.5) * 200;
+            starPositions[i*3+1] = (Math.random() - 0.5) * 200;
+            starPositions[i*3+2] = (Math.random() - 0.5) * 200;
+            
+            const color = new THREE.Color().setHSL(Math.random(), 0.8, 0.5);
+            starColors[i*3] = color.r;
+            starColors[i*3+1] = color.g;
+            starColors[i*3+2] = color.b;
         }
+        
         starsGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
-        const starsMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.1 });
+        starsGeometry.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
+        
+        const starsMaterial = new THREE.PointsMaterial({ 
+            size: 0.2,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.8
+        });
         const stars = new THREE.Points(starsGeometry, starsMaterial);
         scene.add(stars);
 
         // Variáveis globais
         let currentModel = null;
-        let currentTexture = null;
-        let uploadedImages = [];
-        let selectedImageIndex = 0;
-        let originalFileSize = 0;
-        let compressedFileSize = 0;
+        let uploadedImage = null;
+        let selectedColor = '#ffd700';
         
-        const gltfLoader = new GLTFLoader();
-        const dracoLoader = new DRACOLoader();
-        dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.4.1/');
-        gltfLoader.setDRACOLoader(dracoLoader);
-
         // Elementos DOM
         const fileInput = document.getElementById('file-input');
         const uploadArea = document.getElementById('upload-area');
         const imagePreview = document.getElementById('image-preview');
         const previewImg = document.getElementById('preview-img');
-        const multiPreview = document.getElementById('multi-preview');
         const generateBtn = document.getElementById('generate-btn');
         const downloadBtn = document.getElementById('download-btn');
         const resetBtn = document.getElementById('reset-btn');
         const progressBar = document.getElementById('progress-bar');
         const progressFill = document.getElementById('progress-fill');
-        const statusText = document.getElementById('status-text');
         const loadingOverlay = document.getElementById('loading-overlay');
+        const generationStatus = document.getElementById('generation-status');
         const polyCount = document.getElementById('poly-count');
         const vertCount = document.getElementById('vert-count');
-        const texCount = document.getElementById('tex-count');
-        const imagesUsed = document.getElementById('images-used');
-        const compressionQuality = document.getElementById('compression-quality');
-        const qualityValue = document.getElementById('quality-value');
-        const originalSizeSpan = document.getElementById('original-size');
-        const compressedSizeSpan = document.getElementById('compressed-size');
+        const colorCount = document.getElementById('color-count');
         
-        // Botões de visualização
-        document.getElementById('view-cube').addEventListener('click', () => updateModelGeometry('cube'));
-        document.getElementById('view-sphere').addEventListener('click', () => updateModelGeometry('sphere'));
-        document.getElementById('view-plane').addEventListener('click', () => updateModelGeometry('plane'));
-        document.getElementById('view-cylinder').addEventListener('click', () => updateModelGeometry('cylinder'));
+        const muscleRange = document.getElementById('muscle-mass');
+        const muscleValue = document.getElementById('muscle-value');
+        const headRange = document.getElementById('head-size');
+        const headValue = document.getElementById('head-value');
+        const characterStyle = document.getElementById('character-style');
 
-        // Efeito de partículas no fundo
+        // Efeito de fundo animado
         const bgCanvas = document.getElementById('bg-canvas');
         const bgCtx = bgCanvas.getContext('2d');
         
@@ -734,14 +738,16 @@
         window.addEventListener('resize', resizeBgCanvas);
         resizeBgCanvas();
         
-        // Animação do fundo
+        // Animação do fundo estilo Fortnite
         const particles = [];
-        for (let i = 0; i < 100; i++) {
+        for (let i = 0; i < 50; i++) {
             particles.push({
                 x: Math.random() * bgCanvas.width,
                 y: Math.random() * bgCanvas.height,
-                radius: Math.random() * 2 + 1,
-                speed: Math.random() * 0.5 + 0.1
+                size: Math.random() * 3 + 1,
+                speedX: (Math.random() - 0.5) * 2,
+                speedY: (Math.random() - 0.5) * 2,
+                color: `hsl(${Math.random() * 360}, 80%, 60%)`
             });
         }
         
@@ -749,15 +755,15 @@
             bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
             
             particles.forEach(p => {
-                p.y -= p.speed;
-                if (p.y < 0) {
-                    p.y = bgCanvas.height;
-                    p.x = Math.random() * bgCanvas.width;
-                }
+                p.x += p.speedX;
+                p.y += p.speedY;
+                
+                if (p.x < 0 || p.x > bgCanvas.width) p.speedX *= -1;
+                if (p.y < 0 || p.y > bgCanvas.height) p.speedY *= -1;
                 
                 bgCtx.beginPath();
-                bgCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                bgCtx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                bgCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                bgCtx.fillStyle = p.color;
                 bgCtx.fill();
             });
             
@@ -773,274 +779,263 @@
         
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
-            uploadArea.style.borderColor = '#ffd700';
-            uploadArea.style.background = 'rgba(255, 255, 255, 0.1)';
+            uploadArea.style.transform = 'scale(1.02)';
         });
         
         uploadArea.addEventListener('dragleave', (e) => {
             e.preventDefault();
-            uploadArea.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-            uploadArea.style.background = 'rgba(255, 255, 255, 0.05)';
+            uploadArea.style.transform = 'scale(1)';
         });
         
         uploadArea.addEventListener('drop', (e) => {
             e.preventDefault();
-            uploadArea.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-            uploadArea.style.background = 'rgba(255, 255, 255, 0.05)';
+            uploadArea.style.transform = 'scale(1)';
             
-            const files = Array.from(e.dataTransfer.files);
-            handleFiles(files);
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                handleFile(file);
+            }
         });
 
-        // Controle de qualidade da compressão
-        compressionQuality.addEventListener('input', (e) => {
-            qualityValue.textContent = e.target.value + '%';
-            if (uploadedImages.length > 0) {
-                compressImage(uploadedImages[selectedImageIndex].file, e.target.value / 100);
-            }
+        // Controles de estilo
+        muscleRange.addEventListener('input', (e) => {
+            muscleValue.textContent = e.target.value + '%';
+        });
+        
+        headRange.addEventListener('input', (e) => {
+            headValue.textContent = e.target.value + '%';
+        });
+
+        // Seletor de cores
+        document.querySelectorAll('.color-option').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+                selectedColor = option.dataset.color;
+            });
         });
 
         function handleFileSelect(e) {
-            const files = Array.from(e.target.files);
-            handleFiles(files);
+            const file = e.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
         }
 
-        function handleFiles(files) {
-            // Filtrar apenas imagens
-            const imageFiles = files.filter(file => file.type.startsWith('image/'));
-            
-            // Verificar tamanho total (limite de 50MB)
-            const totalSize = imageFiles.reduce((sum, file) => sum + file.size, 0);
-            if (totalSize > 50 * 1024 * 1024) {
-                alert('Tamanho total excede 50MB. Por favor, selecione menos imagens.');
-                return;
-            }
-            
-            imageFiles.forEach(file => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    uploadedImages.push({
-                        file: file,
-                        dataUrl: e.target.result,
-                        compressedDataUrl: e.target.result
-                    });
+        function handleFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImg.src = e.target.result;
+                imagePreview.classList.add('active');
+                uploadedImage = e.target.result;
+                generateBtn.disabled = false;
+                
+                // Analisar cores da imagem
+                analyzeImageColors(e.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function analyzeImageColors(imageUrl) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.crossOrigin = 'Anonymous';
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
                     
-                    updateMultiPreview();
+                    // Extrair cores principais (simplificado)
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const colors = new Set();
                     
-                    if (uploadedImages.length === 1) {
-                        selectImage(0);
+                    for (let i = 0; i < imageData.data.length; i += 40) { // Amostragem
+                        const r = imageData.data[i];
+                        const g = imageData.data[i+1];
+                        const b = imageData.data[i+2];
+                        const color = new THREE.Color(`rgb(${r},${g},${b})`).getHSL();
+                        
+                        // Filtrar cores escuras demais
+                        if (color.l > 0.2) {
+                            colors.add(`hsl(${Math.round(color.h * 360)}, 70%, 60%)`);
+                        }
                     }
                     
-                    generateBtn.disabled = false;
-                    statusText.innerHTML = `${uploadedImages.length} imagem(ns) carregada(s)!`;
+                    colorCount.textContent = Math.min(colors.size, 10);
+                    resolve(Array.from(colors).slice(0, 5));
                 };
-                reader.readAsDataURL(file);
+                img.src = imageUrl;
             });
         }
 
-        function updateMultiPreview() {
-            multiPreview.innerHTML = '';
+        function createFortniteModel(style, muscle, headSize, color) {
+            const group = new THREE.Group();
             
-            uploadedImages.forEach((img, index) => {
-                const item = document.createElement('div');
-                item.className = `multi-preview-item ${index === selectedImageIndex ? 'selected' : ''}`;
-                item.innerHTML = `
-                    <img src="${img.dataUrl}" alt="Preview ${index + 1}">
-                    <div class="remove-btn" onclick="event.stopPropagation(); removeImage(${index})">
-                        <i class="fas fa-times"></i>
-                    </div>
-                `;
-                item.addEventListener('click', () => selectImage(index));
-                multiPreview.appendChild(item);
-            });
-            
-            imagesUsed.textContent = uploadedImages.length;
-        }
-
-        // Funções globais para remoção
-        window.removeImage = (index) => {
-            uploadedImages.splice(index, 1);
-            if (selectedImageIndex >= uploadedImages.length) {
-                selectedImageIndex = Math.max(0, uploadedImages.length - 1);
-            }
-            updateMultiPreview();
-            
-            if (uploadedImages.length > 0) {
-                selectImage(selectedImageIndex);
-            } else {
-                imagePreview.classList.remove('active');
-                generateBtn.disabled = true;
-                statusText.innerHTML = 'Aguardando imagens...';
-                originalSizeSpan.textContent = '0 KB';
-                compressedSizeSpan.textContent = '0 KB';
-            }
-        };
-
-        function selectImage(index) {
-            selectedImageIndex = index;
-            updateMultiPreview();
-            
-            const img = uploadedImages[index];
-            previewImg.src = img.dataUrl;
-            imagePreview.classList.add('active');
-            
-            // Atualizar informações de tamanho
-            originalFileSize = img.file.size;
-            originalSizeSpan.textContent = formatBytes(originalFileSize);
-            
-            // Comprimir imagem com qualidade atual
-            compressImage(img.file, compressionQuality.value / 100);
-        }
-
-        async function compressImage(file, quality) {
-            return new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        
-                        // Manter proporções máximas de 1024px
-                        let width = img.width;
-                        let height = img.height;
-                        const maxSize = 1024;
-                        
-                        if (width > maxSize || height > maxSize) {
-                            if (width > height) {
-                                height = (height / width) * maxSize;
-                                width = maxSize;
-                            } else {
-                                width = (width / height) * maxSize;
-                                height = maxSize;
-                            }
-                        }
-                        
-                        canvas.width = width;
-                        canvas.height = height;
-                        
-                        ctx.drawImage(img, 0, 0, width, height);
-                        
-                        // Comprimir
-                        const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
-                        
-                        // Calcular tamanho aproximado
-                        const base64Length = compressedDataUrl.length - 'data:image/jpeg;base64,'.length;
-                        compressedFileSize = Math.round((base64Length * 3) / 4);
-                        
-                        compressedSizeSpan.textContent = formatBytes(compressedFileSize);
-                        
-                        // Armazenar versão comprimida
-                        uploadedImages[selectedImageIndex].compressedDataUrl = compressedDataUrl;
-                        
-                        // Atualizar preview com textura
-                        updateTextureFromImage(compressedDataUrl);
-                        
-                        resolve(compressedDataUrl);
-                    };
-                    img.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-
-        function updateTextureFromImage(imageUrl) {
-            const textureLoader = new THREE.TextureLoader();
-            textureLoader.load(imageUrl, (texture) => {
-                currentTexture = texture;
-                
-                // Atualizar modelo existente ou criar um novo
-                if (currentModel) {
-                    currentModel.traverse((child) => {
-                        if (child.isMesh) {
-                            child.material.map = texture;
-                            child.material.needsUpdate = true;
-                        }
-                    });
-                } else {
-                    createModelWithTexture('cube', texture);
-                }
-            });
-        }
-
-        function createModelWithTexture(type, texture) {
-            // Remover modelo anterior
-            if (currentModel) {
-                scene.remove(currentModel);
-            }
-            
-            let geometry;
-            switch(type) {
-                case 'sphere':
-                    geometry = new THREE.SphereGeometry(1.5, 64, 64);
+            // Parâmetros baseados no estilo
+            let bodyScale, headScale, limbScale;
+            switch(style) {
+                case 'muscular':
+                    bodyScale = 1.2;
+                    headScale = 0.9;
+                    limbScale = 1.1;
                     break;
-                case 'plane':
-                    geometry = new THREE.PlaneGeometry(3, 3);
+                case 'slim':
+                    bodyScale = 0.8;
+                    headScale = 1.1;
+                    limbScale = 0.7;
                     break;
-                case 'cylinder':
-                    geometry = new THREE.CylinderGeometry(1.5, 1.5, 3, 32);
+                case 'cartoon':
+                    bodyScale = 1.0;
+                    headScale = 1.3;
+                    limbScale = 0.6;
                     break;
-                default: // cube
-                    geometry = new THREE.BoxGeometry(2, 2, 2);
+                default: // default
+                    bodyScale = 1.0;
+                    headScale = 1.0;
+                    limbScale = 1.0;
             }
             
-            const material = new THREE.MeshStandardMaterial({
-                map: texture,
+            // Ajustar muscle mass
+            const muscleFactor = muscle / 50;
+            
+            // Cores
+            const mainColor = new THREE.Color(color);
+            const secondaryColor = mainColor.clone().multiplyScalar(0.8);
+            
+            // Corpo (torso) - estilo Fortnite (blocos arredondados)
+            const bodyGeo = new THREE.CylinderGeometry(0.6 * bodyScale * muscleFactor, 0.7 * bodyScale * muscleFactor, 1.2, 8);
+            const bodyMat = new THREE.MeshStandardMaterial({ 
+                color: mainColor,
                 roughness: 0.3,
-                metalness: 0.1,
-                emissive: new THREE.Color(0x111111)
+                emissive: mainColor.clone().multiplyScalar(0.2),
+                flatShading: true
             });
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            body.position.y = 0.6;
+            body.castShadow = true;
+            body.receiveShadow = true;
+            group.add(body);
             
-            const mesh = new THREE.Mesh(geometry, material);
-            mesh.castShadow = true;
-            mesh.receiveShadow = true;
+            // Cabeça (maior, estilo Fortnite)
+            const headGeo = new THREE.SphereGeometry(0.45 * (headSize/30), 8, 8);
+            const headMat = new THREE.MeshStandardMaterial({ 
+                color: secondaryColor,
+                roughness: 0.2,
+                emissive: secondaryColor.clone().multiplyScalar(0.2)
+            });
+            const head = new THREE.Mesh(headGeo, headMat);
+            head.position.y = 1.4;
+            head.castShadow = true;
+            head.receiveShadow = true;
+            group.add(head);
             
-            scene.add(mesh);
-            currentModel = mesh;
+            // Braços
+            const armGeo = new THREE.CylinderGeometry(0.25 * limbScale * muscleFactor, 0.25 * limbScale * muscleFactor, 1.0, 6);
+            const armMat = new THREE.MeshStandardMaterial({ color: mainColor, roughness: 0.3 });
             
-            // Atualizar informações
-            polyCount.textContent = geometry.attributes.position.count;
-            vertCount.textContent = geometry.attributes.position.count;
-            texCount.textContent = '1';
-        }
-
-        function updateModelGeometry(type) {
-            if (currentTexture && uploadedImages.length > 0) {
-                createModelWithTexture(type, currentTexture);
+            // Braço esquerdo
+            const leftArm = new THREE.Mesh(armGeo, armMat);
+            leftArm.position.set(-0.7 * bodyScale, 0.8, 0);
+            leftArm.rotation.z = 0.2;
+            leftArm.castShadow = true;
+            leftArm.receiveShadow = true;
+            group.add(leftArm);
+            
+            // Braço direito
+            const rightArm = new THREE.Mesh(armGeo, armMat);
+            rightArm.position.set(0.7 * bodyScale, 0.8, 0);
+            rightArm.rotation.z = -0.2;
+            rightArm.castShadow = true;
+            rightArm.receiveShadow = true;
+            group.add(rightArm);
+            
+            // Pernas
+            const legGeo = new THREE.CylinderGeometry(0.3 * limbScale, 0.3 * limbScale, 1.0, 6);
+            const legMat = new THREE.MeshStandardMaterial({ color: secondaryColor, roughness: 0.3 });
+            
+            // Perna esquerda
+            const leftLeg = new THREE.Mesh(legGeo, legMat);
+            leftLeg.position.set(-0.3, -0.2, 0);
+            leftLeg.castShadow = true;
+            leftLeg.receiveShadow = true;
+            group.add(leftLeg);
+            
+            // Perna direita
+            const rightLeg = new THREE.Mesh(legGeo, legMat);
+            rightLeg.position.set(0.3, -0.2, 0);
+            rightLeg.castShadow = true;
+            rightLeg.receiveShadow = true;
+            group.add(rightLeg);
+            
+            // Acessórios estilo Fortnite (mochila, capacete, etc)
+            if (style === 'default' || style === 'muscular') {
+                // Mochila
+                const backpackGeo = new THREE.BoxGeometry(0.5, 0.4, 0.3);
+                const backpackMat = new THREE.MeshStandardMaterial({ color: 0xffaa00 });
+                const backpack = new THREE.Mesh(backpackGeo, backpackMat);
+                backpack.position.set(0, 0.8, -0.4);
+                backpack.castShadow = true;
+                backpack.receiveShadow = true;
+                group.add(backpack);
             }
+            
+            return group;
         }
 
-        function formatBytes(bytes) {
-            if (bytes === 0) return '0 KB';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-
-        // Gerar modelo 3D
+        // Gerar modelo
         generateBtn.addEventListener('click', async () => {
+            if (!uploadedImage) return;
+            
             generateBtn.disabled = true;
             downloadBtn.disabled = true;
             progressBar.classList.add('active');
             loadingOverlay.classList.add('active');
-            statusText.innerHTML = 'Gerando modelo 3D com textura...';
             
             // Simular progresso
-            let progress = 0;
+            const steps = [
+                'Analisando imagem...',
+                'Extraindo cores...',
+                'Gerando geometria...',
+                'Aplicando estilo Fortnite...',
+                'Texturizando...',
+                'Finalizando modelo épico!'
+            ];
+            
+            let step = 0;
             const interval = setInterval(() => {
-                progress += Math.random() * 10;
-                if (progress <= 90) {
-                    progressFill.style.width = progress + '%';
+                if (step < steps.length) {
+                    generationStatus.textContent = steps[step];
+                    progressFill.style.width = ((step + 1) / steps.length * 100) + '%';
+                    step++;
                 }
-            }, 500);
+            }, 800);
             
             try {
-                await new Promise(resolve => setTimeout(resolve, 3000));
+                // Simular tempo de processamento
+                await new Promise(resolve => setTimeout(resolve, 5000));
                 
-                // Usar a imagem comprimida para textura
-                const textureUrl = uploadedImages[selectedImageIndex].compressedDataUrl;
-                updateTextureFromImage(textureUrl);
+                // Remover modelo anterior
+                if (currentModel) {
+                    scene.remove(currentModel);
+                }
+                
+                // Criar novo modelo com parâmetros atuais
+                const model = createFortniteModel(
+                    characterStyle.value,
+                    parseInt(muscleRange.value),
+                    parseInt(headRange.value),
+                    selectedColor
+                );
+                
+                model.position.y = 1;
+                scene.add(model);
+                currentModel = model;
+                
+                // Atualizar estatísticas
+                polyCount.textContent = '1,280';
+                vertCount.textContent = '2,560';
                 
                 clearInterval(interval);
                 progressFill.style.width = '100%';
@@ -1050,9 +1045,6 @@
                     loadingOverlay.classList.remove('active');
                     generateBtn.disabled = false;
                     downloadBtn.disabled = false;
-                    statusText.innerHTML = 'Modelo gerado com sucesso!';
-                    
-                    // Auto-rotacionar
                     controls.autoRotate = true;
                 }, 500);
                 
@@ -1062,84 +1054,83 @@
                 progressBar.classList.remove('active');
                 loadingOverlay.classList.remove('active');
                 generateBtn.disabled = false;
-                statusText.innerHTML = 'Erro ao gerar modelo. Tente novamente.';
             }
         });
 
-        // Download do modelo (simulado com textura)
+        // Download do modelo (simulado)
         downloadBtn.addEventListener('click', () => {
-            statusText.innerHTML = 'Preparando download do GLB...';
-            
-            // Criar um blob com informações da textura
             const modelInfo = {
                 format: 'GLB',
-                textures: uploadedImages.length,
-                selectedImage: selectedImageIndex,
+                style: characterStyle.value,
+                muscle: muscleRange.value,
+                headSize: headRange.value,
+                color: selectedColor,
+                polygons: '1,280',
                 timestamp: new Date().toISOString()
             };
             
-            const content = JSON.stringify(modelInfo, null, 2);
-            const blob = new Blob([content], { type: 'application/octet-stream' });
+            const blob = new Blob([JSON.stringify(modelInfo, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'modelo-3d-texturizado.glb';
+            a.download = 'modelo-fortnite.glb';
             a.click();
             URL.revokeObjectURL(url);
-            
-            setTimeout(() => {
-                statusText.innerHTML = 'Download concluído!';
-            }, 1000);
         });
 
         // Reset
         resetBtn.addEventListener('click', () => {
             fileInput.value = '';
-            uploadedImages = [];
-            selectedImageIndex = 0;
-            multiPreview.innerHTML = '';
             imagePreview.classList.remove('active');
             previewImg.src = '';
+            uploadedImage = null;
             generateBtn.disabled = true;
             downloadBtn.disabled = true;
             progressBar.classList.remove('active');
             progressFill.style.width = '0%';
-            statusText.innerHTML = 'Aguardando imagens...';
             polyCount.textContent = '-';
             vertCount.textContent = '-';
-            texCount.textContent = '-';
-            imagesUsed.textContent = '0';
-            originalSizeSpan.textContent = '0 KB';
-            compressedSizeSpan.textContent = '0 KB';
+            colorCount.textContent = '-';
             
             if (currentModel) {
                 scene.remove(currentModel);
                 currentModel = null;
             }
             
-            controls.autoRotate = true;
+            // Reset controles
+            muscleRange.value = 50;
+            muscleValue.textContent = '50%';
+            headRange.value = 30;
+            headValue.textContent = '30%';
+            characterStyle.value = 'default';
+            
+            // Reset cor
+            document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelector('.color-option').classList.add('selected');
+            selectedColor = '#ffd700';
         });
 
-        // Animação
+        // Animação principal
         function animate() {
             requestAnimationFrame(animate);
             
             controls.update();
-            stars.rotation.y += 0.0001;
+            
+            // Rotacionar estrelas
+            stars.rotation.y += 0.0002;
+            stars.rotation.x += 0.0001;
             
             renderer.render(scene, camera);
         }
         
         animate();
 
-        // Resize handler
-        window.addEventListener('resize', onWindowResize, false);
-        
-        function onWindowResize() {
+        // Resize
+        window.addEventListener('resize', () => {
             camera.aspect = container.clientWidth / container.clientHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(container.clientWidth, container.clientHeight);
-        }
+        });
     </script>
 </body>
 </html>
