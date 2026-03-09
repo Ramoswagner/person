@@ -1,632 +1,463 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LEGO® Executivo - Ultra Realista</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400&display=swap');
-  *{margin:0;padding:0;box-sizing:border-box;}
-  body{background:#111;overflow:hidden;font-family:'Inter',sans-serif;}
-  canvas{display:block;}
-  #ui{
-    position:fixed;bottom:22px;left:50%;transform:translateX(-50%);
-    display:flex;flex-direction:column;align-items:center;gap:8px;
-    pointer-events:all;user-select:none;z-index:10;
-  }
-  .dpad{display:grid;grid-template-columns:48px 48px 48px;grid-template-rows:48px 48px 48px;gap:4px;}
-  .db{
-    background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.18);
-    border-radius:10px;display:flex;align-items:center;justify-content:center;
-    font-size:18px;cursor:pointer;color:#fff;backdrop-filter:blur(12px);
-    -webkit-tap-highlight-color:transparent;transition:all 0.1s;
-  }
-  .db:active,.db.on{background:rgba(255,255,255,0.22);transform:scale(0.92);}
-  .extras{display:flex;gap:7px;}
-  .eb{
-    padding:7px 14px;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.15);
-    border-radius:18px;color:rgba(255,255,255,0.7);font-size:10px;letter-spacing:1px;
-    cursor:pointer;backdrop-filter:blur(12px);transition:all 0.15s;
-    -webkit-tap-highlight-color:transparent;
-  }
-  .eb:active,.eb.active{background:rgba(255,255,255,0.22);color:#fff;}
-  #info{
-    position:fixed;top:16px;left:50%;transform:translateX(-50%);
-    font-size:10px;letter-spacing:2px;color:rgba(255,255,255,0.28);
-    text-transform:uppercase;pointer-events:none;white-space:nowrap;
-  }
-  #fx-panel{
-    position:fixed;top:16px;right:16px;
-    background:rgba(0,0,0,0.55);border:1px solid rgba(255,255,255,0.12);
-    border-radius:12px;padding:12px 14px;backdrop-filter:blur(12px);
-    color:rgba(255,255,255,0.7);font-size:10px;letter-spacing:1px;
-    display:flex;flex-direction:column;gap:7px;min-width:140px;
-  }
-  #fx-panel label{display:flex;align-items:center;gap:7px;cursor:pointer;}
-  #fx-panel input[type=checkbox]{accent-color:#7cf;width:13px;height:13px;}
-  #fx-title{font-size:9px;letter-spacing:2px;color:rgba(255,255,255,0.4);margin-bottom:2px;text-transform:uppercase;}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LEGO® Executive Suite - Kanban & Charts</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        #info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            pointer-events: none;
+            font-size: 14px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.2);
+            z-index: 100;
+        }
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.2);
+            z-index: 100;
+            display: flex;
+            gap: 20px;
+        }
+        .key {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-<canvas id="c"></canvas>
-<div id="info">WASD · Shift Correr · Arrastar Câmera · Scroll Zoom</div>
+    <div id="info">
+        <strong>LEGO® Executive Suite</strong> | Gerente de Terno Azul | Quadro Kanban | Gráficos de Gestão
+    </div>
+    <div id="controls">
+        <span><span class="key">WASD</span> mover câmera</span>
+        <span><span class="key">Clique + Arraste</span> rotacionar</span>
+        <span><span class="key">Scroll</span> zoom</span>
+    </div>
 
-<!-- FX controls -->
-<div id="fx-panel">
-  <div id="fx-title">Efeitos</div>
-  <label><input type="checkbox" id="fx-bloom" checked> Bloom</label>
-  <label><input type="checkbox" id="fx-ssao" checked> Ambient Occlusion</label>
-  <label><input type="checkbox" id="fx-dof" > Depth of Field</label>
-  <label><input type="checkbox" id="fx-vignette" checked> Vignette</label>
-  <label><input type="checkbox" id="fx-sss" checked> Skin SSS</label>
-</div>
+    <!-- Importação do Three.js via CDN -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+            }
+        }
+    </script>
 
-<div id="ui">
-  <div class="dpad">
-    <div></div><div class="db" id="bu">▲</div><div></div>
-    <div class="db" id="bl">◀</div><div style="border-radius:10px;background:rgba(0,0,0,0.2);"></div><div class="db" id="br">▶</div>
-    <div></div><div class="db" id="bd">▼</div><div></div>
-  </div>
-  <div class="extras">
-    <div class="eb active" id="b-idle">Parado</div>
-    <div class="eb" id="b-wave">Acenar</div>
-    <div class="eb" id="b-sit">Sentar</div>
-    <div class="eb" id="b-run">🏃 Correr</div>
-  </div>
-</div>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script>
-// ============================================================
-// FX STATE
-// ============================================================
-const FX = {
-  bloom: true, ssao: true, dof: false,
-  vignette: true, sss: true
-};
-['bloom','ssao','dof','vignette','sss'].forEach(k=>{
-  document.getElementById('fx-'+k).addEventListener('change',e=>{
-    FX[k]=e.target.checked;
-  });
-});
+        // ============================================================
+        // MÓDULO: Personagem Gerente LEGO (careca, terno azul, barba)
+        // ============================================================
+        function createLegoManager() {
+            const g = new THREE.Group();
 
-// ============================================================
-// RENDERER
-// ============================================================
-const canvas = document.getElementById('c');
-const renderer = new THREE.WebGLRenderer({canvas, antialias:true, powerPreference:'high-performance'});
-renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.15;
-renderer.physicallyCorrectLights = true;
+            const skin = new THREE.MeshStandardMaterial({ color: 0x8d5524 }); // pele morena
+            const suit = new THREE.MeshStandardMaterial({ color: 0x0a1f44 }); // azul marinho
+            const shirt = new THREE.MeshStandardMaterial({ color: 0xffffff }); // camisa branca
+            const black = new THREE.MeshStandardMaterial({ color: 0x111111 }); // barba
 
-// Render targets
-const W = window.innerWidth, H = window.innerHeight;
-const rtMain = new THREE.WebGLRenderTarget(W, H, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBAFormat, type: THREE.HalfFloatType });
-const rtBlurH = new THREE.WebGLRenderTarget(W/2, H/2, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter });
-const rtBlurV = new THREE.WebGLRenderTarget(W/2, H/2, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter });
-const rtDepth = new THREE.WebGLRenderTarget(W, H, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBAFormat });
-const rtDof = new THREE.WebGLRenderTarget(W/4, H/4, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter });
+            // Cabeça (cilindro LEGO)
+            const head = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.28, 0.28, 0.35, 32),
+                skin
+            );
+            head.position.y = 2.3;
+            g.add(head);
 
-// Post-processing quad setup
-const postScene  = new THREE.Scene();
-const postCamera = new THREE.OrthographicCamera(-1,1,1,-1,0,1);
-const quadGeo    = new THREE.PlaneGeometry(2,2);
-const VERT_PASS = `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position,1.0); }`;
+            // Stud do cabelo (careca, então só um pequeno topo)
+            const stud = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.12, 0.12, 0.08, 32),
+                skin
+            );
+            stud.position.y = 2.52;
+            g.add(stud);
 
-// --- Shaders (simplified but functional) ---
-const blurHShader = `
-  uniform sampler2D tDiffuse; uniform vec2 uResolution; uniform float uBloomThreshold; varying vec2 vUv;
-  vec3 sampleTex(vec2 uv){ return texture2D(tDiffuse, uv).rgb; }
-  void main(){
-    vec2 texel = 1.0 / uResolution;
-    vec3 col = sampleTex(vUv);
-    float brightness = dot(col, vec3(0.2126,0.7152,0.0722));
-    vec3 bright = col * max(0.0, brightness - uBloomThreshold);
-    vec3 blur = vec3(0.0);
-    float w[5]; w[0]=0.227; w[1]=0.194; w[2]=0.121; w[3]=0.054; w[4]=0.016;
-    blur += sampleTex(vUv) * w[0];
-    for(int i=1;i<5;i++){ float fi=float(i)*2.0;
-      blur += sampleTex(vUv+vec2(texel.x*fi,0.0)) * w[i];
-      blur += sampleTex(vUv-vec2(texel.x*fi,0.0)) * w[i];
-    }
-    gl_FragColor = vec4(blur * max(0.0, brightness - uBloomThreshold + 0.05), 1.0);
-  }`;
-const blurVShader = `
-  uniform sampler2D tDiffuse; uniform vec2 uResolution; varying vec2 vUv;
-  void main(){
-    vec2 texel = 1.0 / uResolution; vec3 blur = vec3(0.0);
-    float w[5]; w[0]=0.227; w[1]=0.194; w[2]=0.121; w[3]=0.054; w[4]=0.016;
-    blur += texture2D(tDiffuse, vUv).rgb * w[0];
-    for(int i=1;i<5;i++){ float fi=float(i)*2.0;
-      blur += texture2D(tDiffuse, vUv+vec2(0.0,texel.y*fi)).rgb * w[i];
-      blur += texture2D(tDiffuse, vUv-vec2(0.0,texel.y*fi)).rgb * w[i];
-    }
-    gl_FragColor = vec4(blur,1.0);
-  }`;
-const ssaoShader = `
-  uniform sampler2D tDiffuse; uniform sampler2D tDepth; uniform vec2 uResolution; uniform bool uEnabled; varying vec2 vUv;
-  float getDepth(vec2 uv){ return texture2D(tDepth, uv).r; }
-  void main(){
-    vec4 color = texture2D(tDiffuse, vUv); if(!uEnabled){ gl_FragColor = color; return; }
-    vec2 texel = 1.0 / uResolution; float depth = getDepth(vUv); float ao = 0.0;
-    float radius = 0.008; int samples = 8;
-    for(int i=0;i<8;i++){
-      float angle = float(i) * 0.7854; vec2 offset = vec2(cos(angle), sin(angle)) * radius;
-      float sDepth = getDepth(vUv + offset); float diff = depth - sDepth;
-      ao += clamp(diff * 80.0, 0.0, 1.0);
-    }
-    ao = 1.0 - ao / 8.0 * 0.65; gl_FragColor = vec4(color.rgb * ao, color.a);
-  }`;
-const dofShader = `
-  uniform sampler2D tDiffuse; uniform sampler2D tBlurred; uniform sampler2D tDepth; uniform float uFocusDepth; uniform float uFocusRange; uniform bool uEnabled; varying vec2 vUv;
-  void main(){
-    vec4 sharp = texture2D(tDiffuse, vUv); if(!uEnabled){ gl_FragColor = sharp; return; }
-    vec4 blurry = texture2D(tBlurred, vUv); float depth = texture2D(tDepth, vUv).r;
-    float blur = clamp(abs(depth - uFocusDepth) / uFocusRange, 0.0, 1.0); blur = smoothstep(0.0,1.0,blur);
-    gl_FragColor = mix(sharp, blurry, blur * 0.85);
-  }`;
-const compositeShader = `
-  uniform sampler2D tDiffuse; uniform sampler2D tBloom; uniform bool uBloom; uniform bool uVignette; uniform float uExposure; varying vec2 vUv;
-  vec3 aces(vec3 x){ return clamp((x*(2.51*x+0.03))/(x*(2.43*x+0.59)+0.14),0.0,1.0); }
-  void main(){
-    vec3 col = texture2D(tDiffuse, vUv).rgb;
-    if(uBloom){ vec3 bloom = texture2D(tBloom, vUv).rgb; col += bloom * 0.38; }
-    col *= uExposure; vec3 lum = vec3(dot(col,vec3(0.2126,0.7152,0.0722)));
-    col = mix(col * vec3(0.96,0.97,1.02), col * vec3(1.02,1.00,0.97), smoothstep(0.0,1.0,lum.r));
-    col = aces(col); col = pow(col, vec3(1.0/2.2));
-    if(uVignette){ vec2 uv2 = vUv * 2.0 - 1.0; float vig = 1.0 - dot(uv2*vec2(0.6,0.8), uv2*vec2(0.6,0.8)); vig = pow(clamp(vig,0.0,1.0), 0.5); col *= mix(0.62,1.0,vig); }
-    float seed = dot(vUv, vec2(127.1,311.7)); float noise = fract(sin(seed)*43758.5453); col += (noise-0.5)*0.018;
-    gl_FragColor = vec4(clamp(col,0.0,1.0), 1.0);
-  }`;
+            // Barba (caixa preta)
+            const beard = new THREE.Mesh(
+                new THREE.BoxGeometry(0.36, 0.18, 0.15),
+                black
+            );
+            beard.position.set(0, 2.15, 0.28);
+            g.add(beard);
 
-// Post meshes
-const blurHMat = new THREE.ShaderMaterial({ vertexShader: VERT_PASS, fragmentShader: blurHShader, uniforms: { tDiffuse:{value:null}, uResolution:{value:new THREE.Vector2(W/2,H/2)}, uBloomThreshold:{value:0.55} } });
-const blurHQuad = new THREE.Mesh(quadGeo, blurHMat);
-const blurVMat = new THREE.ShaderMaterial({ vertexShader: VERT_PASS, fragmentShader: blurVShader, uniforms: { tDiffuse:{value:null}, uResolution:{value:new THREE.Vector2(W/2,H/2)} } });
-const blurVQuad = new THREE.Mesh(quadGeo, blurVMat);
-const ssaoMat = new THREE.ShaderMaterial({ vertexShader: VERT_PASS, fragmentShader: ssaoShader, uniforms: { tDiffuse:{value:null}, tDepth:{value:null}, uResolution:{value:new THREE.Vector2(W,H)}, uEnabled:{value:true} } });
-const ssaoQuad = new THREE.Mesh(quadGeo, ssaoMat);
-const dofMat = new THREE.ShaderMaterial({ vertexShader: VERT_PASS, fragmentShader: dofShader, uniforms: { tDiffuse:{value:null}, tBlurred:{value:null}, tDepth:{value:null}, uFocusDepth:{value:0.5}, uFocusRange:{value:0.15}, uEnabled:{value:false} } });
-const dofQuad = new THREE.Mesh(quadGeo, dofMat);
-const compositeMat = new THREE.ShaderMaterial({ vertexShader: VERT_PASS, fragmentShader: compositeShader, uniforms: { tDiffuse:{value:null}, tBloom:{value:null}, uBloom:{value:true}, uVignette:{value:true}, uExposure:{value:1.05} } });
-const compositeQuad = new THREE.Mesh(quadGeo, compositeMat);
-postScene.add(blurHQuad, blurVQuad, ssaoQuad, dofQuad, compositeQuad);
+            // Corpo (paletó)
+            const body = new THREE.Mesh(
+                new THREE.BoxGeometry(0.8, 1, 0.4),
+                suit
+            );
+            body.position.y = 1.6;
+            g.add(body);
 
-window.addEventListener('resize',()=>{
-  const nw=window.innerWidth, nh=window.innerHeight;
-  renderer.setSize(nw,nh);
-  camera.aspect=nw/nh; camera.updateProjectionMatrix();
-  rtMain.setSize(nw,nh); rtDepth.setSize(nw,nh); rtBlurH.setSize(nw/2,nh/2); rtBlurV.setSize(nw/2,nh/2);
-  blurHMat.uniforms.uResolution.value.set(nw/2,nh/2);
-  blurVMat.uniforms.uResolution.value.set(nw/2,nh/2);
-  ssaoMat.uniforms.uResolution.value.set(nw,nh);
-});
+            // Frente da camisa
+            const shirtFront = new THREE.Mesh(
+                new THREE.BoxGeometry(0.3, 0.7, 0.02),
+                shirt
+            );
+            shirtFront.position.set(0, 1.6, 0.21);
+            g.add(shirtFront);
 
-// ============================================================
-// SCENE & LIGHTS
-// ============================================================
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xd2d2d2);
-scene.fog = new THREE.Fog(0xd2d2d2, 22, 60);
-const camera = new THREE.PerspectiveCamera(42, window.innerWidth/window.innerHeight, 0.1, 100);
-camera.position.set(0,3.8,9);
+            // Pernas
+            const leg1 = new THREE.Mesh(
+                new THREE.BoxGeometry(0.35, 0.9, 0.35),
+                suit
+            );
+            leg1.position.set(-0.2, 0.7, 0);
+            g.add(leg1);
 
-// Simple env map
-const pmremGen = new THREE.PMREMGenerator(renderer);
-function buildEnv() {
-  const cw=512,ch=256; const cv=document.createElement('canvas'); cv.width=cw; cv.height=ch;
-  const ctx=cv.getContext('2d'); const g=ctx.createLinearGradient(0,0,0,ch);
-  g.addColorStop(0,'#b0c0e0'); g.addColorStop(0.45,'#ccd8f0'); g.addColorStop(0.5,'#e5e5e5'); g.addColorStop(1,'#b8b8b8');
-  ctx.fillStyle=g; ctx.fillRect(0,0,cw,ch);
-  const rg=ctx.createRadialGradient(cw*0.65,ch*0.18,8,cw*0.65,ch*0.18,cw*0.42);
-  rg.addColorStop(0,'rgba(255,248,220,0.95)'); rg.addColorStop(1,'rgba(255,248,220,0)');
-  ctx.fillStyle=rg; ctx.fillRect(0,0,cw,ch);
-  const t=new THREE.CanvasTexture(cv); t.mapping=THREE.EquirectangularReflectionMapping;
-  return pmremGen.fromEquirectangular(t).texture;
-}
-const envMap = buildEnv();
-scene.environment = envMap;
+            const leg2 = leg1.clone();
+            leg2.position.x = 0.2;
+            g.add(leg2);
 
-// Lights
-const keyLight = new THREE.DirectionalLight(0xfff4e0,4.8);
-keyLight.position.set(4,11,6); keyLight.castShadow=true;
-keyLight.shadow.mapSize.width=keyLight.shadow.mapSize.height=4096;
-keyLight.shadow.camera.near=0.5; keyLight.shadow.camera.far=60;
-keyLight.shadow.camera.left=-8; keyLight.shadow.camera.right=8;
-keyLight.shadow.camera.top=10; keyLight.shadow.camera.bottom=-4;
-keyLight.shadow.bias=-0.0006; keyLight.shadow.normalBias=0.02;
-scene.add(keyLight); scene.add(keyLight.target);
-const fillLight=new THREE.DirectionalLight(0xaabbff,1.3); fillLight.position.set(-7,5,3); scene.add(fillLight);
-const rimLight=new THREE.DirectionalLight(0xffe8cc,3.0); rimLight.position.set(-2,8,-10); scene.add(rimLight);
-const bounceLight=new THREE.DirectionalLight(0xdde8ff,0.7); bounceLight.position.set(0,-4,3); scene.add(bounceLight);
-scene.add(new THREE.HemisphereLight(0xdde8ff,0xc8c0a8,1.1));
+            // Olhos simples (botões LEGO)
+            const eyeWhite = new THREE.MeshStandardMaterial({ color: 0xffffff });
+            const eyePupil = new THREE.MeshStandardMaterial({ color: 0x000000 });
+            
+            [-1, 1].forEach(side => {
+                const eyeBase = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.05, 0.05, 0.02, 8),
+                    eyeWhite
+                );
+                eyeBase.rotation.x = Math.PI / 2;
+                eyeBase.position.set(side * 0.12, 2.4, 0.32);
+                g.add(eyeBase);
+                
+                const pupil = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.025, 0.025, 0.03, 6),
+                    eyePupil
+                );
+                pupil.rotation.x = Math.PI / 2;
+                pupil.position.set(side * 0.12, 2.4, 0.34);
+                g.add(pupil);
+            });
 
-// Floor
-const floorMat=new THREE.MeshStandardMaterial({color:0xcccccc,roughness:0.9,metalness:0,envMap,envMapIntensity:0.3});
-const floorMesh=new THREE.Mesh(new THREE.PlaneGeometry(60,60),floorMat);
-floorMesh.rotation.x=-Math.PI/2; floorMesh.receiveShadow=true; scene.add(floorMesh);
-const grid=new THREE.GridHelper(60,60,0xbbbbbb,0xc5c5c5); grid.position.y=0.001; scene.add(grid);
+            return g;
+        }
 
-// ============================================================
-// LEGO-STYLE MATERIALS (cores específicas)
-// ============================================================
-function pbr(color,rough,metal,opts={}){ return new THREE.MeshStandardMaterial({ color:new THREE.Color(color), roughness:rough, metalness:metal, envMap, envMapIntensity: opts.envInt??1.0, ...opts }); }
+        // ============================================================
+        // MÓDULO: Escritório LEGO
+        // ============================================================
+        function createLegoOffice() {
+            const office = new THREE.Group();
 
-// Skin tones (moreno / marrom)
-const skinColor  = 0x8b5a2b;   // marrom médio
-const skinDark   = 0x6b4a1e;   // tom mais escuro para detalhes
+            // Piso
+            const floor = new THREE.Mesh(
+                new THREE.BoxGeometry(10, 0.3, 10),
+                new THREE.MeshStandardMaterial({ color: 0xd9d9d9 })
+            );
+            floor.position.y = -0.15;
+            office.add(floor);
 
-// Cores do terno e camisa
-const suitColor  = 0x0a1a3a;   // azul marinho profundo
-const suitLtColor= 0x1a2a4a;   // tom ligeiramente mais claro para detalhes
-const shirtColor = 0xffffff;   // branco
-const beardColor = 0x3a2a1a;   // marrom escuro para barba
-const eyeColor   = 0x2a1a0a;   // castanho escuro
+            // Mesa principal
+            const deskTop = new THREE.Mesh(
+                new THREE.BoxGeometry(2, 0.2, 1),
+                new THREE.MeshStandardMaterial({ color: 0x8b4513 })
+            );
+            deskTop.position.set(0, 1, 1);
+            office.add(deskTop);
 
-const M = {
-  skin:     pbr(skinColor, 0.4, 0.0, { envInt:0.6 }),
-  skinDark: pbr(skinDark,  0.5, 0.0, { envInt:0.6 }),
-  suit:     pbr(suitColor, 0.7, 0.02, { envInt:0.5 }),
-  suitLt:   pbr(suitLtColor,0.65,0.02, { envInt:0.5 }),
-  shirt:    pbr(shirtColor,0.6,0.00, { envInt:0.5 }),
-  beard:    pbr(beardColor,0.9,0.00, { envInt:0.02 }),
-  belt:     pbr(0x0d0d0d,0.55,0.02, { envInt:0.3 }),
-  buckle:   pbr(0xb8b8b8,0.28,0.92, { envInt:1.6 }),
-  shoe:     pbr(0x090909,0.16,0.05, { envInt:1.3 }),
-  shoeSole: pbr(0x1a1a1a,0.92,0.00),
-  sclera:   pbr(0xf5f0e8,0.28,0.00, { envInt:0.15 }),
-  iris:     pbr(0x3a2208,0.08,0.00, { envInt:0.9 }),
-  pupil:    new THREE.MeshBasicMaterial({color:0x040201}),
-  eyeHL:    new THREE.MeshBasicMaterial({color:0xffffff}),
-};
+            // Pernas da mesa
+            for (let x of [-0.9, 0.9]) {
+                for (let z of [-0.4, 0.4]) {
+                    const leg = new THREE.Mesh(
+                        new THREE.BoxGeometry(0.1, 1, 0.1),
+                        new THREE.MeshStandardMaterial({ color: 0x333333 })
+                    );
+                    leg.position.set(x, 0.5, z + 1);
+                    office.add(leg);
+                }
+            }
 
-// ============================================================
-// CONSTRUÇÃO LEGO® (peças simplificadas, formato cilíndrico/blocado)
-// ============================================================
-function castAll(g){ g.traverse(c=>{ if(c.isMesh){c.castShadow=true;c.receiveShadow=true;} }); return g; }
+            // Cadeira simples
+            const chairSeat = new THREE.Mesh(
+                new THREE.BoxGeometry(0.6, 0.1, 0.6),
+                new THREE.MeshStandardMaterial({ color: 0x4a4a4a })
+            );
+            chairSeat.position.set(0, 0.55, 2);
+            office.add(chairSeat);
 
-// --- Perna (estilo LEGO) ---
-function makeLegoLeg(){
-  const g=new THREE.Group();
-  // Coxa
-  const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.7, 8), M.suit);
-  thigh.position.y = -0.35;
-  g.add(thigh);
-  // Pé
-  const foot = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.18, 0.5), M.shoe);
-  foot.position.set(0, -0.78, 0.12);
-  g.add(foot);
-  // Detalhe do sapato
-  const sole = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.06, 0.48), M.shoeSole);
-  sole.position.set(0, -0.87, 0.12);
-  g.add(sole);
-  return castAll(g);
-}
+            const chairBack = new THREE.Mesh(
+                new THREE.BoxGeometry(0.6, 0.6, 0.1),
+                new THREE.MeshStandardMaterial({ color: 0x4a4a4a })
+            );
+            chairBack.position.set(0, 0.9, 2.3);
+            office.add(chairBack);
 
-// --- Tronco (camisa + paletó) ---
-function makeLegoTorso(){
-  const g=new THREE.Group();
-  // Base do torso (camisa por baixo)
-  const base = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 1.0, 8), M.shirt);
-  base.position.y = 0.0;
-  g.add(base);
-  // Paletó (sobreposição)
-  const jacket = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.48, 0.9, 8), M.suit);
-  jacket.position.y = 0.05;
-  g.add(jacket);
-  // Gola / lapelas
-  const collarL = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.15, 0.1), M.suitLt);
-  collarL.position.set(-0.25, 0.4, 0.4);
-  collarL.rotation.z = 0.3;
-  g.add(collarL);
-  const collarR = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.15, 0.1), M.suitLt);
-  collarR.position.set(0.25, 0.4, 0.4);
-  collarR.rotation.z = -0.3;
-  g.add(collarR);
-  // Gravata? não, camisa social (um retângulo branco)
-  const shirtFront = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.5, 0.05), M.shirt);
-  shirtFront.position.set(0, 0.0, 0.48);
-  g.add(shirtFront);
-  // Botões
-  [-0.2,0.0,0.2].forEach(y=>{
-    const btn = new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.02,6), M.buckle);
-    btn.rotation.x = Math.PI/2;
-    btn.position.set(0, y, 0.48);
-    g.add(btn);
-  });
-  return castAll(g);
-}
+            // Parede decorativa (opcional)
+            const wall = new THREE.Mesh(
+                new THREE.BoxGeometry(10, 3, 0.2),
+                new THREE.MeshStandardMaterial({ color: 0xcccccc })
+            );
+            wall.position.set(0, 1.5, -5);
+            office.add(wall);
 
-// --- Braço (LEGO articulado) ---
-function makeLegoArm(side){
-  const g=new THREE.Group();
-  const sign = side==='L' ? -1 : 1;
-  // Ombro (bola)
-  const shoulder = new THREE.Mesh(new THREE.SphereGeometry(0.2, 10, 8), M.suit);
-  shoulder.scale.set(1, 0.8, 1);
-  g.add(shoulder);
-  // Braço superior
-  const upper = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.14, 0.6, 7), M.suit);
-  upper.position.set(0, -0.3, 0);
-  g.add(upper);
-  // Cotovelo (articulação)
-  const elbow = new THREE.Mesh(new THREE.SphereGeometry(0.14, 8, 6), M.suitLt);
-  elbow.position.set(0, -0.6, 0);
-  g.add(elbow);
-  // Antebraço
-  const lower = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.10, 0.55, 7), M.shirt);
-  lower.position.set(0, -0.88, 0);
-  g.add(lower);
-  // Mão (estilo LEGO: gancho)
-  const hand = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.15, 5), M.skin);
-  hand.position.set(0, -1.15, 0);
-  g.add(hand);
-  const thumb = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 0.1), M.skin);
-  thumb.position.set(sign*0.08, -1.12, 0.05);
-  g.add(thumb);
-  return castAll(g);
-}
+            return office;
+        }
 
-// --- Cabeça LEGO (careca, barba, olhos expressivos) ---
-function makeLegoHead(){
-  const g=new THREE.Group();
-  // Cabeça base (cilindro/ esfera achatada)
-  const headBase = new THREE.Mesh(new THREE.SphereGeometry(0.42, 16, 12), M.skin);
-  headBase.scale.set(1, 1.1, 0.9);
-  headBase.position.y = 0.0;
-  g.add(headBase);
+        // ============================================================
+        // MÓDULO: Quadro Kanban LEGO
+        // ============================================================
+        function createKanbanBoard() {
+            const board = new THREE.Group();
 
-  // Barba (sugestão: formas geométricas)
-  const beard = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.4, 0.25, 6), M.beard);
-  beard.position.set(0, -0.25, 0.35);
-  beard.rotation.x = 0.2;
-  g.add(beard);
-  const beardSideL = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.15, 0.1), M.beard);
-  beardSideL.position.set(-0.3, -0.15, 0.3);
-  beardSideL.rotation.z = 0.2;
-  g.add(beardSideL);
-  const beardSideR = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.15, 0.1), M.beard);
-  beardSideR.position.set(0.3, -0.15, 0.3);
-  beardSideR.rotation.z = -0.2;
-  g.add(beardSideR);
-  // Bigode
-  const mustache = new THREE.Mesh(new THREE.TorusGeometry(0.1, 0.03, 4, 10, Math.PI), M.beard);
-  mustache.rotation.x = Math.PI/2;
-  mustache.rotation.z = Math.PI;
-  mustache.position.set(0, -0.08, 0.45);
-  g.add(mustache);
+            // Base do quadro
+            const base = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 2, 0.1),
+                new THREE.MeshStandardMaterial({ color: 0xffffff })
+            );
+            base.position.y = 1;
+            board.add(base);
 
-  // Olhos (estilo LEGO: círculos pretos com brilho)
-  [-1,1].forEach(s=>{
-    const eyeW = new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.08,0.02,8), new THREE.MeshStandardMaterial({color:0xffffff}));
-    eyeW.rotation.x = Math.PI/2;
-    eyeW.position.set(s*0.15, 0.15, 0.5);
-    g.add(eyeW);
-    const pupil = new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,0.03,6), M.pupil);
-    pupil.rotation.x = Math.PI/2;
-    pupil.position.set(s*0.15, 0.15, 0.52);
-    g.add(pupil);
-    const hl = new THREE.Mesh(new THREE.SphereGeometry(0.02,4,4), M.eyeHL);
-    hl.position.set(s*0.18, 0.19, 0.53);
-    g.add(hl);
-  });
+            // Função para criar colunas
+            function column(x, color) {
+                const col = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.8, 1.5, 0.05),
+                    new THREE.MeshStandardMaterial({ color })
+                );
+                col.position.set(x, 1, 0.06);
+                return col;
+            }
 
-  // Nariz (simples)
-  const nose = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.08, 6), M.skinDark);
-  nose.position.set(0, 0.0, 0.55);
-  nose.rotation.x = 0.2;
-  g.add(nose);
+            // Colunas: Backlog, Doing, Done
+            board.add(column(-1, 0xffcc00)); // amarelo
+            board.add(column(0, 0x00ccff));  // azul
+            board.add(column(1, 0x00cc66));  // verde
 
-  return castAll(g);
-}
+            // Títulos das colunas (pequenos blocos)
+            const whiteMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+            const blackMat = new THREE.MeshStandardMaterial({ color: 0x000000 });
+            
+            const titles = ['BACKLOG', 'DOING', 'DONE'];
+            [-1, 0, 1].forEach((x, i) => {
+                const titleBg = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.7, 0.2, 0.02),
+                    whiteMat
+                );
+                titleBg.position.set(x, 1.8, 0.07);
+                board.add(titleBg);
+            });
 
-// --- Montagem do personagem LEGO ---
-const character = new THREE.Group(); scene.add(character);
+            return board;
+        }
 
-const hips = new THREE.Group(); hips.position.y = 2.85; character.add(hips);
+        // ============================================================
+        // MÓDULO: Gráficos LEGO (Barras e Pizza)
+        // ============================================================
+        function createLegoCharts() {
+            const charts = new THREE.Group();
 
-// Pernas
-const legGroupL = new THREE.Group(); legGroupL.position.set(-0.2, 0, 0); hips.add(legGroupL);
-legGroupL.add(makeLegoLeg());
-const legGroupR = new THREE.Group(); legGroupR.position.set(0.2, 0, 0); hips.add(legGroupR);
-legGroupR.add(makeLegoLeg());
+            // Base dos gráficos
+            const basePlate = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 0.1, 1.5),
+                new THREE.MeshStandardMaterial({ color: 0xcccccc })
+            );
+            basePlate.position.set(0, 0.05, 0);
+            charts.add(basePlate);
 
-// Torso
-const torsoGroup = new THREE.Group(); torsoGroup.position.y = 0.55; hips.add(torsoGroup);
-torsoGroup.add(makeLegoTorso());
+            // GRÁFICO DE BARRAS (lado esquerdo)
+            const barGroup = new THREE.Group();
+            barGroup.position.set(-0.8, 0.15, 0);
+            
+            const barColors = [0xff6b6b, 0x4ecdc4, 0x45b7d1, 0x96ceb4];
+            const barHeights = [0.8, 1.2, 0.6, 1.0];
+            
+            barHeights.forEach((height, i) => {
+                const bar = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.25, height, 0.25),
+                    new THREE.MeshStandardMaterial({ color: barColors[i % barColors.length] })
+                );
+                bar.position.set(i * 0.35 - 0.5, height/2, 0);
+                barGroup.add(bar);
+                
+                // Topo arredondado (stud)
+                const stud = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.1, 0.1, 0.05, 8),
+                    new THREE.MeshStandardMaterial({ color: barColors[i % barColors.length] })
+                );
+                stud.position.set(i * 0.35 - 0.5, height, 0);
+                barGroup.add(stud);
+            });
+            
+            charts.add(barGroup);
 
-// Braços
-const armL = new THREE.Group(); armL.position.set(-0.55, 0.45, 0); torsoGroup.add(armL);
-armL.add(makeLegoArm('L'));
-const armR = new THREE.Group(); armR.position.set(0.55, 0.45, 0); torsoGroup.add(armR);
-armR.add(makeLegoArm('R'));
+            // GRÁFICO DE PIZZA (lado direito)
+            const pieGroup = new THREE.Group();
+            pieGroup.position.set(0.8, 0.15, 0);
+            
+            const pieColors = [0xff6b6b, 0x4ecdc4, 0x45b7d1];
+            const segments = [0.5, 0.3, 0.2]; // proporções
+            
+            let angleStart = 0;
+            segments.forEach((seg, i) => {
+                const angleEnd = angleStart + seg * Math.PI * 2;
+                
+                // Criar fatia usando um cilindro com geometria de segmento (simplificado com caixas)
+                // Para simplicidade, usaremos pequenos blocos formando um círculo
+                const slice = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.4, 0.4, 0.1, 32, 1),
+                    new THREE.MeshStandardMaterial({ color: pieColors[i] })
+                );
+                slice.position.set(0, 0.05, 0);
+                pieGroup.add(slice);
+                
+                // Adicionar studs decorativos nas fatias (simulação)
+                for (let j = 0; j < 3; j++) {
+                    const stud = new THREE.Mesh(
+                        new THREE.CylinderGeometry(0.05, 0.05, 0.05, 6),
+                        new THREE.MeshStandardMaterial({ color: 0xffdd44 })
+                    );
+                    stud.position.set(
+                        Math.cos(angleStart + seg * Math.PI) * 0.2,
+                        0.1,
+                        Math.sin(angleStart + seg * Math.PI) * 0.2
+                    );
+                    pieGroup.add(stud);
+                }
+                
+                angleStart = angleEnd;
+            });
+            
+            charts.add(pieGroup);
 
-// Cabeça
-const neck = new THREE.Group(); neck.position.set(0, 0.8, 0); torsoGroup.add(neck);
-const headGroup = new THREE.Group(); headGroup.position.y = 0.25; neck.add(headGroup);
-headGroup.add(makeLegoHead());
+            return charts;
+        }
 
-// ============================================================
-// ANIMAÇÃO SIMPLES (idle, wave, walk, sit)
-// ============================================================
-const clock = new THREE.Clock();
-let walkPhase=0, wavePhase=0, breathPhase=0, headSwayP=0;
-let animState='idle', sitProgress=0, sitTarget=0;
-function lerp(a,b,t){ return a+(b-a)*t; }
+        // ============================================================
+        // CENA PRINCIPAL (main.js)
+        // ============================================================
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xf0f0f0);
 
-function applyWalk(ph, run){
-  const a = run?1.35:1.0;
-  legGroupL.rotation.x = Math.sin(ph)*0.4*a;
-  legGroupR.rotation.x = Math.sin(ph+Math.PI)*0.4*a;
-  hips.rotation.z = Math.sin(ph)*0.02;
-  hips.position.y = 2.85 + Math.abs(Math.sin(ph))*0.03*a;
-  armL.rotation.x = -Math.sin(ph)*0.3*a;
-  armR.rotation.x = Math.sin(ph)*0.3*a;
-}
-function applyIdle(dt){
-  breathPhase += dt*0.8; headSwayP += dt*0.3;
-  hips.position.y = 2.85 + Math.sin(breathPhase*0.5)*0.006;
-  headGroup.rotation.y = Math.sin(headSwayP)*0.02;
-  const t = dt*3;
-  armL.rotation.x = lerp(armL.rotation.x, 0, t);
-  armR.rotation.x = lerp(armR.rotation.x, 0, t);
-  legGroupL.rotation.x = lerp(legGroupL.rotation.x, 0, t);
-  legGroupR.rotation.x = lerp(legGroupR.rotation.x, 0, t);
-}
-function applyWave(dt){
-  wavePhase += dt*3.5;
-  armR.rotation.x = lerp(armR.rotation.x, -1.2, dt*4);
-  armR.rotation.z = lerp(armR.rotation.z, -0.3, dt*4);
-  armL.rotation.x = lerp(armL.rotation.x, 0.1, dt*2);
-  headGroup.rotation.y = Math.sin(wavePhase)*0.1;
-}
-function applySit(dt){
-  sitProgress = lerp(sitProgress, sitTarget, dt*2.5); const s = sitProgress;
-  hips.position.y = lerp(2.85, 1.6, s);
-  legGroupL.rotation.x = lerp(0, -Math.PI/2, s);
-  legGroupR.rotation.x = lerp(0, -Math.PI/2, s);
-  torsoGroup.rotation.x = lerp(0, 0.1, s);
-  armL.rotation.x = lerp(0, 0.2, s);
-  armR.rotation.x = lerp(0, 0.2, s);
-}
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(6, 5, 8);
 
-// ============================================================
-// CONTROLES (mesmos da interface)
-// ============================================================
-const move = { forward:false, back:false, left:false, right:false, run:false };
-let charAngle=0, charTargetAngle=0, charSpeed=0;
-document.addEventListener('keydown', e=>{
-  if(e.key==='ArrowUp'||e.key==='w'||e.key==='W') move.forward=true;
-  if(e.key==='ArrowDown'||e.key==='s'||e.key==='S') move.back=true;
-  if(e.key==='ArrowLeft'||e.key==='a'||e.key==='A') move.left=true;
-  if(e.key==='ArrowRight'||e.key==='d'||e.key==='D') move.right=true;
-  if(e.key==='Shift') move.run=true; e.preventDefault();
-});
-document.addEventListener('keyup', e=>{
-  if(e.key==='ArrowUp'||e.key==='w'||e.key==='W') move.forward=false;
-  if(e.key==='ArrowDown'||e.key==='s'||e.key==='S') move.back=false;
-  if(e.key==='ArrowLeft'||e.key==='a'||e.key==='A') move.left=false;
-  if(e.key==='ArrowRight'||e.key==='d'||e.key==='D') move.right=false;
-  if(e.key==='Shift') move.run=false;
-});
-function holdBtn(id,key){
-  const el=document.getElementById(id);
-  const on=()=>{move[key]=true;el.classList.add('on');};
-  const off=()=>{move[key]=false;el.classList.remove('on');};
-  el.addEventListener('mousedown',on); el.addEventListener('mouseup',off); el.addEventListener('mouseleave',off);
-  el.addEventListener('touchstart',e=>{e.preventDefault();on();},{passive:false});
-  el.addEventListener('touchend',e=>{e.preventDefault();off();},{passive:false});
-}
-holdBtn('bu','forward'); holdBtn('bd','back'); holdBtn('bl','left'); holdBtn('br','right');
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        document.body.appendChild(renderer.domElement);
 
-document.getElementById('b-idle').addEventListener('click',()=>{ animState='idle'; sitTarget=0; document.querySelectorAll('.eb').forEach(b=>b.classList.remove('active')); document.getElementById('b-idle').classList.add('active'); });
-document.getElementById('b-wave').addEventListener('click',()=>{ animState='wave'; wavePhase=0; document.querySelectorAll('.eb').forEach(b=>b.classList.remove('active')); document.getElementById('b-wave').classList.add('active'); });
-document.getElementById('b-sit').addEventListener('click',()=>{ const el=document.getElementById('b-sit'); if(animState==='sit'){ animState='idle'; sitTarget=0; el.classList.remove('active'); } else { animState='sit'; sitTarget=1; el.classList.add('active'); } });
-document.getElementById('b-run').addEventListener('click',()=>{ move.run=!move.run; document.getElementById('b-run').classList.toggle('active',move.run); });
+        // Controls
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.screenSpacePanning = true;
+        controls.maxPolarAngle = Math.PI / 2;
+        controls.target.set(0, 2, 0);
 
-// Câmera (arrastar)
-let camH=0.15, camV=0.28, camDist=8.0;
-let dragging=false, lmx=0, lmy=0;
-const camTarget=new THREE.Vector3(0,2,0);
-canvas.addEventListener('mousedown',e=>{ dragging=true; lmx=e.clientX; lmy=e.clientY; });
-canvas.addEventListener('mouseup',()=> dragging=false);
-canvas.addEventListener('mousemove',e=>{ if(!dragging) return; camH-=(e.clientX-lmx)*0.007; camV-=(e.clientY-lmy)*0.005; camV=Math.max(-0.22,Math.min(1.05,camV)); lmx=e.clientX; lmy=e.clientY; });
-canvas.addEventListener('wheel',e=>{ camDist+=e.deltaY*0.012; camDist=Math.max(2.5,Math.min(18,camDist)); e.preventDefault(); },{passive:false});
-canvas.addEventListener('touchstart',e=>{ if(e.touches.length===1){ dragging=true; lmx=e.touches[0].clientX; lmy=e.touches[0].clientY; } });
-canvas.addEventListener('touchend',()=> dragging=false);
-canvas.addEventListener('touchmove',e=>{ if(!dragging||e.touches.length!==1) return; camH-=(e.touches[0].clientX-lmx)*0.007; camV-=(e.touches[0].clientY-lmy)*0.005; camV=Math.max(-0.22,Math.min(1.05,camV)); lmx=e.touches[0].clientX; lmy=e.touches[0].clientY; e.preventDefault(); },{passive:false});
+        // Iluminação
+        const light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position.set(5, 10, 5);
+        light.castShadow = true;
+        light.shadow.mapSize.width = 1024;
+        light.shadow.mapSize.height = 1024;
+        const d = 10;
+        light.shadow.camera.left = -d;
+        light.shadow.camera.right = d;
+        light.shadow.camera.top = d;
+        light.shadow.camera.bottom = -d;
+        light.shadow.camera.near = 1;
+        light.shadow.camera.far = 15;
+        scene.add(light);
 
-// ============================================================
-// LOOP PRINCIPAL COM POST-PROCESSING
-// ============================================================
-const rtA = new THREE.WebGLRenderTarget(W,H,{minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter,type:THREE.HalfFloatType});
-const rtB = new THREE.WebGLRenderTarget(W/2,H/2,{minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter});
-const rtC = new THREE.WebGLRenderTarget(W/2,H/2,{minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter});
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
 
-function renderPass(quad, target){
-  postScene.children.forEach(c=>c.visible=false);
-  quad.visible=true;
-  renderer.setRenderTarget(target);
-  renderer.render(postScene, postCamera);
-  renderer.setRenderTarget(null);
-}
+        // Luz de preenchimento
+        const fillLight = new THREE.DirectionalLight(0xccddff, 0.5);
+        fillLight.position.set(-5, 5, 5);
+        scene.add(fillLight);
 
-function loop(){
-  requestAnimationFrame(loop);
-  const dt = Math.min(clock.getDelta(), 0.05);
+        // Adicionar uma grade no chão para referência
+        const gridHelper = new THREE.GridHelper(10, 20, 0x888888, 0x444444);
+        gridHelper.position.y = 0;
+        scene.add(gridHelper);
 
-  // Movimento
-  const moving = move.forward||move.back||move.left||move.right;
-  const running = move.run && moving;
-  charSpeed = lerp(charSpeed, moving ? (running?0.076:0.042) : 0, dt*9);
-  if(moving){
-    let mx=0, mz=0;
-    if(move.forward) mz=-1;
-    if(move.back) mz=1;
-    if(move.left) mx=-1;
-    if(move.right) mx=1;
-    const cf = new THREE.Vector3(Math.sin(camH),0,Math.cos(camH));
-    const cr = new THREE.Vector3(Math.cos(camH),0,-Math.sin(camH));
-    const dir = new THREE.Vector3().addScaledVector(cr,mx).addScaledVector(cf,mz).normalize();
-    character.position.x += dir.x * charSpeed;
-    character.position.z += dir.z * charSpeed;
-    charTargetAngle = Math.atan2(dir.x, dir.z);
-    if(animState!=='walk') animState='walk';
-  } else {
-    if(animState==='walk') animState='idle';
-  }
-  let da = charTargetAngle - charAngle;
-  while(da>Math.PI) da-=Math.PI*2;
-  while(da<-Math.PI) da+=Math.PI*2;
-  charAngle += da*Math.min(1,dt*10);
-  character.rotation.y = charAngle;
+        // ============================================================
+        // MONTAGEM DA CENA
+        // ============================================================
+        
+        // Escritório
+        const office = createLegoOffice();
+        office.position.set(0, 0, 0);
+        scene.add(office);
 
-  // Animação
-  if(animState==='walk'){ walkPhase += dt*(running?1.72:1.16)*Math.PI*2*Math.max(0.4,charSpeed/0.042); applyWalk(walkPhase, running); }
-  else if(animState==='idle') applyIdle(dt);
-  else if(animState==='wave') applyWave(dt);
-  else if(animState==='sit') applySit(dt);
+        // Gerente
+        const manager = createLegoManager();
+        manager.position.set(0, 0.15, 0.5); // ajuste para ficar atrás da mesa
+        manager.rotation.y = Math.PI / 4; // olhando para o quadro
+        scene.add(manager);
 
-  // Atualiza câmera
-  const cp = character.position;
-  camTarget.lerp(new THREE.Vector3(cp.x, cp.y+2.1, cp.z), dt*5);
-  camera.position.set(
-    camTarget.x + Math.sin(camH)*camDist*Math.cos(camV),
-    camTarget.y + Math.sin(camV)*camDist,
-    camTarget.z + Math.cos(camH)*camDist*Math.cos(camV)
-  );
-  camera.lookAt(camTarget);
-  keyLight.target.position.set(cp.x,0,cp.z);
-  keyLight.target.updateMatrixWorld();
-  keyLight.position.set(cp.x+4,11,cp.z+6);
+        // Quadro Kanban (posicionado na parede)
+        const kanban = createKanbanBoard();
+        kanban.position.set(0, 1.5, -3.5);
+        scene.add(kanban);
 
-  // Post-processing
-  renderer.setRenderTarget(rtA);
-  renderer.render(scene, camera);
-  ssaoMat.uniforms.tDiffuse.value = rtA.texture;
-  ssaoMat.uniforms.tDepth.value   = rtA.texture; // simplificado
-  ssaoMat.uniforms.uEnabled.value = FX.ssao;
-  renderPass(ssaoQuad, rtB);
-  blurHMat.uniforms.tDiffuse.value = rtB.texture;
-  blurHMat.uniforms.uBloomThreshold.value = 0.52;
-  renderPass(blurHQuad, rtC);
-  blurVMat.uniforms.tDiffuse.value = rtC.texture;
-  renderPass(blurVQuad, rtB);
-  compositeMat.uniforms.tDiffuse.value  = rtA.texture;
-  compositeMat.uniforms.tBloom.value    = rtB.texture;
-  compositeMat.uniforms.uBloom.value    = FX.bloom;
-  compositeMat.uniforms.uVignette.value = FX.vignette;
-  postScene.children.forEach(c=>c.visible=false);
-  compositeQuad.visible=true;
-  renderer.setRenderTarget(null);
-  renderer.render(postScene, postCamera);
-}
+        // Gráficos LEGO (sobre a mesa)
+        const charts = createLegoCharts();
+        charts.position.set(0, 1.2, 1.2); // em cima da mesa
+        charts.rotation.y = 0.2;
+        scene.add(charts);
 
-loop();
-</script>
+        // Adicionar alguns elementos decorativos: bloquinhos extras no chão
+        const blockMat = new THREE.MeshStandardMaterial({ color: 0xffaa00 });
+        for (let i = 0; i < 5; i++) {
+            const block = new THREE.Mesh(
+                new THREE.BoxGeometry(0.3, 0.3, 0.3),
+                blockMat
+            );
+            block.position.set(2 + i * 0.4, 0.15, 2);
+            scene.add(block);
+        }
+
+        // ============================================================
+        // ANIMAÇÃO
+        // ============================================================
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Pequena animação no gerente (respiração)
+            const time = Date.now() * 0.002;
+            manager.position.y = 0.15 + Math.sin(time) * 0.01;
+            
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // Ajuste de resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
 </body>
 </html>
