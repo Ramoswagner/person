@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visualizador 3D Profissional - GLB/GLTF</title>
+    <title>Visualizador LEGO 3D</title>
     <style>
         body {
             margin: 0;
@@ -16,82 +16,54 @@
             top: 20px;
             left: 20px;
             background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 12px 24px;
+            color: #ffd966;
+            padding: 10px 20px;
             border-radius: 30px;
             font-weight: bold;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            backdrop-filter: blur(5px);
+            border: 2px solid #ffd966;
             z-index: 100;
-            pointer-events: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
         
-        #controls-panel {
+        #status {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #4caf50;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 14px;
+            backdrop-filter: blur(5px);
+            border: 1px solid #4caf50;
+            z-index: 100;
+        }
+        
+        #controls {
             position: absolute;
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(0, 0, 0, 0.8);
             color: white;
-            padding: 15px 30px;
-            border-radius: 50px;
+            padding: 12px 24px;
+            border-radius: 40px;
             font-size: 14px;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(5px);
             border: 1px solid rgba(255, 255, 255, 0.2);
             z-index: 100;
             display: flex;
-            gap: 30px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            gap: 20px;
         }
         
         .key {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 5px 12px;
+            background: #ffd966;
+            color: #000;
+            padding: 4px 10px;
             border-radius: 20px;
-            font-family: monospace;
             font-weight: bold;
-            color: #ffd700;
-        }
-        
-        #file-upload {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 100;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 30px;
-            padding: 10px 20px;
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        #file-upload:hover {
-            background: rgba(74, 158, 255, 0.9);
-            transform: scale(1.05);
-        }
-        
-        #file-upload input {
-            display: none;
-        }
-        
-        #stats {
-            position: absolute;
-            bottom: 100px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            color: #00ff00;
-            padding: 15px;
-            border-radius: 10px;
-            font-family: monospace;
-            font-size: 12px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 255, 0, 0.3);
-            z-index: 100;
-            line-height: 1.8;
+            margin: 0 5px;
         }
         
         #loading {
@@ -99,19 +71,17 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0,0,0,0.9);
             color: white;
             padding: 20px 40px;
             border-radius: 10px;
-            font-size: 18px;
             z-index: 1000;
             display: none;
-            border: 2px solid #4a9eff;
         }
         
         .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top: 4px solid #4a9eff;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid #ffd966;
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -124,80 +94,28 @@
             100% { transform: rotate(360deg); }
         }
         
-        #error-message {
+        #error {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(255, 0, 0, 0.9);
+            background: rgba(255,0,0,0.9);
             color: white;
             padding: 20px;
             border-radius: 10px;
             z-index: 1000;
             display: none;
         }
-        
-        #instructions {
-            position: absolute;
-            top: 20px;
-            right: 200px;
-            background: rgba(0, 0, 0, 0.6);
-            color: #ccc;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .color-picker {
-            position: absolute;
-            bottom: 100px;
-            left: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 15px;
-            border-radius: 10px;
-            color: white;
-            z-index: 100;
-        }
-        
-        .color-picker label {
-            display: block;
-            margin-bottom: 5px;
-            color: #ccc;
-        }
-        
-        .color-picker input {
-            width: 100%;
-            height: 30px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
     </style>
 </head>
 <body>
-    <div id="info">🏗️ Visualizador 3D Profissional - GLB/GLTF</div>
-    <div id="instructions">✨ Arraste para rotacionar | Scroll para zoom</div>
+    <div id="info">🧱 LEGO® Gerente - Terno Azul Marinho</div>
+    <div id="status">✅ Modelo: avatar.glb</div>
     
-    <label id="file-upload">
-        📂 Selecionar Arquivo GLB
-        <input type="file" id="file-input" accept=".glb,.gltf,.gltf,.bin">
-    </label>
-    
-    <div id="stats">
-        <div>📊 Estatísticas do Modelo:</div>
-        <div id="model-name">Nome: -</div>
-        <div id="model-vertices">Vértices: -</div>
-        <div id="model-faces">Faces: -</div>
-        <div id="model-materials">Materiais: -</div>
-        <div id="model-size">Tamanho: -</div>
-        <div id="model-position">Posição: -</div>
-    </div>
-    
-    <div class="color-picker">
-        <label>🎨 Cor de Fundo:</label>
-        <input type="color" id="bg-color" value="#2b2b2b">
+    <div id="controls">
+        <span><span class="key">🖱️</span> Arrastar para rotacionar</span>
+        <span><span class="key">⏫⏬</span> Scroll para zoom</span>
+        <span><span class="key">⏺️</span> Auto-rotação</span>
     </div>
     
     <div id="loading">
@@ -205,9 +123,9 @@
         <div>Carregando modelo 3D...</div>
     </div>
     
-    <div id="error-message"></div>
+    <div id="error"></div>
 
-    <!-- Importação das bibliotecas Three.js -->
+    <!-- Three.js -->
     <script type="importmap">
         {
             "imports": {
@@ -221,48 +139,28 @@
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-        import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
-        import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
-        import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
         // ============================================================
-        // Configuração inicial
+        // Configuração da Cena
         // ============================================================
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color('#2b2b2b');
+        scene.background = new THREE.Color(0x111122); // Azul escuro
         
-        // Fundo com gradiente via CSS (mais suave)
-        const canvas = document.createElement('canvas');
-        canvas.width = 2;
-        canvas.height = 256;
-        const ctx = canvas.getContext('2d');
-        const gradient = ctx.createLinearGradient(0, 0, 0, 256);
-        gradient.addColorStop(0, '#1a1a1a');
-        gradient.addColorStop(1, '#2b2b2b');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, 2, 256);
-        const backgroundTexture = new THREE.CanvasTexture(canvas);
-        scene.background = backgroundTexture;
-
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(5, 2, 5);
-        camera.lookAt(0, 0, 0);
-
-        const renderer = new THREE.WebGLRenderer({ 
-            antialias: true,
-            alpha: false,
-            powerPreference: "high-performance"
-        });
+        camera.position.set(3, 2, 5);
+        
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setPixelRatio(window.devicePixelRatio);
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 1.2;
-        renderer.outputEncoding = THREE.sRGBEncoding;
         document.body.appendChild(renderer.domElement);
 
+        // ============================================================
         // Controles
+        // ============================================================
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.05;
@@ -270,292 +168,132 @@
         controls.autoRotateSpeed = 1.5;
         controls.enableZoom = true;
         controls.enablePan = true;
-        controls.maxPolarAngle = Math.PI / 1.8;
-        controls.minDistance = 2;
-        controls.maxDistance = 20;
+        controls.maxPolarAngle = Math.PI / 2; // Não ir abaixo do chão
+        controls.target.set(0, 1, 0);
 
         // ============================================================
-        // Iluminação avançada
+        // Iluminação
         // ============================================================
         
-        // Luz ambiente suave
+        // Luz ambiente
         const ambientLight = new THREE.AmbientLight(0x404060);
         scene.add(ambientLight);
-
-        // Luz principal (direcional com sombras)
+        
+        // Luz principal (direcional)
         const mainLight = new THREE.DirectionalLight(0xfff5e6, 1.5);
-        mainLight.position.set(5, 10, 7);
+        mainLight.position.set(5, 8, 7);
         mainLight.castShadow = true;
-        mainLight.shadow.mapSize.width = 2048;
-        mainLight.shadow.mapSize.height = 2048;
+        mainLight.shadow.mapSize.width = 1024;
+        mainLight.shadow.mapSize.height = 1024;
         mainLight.shadow.camera.near = 0.5;
-        mainLight.shadow.camera.far = 50;
-        mainLight.shadow.camera.left = -10;
-        mainLight.shadow.camera.right = 10;
-        mainLight.shadow.camera.top = 10;
-        mainLight.shadow.camera.bottom = -10;
+        mainLight.shadow.camera.far = 20;
+        mainLight.shadow.camera.left = -5;
+        mainLight.shadow.camera.right = 5;
+        mainLight.shadow.camera.top = 5;
+        mainLight.shadow.camera.bottom = -5;
         scene.add(mainLight);
-
+        
         // Luz de preenchimento
         const fillLight = new THREE.DirectionalLight(0xaaccff, 0.8);
         fillLight.position.set(-5, 3, 5);
         scene.add(fillLight);
+        
+        // Luz de fundo
+        const backLight = new THREE.DirectionalLight(0xffeedd, 0.5);
+        backLight.position.set(-2, 1, -8);
+        scene.add(backLight);
 
-        // Luz de fundo (rim light)
-        const rimLight = new THREE.DirectionalLight(0xffeedd, 0.6);
-        rimLight.position.set(-3, 2, -8);
-        scene.add(rimLight);
-
-        // Luzes pontuais para detalhes
-        const pointLight1 = new THREE.PointLight(0xffaa00, 0.5);
-        pointLight1.position.set(2, 1, 2);
+        // ============================================================
+        // Ambiente (chão, grade, etc)
+        // ============================================================
+        
+        // Grade
+        const gridHelper = new THREE.GridHelper(10, 20, 0x4a9eff, 0x333344);
+        gridHelper.position.y = -0.01;
+        scene.add(gridHelper);
+        
+        // Chão circular
+        const groundGeometry = new THREE.CircleGeometry(5, 32);
+        const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x1a1a2a, roughness: 0.8, metalness: 0.1, emissive: 0x050510 });
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        ground.position.y = 0;
+        ground.receiveShadow = true;
+        scene.add(ground);
+        
+        // Luzes pontuais decorativas
+        const pointLight1 = new THREE.PointLight(0x4466aa, 0.5);
+        pointLight1.position.set(2, 2, 2);
         scene.add(pointLight1);
-
-        const pointLight2 = new THREE.PointLight(0x44aaff, 0.3);
+        
+        const pointLight2 = new THREE.PointLight(0xaa4466, 0.3);
         pointLight2.position.set(-2, 1, -2);
         scene.add(pointLight2);
 
         // ============================================================
-        // Ambiente e efeitos
+        // Carregar modelo GLB (avatar.glb)
         // ============================================================
-        
-        // Grid helper melhorado
-        const gridHelper = new THREE.GridHelper(20, 20, 0x4a9eff, 0x333333);
-        gridHelper.position.y = -0.01;
-        scene.add(gridHelper);
-
-        // Eixos (opcionais, mas úteis)
-        // const axesHelper = new THREE.AxesHelper(5);
-        // scene.add(axesHelper);
-
-        // Círculo de luz no chão
-        const groundLight = new THREE.Mesh(
-            new THREE.CircleGeometry(5, 32),
-            new THREE.MeshStandardMaterial({ color: 0x1a1a1a, emissive: 0x0a0a1a, transparent: true, opacity: 0.3, side: THREE.DoubleSide })
-        );
-        groundLight.rotation.x = -Math.PI / 2;
-        groundLight.position.y = 0.001;
-        scene.add(groundLight);
-
-        // Pequenas partículas decorativas (ambiente)
-        const particleCount = 200;
-        const particlesGeometry = new THREE.BufferGeometry();
-        const particlesPositions = new Float32Array(particleCount * 3);
-        for (let i = 0; i < particleCount; i++) {
-            particlesPositions[i * 3] = (Math.random() - 0.5) * 30;
-            particlesPositions[i * 3 + 1] = (Math.random() - 0.5) * 10;
-            particlesPositions[i * 3 + 2] = (Math.random() - 0.5) * 30;
-        }
-        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(particlesPositions, 3));
-        const particlesMaterial = new THREE.PointsMaterial({ color: 0x4a9eff, size: 0.03, transparent: true, opacity: 0.3 });
-        const particles = new THREE.Points(particlesGeometry, particlesMaterial);
-        scene.add(particles);
-
-        // ============================================================
-        // Loaders configurados
-        // ============================================================
-        
-        // DRACO loader para compressão
-        const dracoLoader = new DRACOLoader();
-        dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.4.1/');
-
-        // GLTF loader
         const loader = new GLTFLoader();
-        loader.setDRACOLoader(dracoLoader);
-
-        // ============================================================
-        // Elementos da UI
-        // ============================================================
         const loadingDiv = document.getElementById('loading');
-        const errorDiv = document.getElementById('error-message');
-        const fileInput = document.getElementById('file-input');
-        const bgColorInput = document.getElementById('bg-color');
-
-        // Estatísticas
-        const modelNameEl = document.getElementById('model-name');
-        const modelVerticesEl = document.getElementById('model-vertices');
-        const modelFacesEl = document.getElementById('model-faces');
-        const modelMaterialsEl = document.getElementById('model-materials');
-        const modelSizeEl = document.getElementById('model-size');
-        const modelPositionEl = document.getElementById('model-position');
-
-        // Modelo atual
-        let currentModel = null;
-        let modelStats = { vertices: 0, faces: 0, materials: 0 };
-
-        // ============================================================
-        // Funções
-        // ============================================================
+        const errorDiv = document.getElementById('error');
+        const statusDiv = document.getElementById('status');
         
-        function showLoading(show) {
-            loadingDiv.style.display = show ? 'block' : 'none';
-        }
-
-        function showError(message) {
-            errorDiv.style.display = 'block';
-            errorDiv.textContent = `❌ Erro: ${message}`;
-            setTimeout(() => {
-                errorDiv.style.display = 'none';
-            }, 5000);
-        }
-
-        function updateStats(model, name = 'Modelo', size = 0) {
-            if (!model) return;
+        // Mostrar loading
+        loadingDiv.style.display = 'block';
+        
+        // Tentar carregar o arquivo
+        loader.load(
+            'avatar.glb', // Nome do arquivo (deve estar na mesma pasta)
             
-            let vertices = 0;
-            let faces = 0;
-            let materials = new Set();
-            
-            model.traverse((child) => {
-                if (child.isMesh) {
-                    if (child.geometry) {
-                        vertices += child.geometry.attributes.position.count;
-                        if (child.geometry.index) {
-                            faces += child.geometry.index.count / 3;
-                        }
-                    }
-                    if (child.material) {
-                        if (Array.isArray(child.material)) {
-                            child.material.forEach(m => materials.add(m.type));
-                        } else {
-                            materials.add(child.material.type);
-                        }
-                    }
-                }
-            });
-            
-            modelNameEl.textContent = `Nome: ${name}`;
-            modelVerticesEl.textContent = `Vértices: ${vertices.toLocaleString()}`;
-            modelFacesEl.textContent = `Faces: ${faces.toLocaleString()}`;
-            modelMaterialsEl.textContent = `Materiais: ${materials.size}`;
-            modelSizeEl.textContent = `Tamanho: ${(size / 1024).toFixed(2)} KB`;
-        }
-
-        function updatePosition() {
-            if (currentModel) {
-                const pos = currentModel.position;
-                modelPositionEl.textContent = `Posição: X:${pos.x.toFixed(2)} Y:${pos.y.toFixed(2)} Z:${pos.z.toFixed(2)}`;
-            }
-        }
-
-        function loadModel(file) {
-            showLoading(true);
-            
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const arrayBuffer = e.target.result;
+            // Sucesso
+            (gltf) => {
+                const model = gltf.scene;
                 
-                // Tentar carregar como GLB
-                loader.parse(
-                    arrayBuffer,
-                    '',
-                    (gltf) => {
-                        // Remover modelo anterior
-                        if (currentModel) {
-                            scene.remove(currentModel);
-                        }
-                        
-                        currentModel = gltf.scene;
-                        
-                        // Escala automática
-                        const box = new THREE.Box3().setFromObject(currentModel);
-                        const size = box.getSize(new THREE.Vector3());
-                        const maxDim = Math.max(size.x, size.y, size.z);
-                        if (maxDim > 5) {
-                            currentModel.scale.setScalar(5 / maxDim);
-                        }
-                        
-                        // Centralizar
-                        const center = box.getCenter(new THREE.Vector3());
-                        currentModel.position.sub(center);
-                        
-                        scene.add(currentModel);
-                        
-                        // Ativar sombras
-                        currentModel.traverse((node) => {
-                            if (node.isMesh) {
-                                node.castShadow = true;
-                                node.receiveShadow = true;
-                            }
-                        });
-                        
-                        updateStats(currentModel, file.name, arrayBuffer.byteLength);
-                        showLoading(false);
-                        controls.autoRotate = true;
-                    },
-                    (error) => {
-                        showError(error.message);
-                        showLoading(false);
-                    }
-                );
-            };
-            
-            reader.readAsArrayBuffer(file);
-        }
-
-        // ============================================================
-        // Eventos
-        // ============================================================
-        
-        fileInput.addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (file) {
-                loadModel(file);
-            }
-        });
-
-        bgColorInput.addEventListener('input', (event) => {
-            scene.background = new THREE.Color(event.target.value);
-        });
-
-        // Drag and drop
-        document.addEventListener('dragover', (event) => {
-            event.preventDefault();
-        });
-
-        document.addEventListener('drop', (event) => {
-            event.preventDefault();
-            const file = event.dataTransfer.files[0];
-            if (file && (file.name.endsWith('.glb') || file.name.endsWith('.gltf'))) {
-                loadModel(file);
-            } else {
-                showError('Por favor, arraste um arquivo .glb ou .gltf válido');
-            }
-        });
-
-        // ============================================================
-        // Exemplo de modelo padrão (cubo LEGO)
-        // ============================================================
-        function createDefaultModel() {
-            const group = new THREE.Group();
-            
-            // Cubo base
-            const boxMat = new THREE.MeshStandardMaterial({ color: 0x4a9eff, roughness: 0.3, metalness: 0.1 });
-            const box = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), boxMat);
-            box.castShadow = true;
-            box.receiveShadow = true;
-            group.add(box);
-            
-            // Studs (característica LEGO)
-            const studMat = new THREE.MeshStandardMaterial({ color: 0x2a7fff, roughness: 0.2 });
-            for (let x = -0.3; x <= 0.3; x += 0.6) {
-                for (let z = -0.3; z <= 0.3; z += 0.6) {
-                    const stud = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.1, 8), studMat);
-                    stud.position.set(x, 0.55, z);
-                    stud.castShadow = true;
-                    stud.receiveShadow = true;
-                    group.add(stud);
+                // Escala automática
+                const box = new THREE.Box3().setFromObject(model);
+                const size = box.getSize(new THREE.Vector3());
+                const maxDim = Math.max(size.x, size.y, size.z);
+                if (maxDim > 2.5) {
+                    model.scale.setScalar(2.5 / maxDim);
                 }
-            }
+                
+                // Centralizar
+                const center = box.getCenter(new THREE.Vector3());
+                model.position.sub(center);
+                model.position.y += 0.5; // Ajuste fino
+                
+                // Ativar sombras
+                model.traverse((node) => {
+                    if (node.isMesh) {
+                        node.castShadow = true;
+                        node.receiveShadow = true;
+                    }
+                });
+                
+                scene.add(model);
+                
+                // Atualizar status
+                loadingDiv.style.display = 'none';
+                statusDiv.innerHTML = '✅ Modelo: avatar.glb carregado!';
+                statusDiv.style.color = '#4caf50';
+                
+                console.log('✅ Modelo carregado com sucesso!');
+            },
             
-            return group;
-        }
-
-        // Adicionar modelo padrão
-        const defaultModel = createDefaultModel();
-        scene.add(defaultModel);
-        currentModel = defaultModel;
-        updateStats(defaultModel, 'Modelo Exemplo (LEGO)');
+            // Progresso
+            (xhr) => {
+                const percent = (xhr.loaded / xhr.total * 100).toFixed(0);
+                loadingDiv.innerHTML = `<div class="spinner"></div><div>Carregando... ${percent}%</div>`;
+            },
+            
+            // Erro
+            (error) => {
+                loadingDiv.style.display = 'none';
+                errorDiv.style.display = 'block';
+                errorDiv.innerHTML = `❌ Erro: ${error.message}<br><br>👉 Coloque o arquivo <strong>avatar.glb</strong> na mesma pasta do HTML`;
+                console.error('Erro:', error);
+            }
+        );
 
         // ============================================================
         // Animação
@@ -563,49 +301,30 @@
         function animate() {
             requestAnimationFrame(animate);
             
-            // Atualizar controles
-            controls.update();
+            controls.update(); // Atualiza auto-rotação
             
-            // Atualizar posição nas estatísticas
-            updatePosition();
-            
-            // Renderizar
             renderer.render(scene, camera);
         }
         
         animate();
 
         // ============================================================
-        // Resize
+        // Redimensionamento
         // ============================================================
-        window.addEventListener('resize', onWindowResize, false);
-        function onWindowResize() {
+        window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
-        }
+        });
 
         // ============================================================
         // Teclas de atalho
         // ============================================================
         window.addEventListener('keydown', (e) => {
-            switch(e.code) {
-                case 'Space':
-                    controls.autoRotate = !controls.autoRotate;
-                    break;
-                case 'KeyR':
-                    controls.reset();
-                    break;
-                case 'KeyW':
-                    renderer.toneMappingExposure += 0.1;
-                    break;
-                case 'KeyS':
-                    renderer.toneMappingExposure -= 0.1;
-                    break;
+            if (e.code === 'Space') {
+                controls.autoRotate = !controls.autoRotate;
             }
         });
-
-        console.log('🚀 Visualizador 3D pronto!');
     </script>
 </body>
 </html>
