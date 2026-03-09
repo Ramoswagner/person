@@ -482,4 +482,151 @@ function applyWave(dt){
   armR.rotation.x = lerp(armR.rotation.x, -1.2, dt*4);
   armR.rotation.z = lerp(armR.rotation.z, -0.3, dt*4);
   armL.rotation.x = lerp(armL.rotation.x, 0.1, dt*2);
- 
+  headGroup.rotation.y = Math.sin(wavePhase)*0.1;
+}
+function applySit(dt){
+  sitProgress = lerp(sitProgress, sitTarget, dt*2.5); const s = sitProgress;
+  hips.position.y = lerp(2.85, 1.6, s);
+  legGroupL.rotation.x = lerp(0, -Math.PI/2, s);
+  legGroupR.rotation.x = lerp(0, -Math.PI/2, s);
+  torsoGroup.rotation.x = lerp(0, 0.1, s);
+  armL.rotation.x = lerp(0, 0.2, s);
+  armR.rotation.x = lerp(0, 0.2, s);
+}
+
+// ============================================================
+// CONTROLES (mesmos da interface)
+// ============================================================
+const move = { forward:false, back:false, left:false, right:false, run:false };
+let charAngle=0, charTargetAngle=0, charSpeed=0;
+document.addEventListener('keydown', e=>{
+  if(e.key==='ArrowUp'||e.key==='w'||e.key==='W') move.forward=true;
+  if(e.key==='ArrowDown'||e.key==='s'||e.key==='S') move.back=true;
+  if(e.key==='ArrowLeft'||e.key==='a'||e.key==='A') move.left=true;
+  if(e.key==='ArrowRight'||e.key==='d'||e.key==='D') move.right=true;
+  if(e.key==='Shift') move.run=true; e.preventDefault();
+});
+document.addEventListener('keyup', e=>{
+  if(e.key==='ArrowUp'||e.key==='w'||e.key==='W') move.forward=false;
+  if(e.key==='ArrowDown'||e.key==='s'||e.key==='S') move.back=false;
+  if(e.key==='ArrowLeft'||e.key==='a'||e.key==='A') move.left=false;
+  if(e.key==='ArrowRight'||e.key==='d'||e.key==='D') move.right=false;
+  if(e.key==='Shift') move.run=false;
+});
+function holdBtn(id,key){
+  const el=document.getElementById(id);
+  const on=()=>{move[key]=true;el.classList.add('on');};
+  const off=()=>{move[key]=false;el.classList.remove('on');};
+  el.addEventListener('mousedown',on); el.addEventListener('mouseup',off); el.addEventListener('mouseleave',off);
+  el.addEventListener('touchstart',e=>{e.preventDefault();on();},{passive:false});
+  el.addEventListener('touchend',e=>{e.preventDefault();off();},{passive:false});
+}
+holdBtn('bu','forward'); holdBtn('bd','back'); holdBtn('bl','left'); holdBtn('br','right');
+
+document.getElementById('b-idle').addEventListener('click',()=>{ animState='idle'; sitTarget=0; document.querySelectorAll('.eb').forEach(b=>b.classList.remove('active')); document.getElementById('b-idle').classList.add('active'); });
+document.getElementById('b-wave').addEventListener('click',()=>{ animState='wave'; wavePhase=0; document.querySelectorAll('.eb').forEach(b=>b.classList.remove('active')); document.getElementById('b-wave').classList.add('active'); });
+document.getElementById('b-sit').addEventListener('click',()=>{ const el=document.getElementById('b-sit'); if(animState==='sit'){ animState='idle'; sitTarget=0; el.classList.remove('active'); } else { animState='sit'; sitTarget=1; el.classList.add('active'); } });
+document.getElementById('b-run').addEventListener('click',()=>{ move.run=!move.run; document.getElementById('b-run').classList.toggle('active',move.run); });
+
+// Câmera (arrastar)
+let camH=0.15, camV=0.28, camDist=8.0;
+let dragging=false, lmx=0, lmy=0;
+const camTarget=new THREE.Vector3(0,2,0);
+canvas.addEventListener('mousedown',e=>{ dragging=true; lmx=e.clientX; lmy=e.clientY; });
+canvas.addEventListener('mouseup',()=> dragging=false);
+canvas.addEventListener('mousemove',e=>{ if(!dragging) return; camH-=(e.clientX-lmx)*0.007; camV-=(e.clientY-lmy)*0.005; camV=Math.max(-0.22,Math.min(1.05,camV)); lmx=e.clientX; lmy=e.clientY; });
+canvas.addEventListener('wheel',e=>{ camDist+=e.deltaY*0.012; camDist=Math.max(2.5,Math.min(18,camDist)); e.preventDefault(); },{passive:false});
+canvas.addEventListener('touchstart',e=>{ if(e.touches.length===1){ dragging=true; lmx=e.touches[0].clientX; lmy=e.touches[0].clientY; } });
+canvas.addEventListener('touchend',()=> dragging=false);
+canvas.addEventListener('touchmove',e=>{ if(!dragging||e.touches.length!==1) return; camH-=(e.touches[0].clientX-lmx)*0.007; camV-=(e.touches[0].clientY-lmy)*0.005; camV=Math.max(-0.22,Math.min(1.05,camV)); lmx=e.touches[0].clientX; lmy=e.touches[0].clientY; e.preventDefault(); },{passive:false});
+
+// ============================================================
+// LOOP PRINCIPAL COM POST-PROCESSING
+// ============================================================
+const rtA = new THREE.WebGLRenderTarget(W,H,{minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter,type:THREE.HalfFloatType});
+const rtB = new THREE.WebGLRenderTarget(W/2,H/2,{minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter});
+const rtC = new THREE.WebGLRenderTarget(W/2,H/2,{minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter});
+
+function renderPass(quad, target){
+  postScene.children.forEach(c=>c.visible=false);
+  quad.visible=true;
+  renderer.setRenderTarget(target);
+  renderer.render(postScene, postCamera);
+  renderer.setRenderTarget(null);
+}
+
+function loop(){
+  requestAnimationFrame(loop);
+  const dt = Math.min(clock.getDelta(), 0.05);
+
+  // Movimento
+  const moving = move.forward||move.back||move.left||move.right;
+  const running = move.run && moving;
+  charSpeed = lerp(charSpeed, moving ? (running?0.076:0.042) : 0, dt*9);
+  if(moving){
+    let mx=0, mz=0;
+    if(move.forward) mz=-1;
+    if(move.back) mz=1;
+    if(move.left) mx=-1;
+    if(move.right) mx=1;
+    const cf = new THREE.Vector3(Math.sin(camH),0,Math.cos(camH));
+    const cr = new THREE.Vector3(Math.cos(camH),0,-Math.sin(camH));
+    const dir = new THREE.Vector3().addScaledVector(cr,mx).addScaledVector(cf,mz).normalize();
+    character.position.x += dir.x * charSpeed;
+    character.position.z += dir.z * charSpeed;
+    charTargetAngle = Math.atan2(dir.x, dir.z);
+    if(animState!=='walk') animState='walk';
+  } else {
+    if(animState==='walk') animState='idle';
+  }
+  let da = charTargetAngle - charAngle;
+  while(da>Math.PI) da-=Math.PI*2;
+  while(da<-Math.PI) da+=Math.PI*2;
+  charAngle += da*Math.min(1,dt*10);
+  character.rotation.y = charAngle;
+
+  // Animação
+  if(animState==='walk'){ walkPhase += dt*(running?1.72:1.16)*Math.PI*2*Math.max(0.4,charSpeed/0.042); applyWalk(walkPhase, running); }
+  else if(animState==='idle') applyIdle(dt);
+  else if(animState==='wave') applyWave(dt);
+  else if(animState==='sit') applySit(dt);
+
+  // Atualiza câmera
+  const cp = character.position;
+  camTarget.lerp(new THREE.Vector3(cp.x, cp.y+2.1, cp.z), dt*5);
+  camera.position.set(
+    camTarget.x + Math.sin(camH)*camDist*Math.cos(camV),
+    camTarget.y + Math.sin(camV)*camDist,
+    camTarget.z + Math.cos(camH)*camDist*Math.cos(camV)
+  );
+  camera.lookAt(camTarget);
+  keyLight.target.position.set(cp.x,0,cp.z);
+  keyLight.target.updateMatrixWorld();
+  keyLight.position.set(cp.x+4,11,cp.z+6);
+
+  // Post-processing
+  renderer.setRenderTarget(rtA);
+  renderer.render(scene, camera);
+  ssaoMat.uniforms.tDiffuse.value = rtA.texture;
+  ssaoMat.uniforms.tDepth.value   = rtA.texture; // simplificado
+  ssaoMat.uniforms.uEnabled.value = FX.ssao;
+  renderPass(ssaoQuad, rtB);
+  blurHMat.uniforms.tDiffuse.value = rtB.texture;
+  blurHMat.uniforms.uBloomThreshold.value = 0.52;
+  renderPass(blurHQuad, rtC);
+  blurVMat.uniforms.tDiffuse.value = rtC.texture;
+  renderPass(blurVQuad, rtB);
+  compositeMat.uniforms.tDiffuse.value  = rtA.texture;
+  compositeMat.uniforms.tBloom.value    = rtB.texture;
+  compositeMat.uniforms.uBloom.value    = FX.bloom;
+  compositeMat.uniforms.uVignette.value = FX.vignette;
+  postScene.children.forEach(c=>c.visible=false);
+  compositeQuad.visible=true;
+  renderer.setRenderTarget(null);
+  renderer.render(postScene, postCamera);
+}
+
+loop();
+</script>
+</body>
+</html>
