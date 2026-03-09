@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LEGO® Executivo - Ultra Realista</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#111;overflow:hidden;font-family:'Inter',sans-serif;}
+  canvas{display:block;}
+  #ui{
+    position:fixed;bottom:22px;left:50%;transform:translateX(-50%);
+    display:flex;flex-direction:column;align-items:center;gap:8px;
+    pointer-events:all;user-select:none;z-index:10;
+  }
+  .dpad{display:grid;grid-template-columns:48px 48px 48px;grid-template-rows:48px 48px 48px;gap:4px;}
+  .db{
+    background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.18);
+    border-radius:10px;display:flex;align-items:center;justify-content:center;
+    font-size:18px;cursor:pointer;color:#fff;backdrop-filter:blur(12px);
+    -webkit-tap-highlight-color:transparent;transition:all 0.1s;
+  }
+  .db:active,.db.on{background:rgba(255,255,255,0.22);transform:scale(0.92);}
+  .extras{display:flex;gap:7px;}
+  .eb{
+    padding:7px 14px;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.15);
+    border-radius:18px;color:rgba(255,255,255,0.7);font-size:10px;letter-spacing:1px;
+    cursor:pointer;backdrop-filter:blur(12px);transition:all 0.15s;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .eb:active,.eb.active{background:rgba(255,255,255,0.22);color:#fff;}
+  #info{
+    position:fixed;top:16px;left:50%;transform:translateX(-50%);
+    font-size:10px;letter-spacing:2px;color:rgba(255,255,255,0.28);
+    text-transform:uppercase;pointer-events:none;white-space:nowrap;
+  }
+  #fx-panel{
+    position:fixed;top:16px;right:16px;
+    background:rgba(0,0,0,0.55);border:1px solid rgba(255,255,255,0.12);
+    border-radius:12px;padding:12px 14px;backdrop-filter:blur(12px);
+    color:rgba(255,255,255,0.7);font-size:10px;letter-spacing:1px;
+    display:flex;flex-direction:column;gap:7px;min-width:140px;
+  }
+  #fx-panel label{display:flex;align-items:center;gap:7px;cursor:pointer;}
+  #fx-panel input[type=checkbox]{accent-color:#7cf;width:13px;height:13px;}
+  #fx-title{font-size:9px;letter-spacing:2px;color:rgba(255,255,255,0.4);margin-bottom:2px;text-transform:uppercase;}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="info">WASD · Shift Correr · Arrastar Câmera · Scroll Zoom</div>
+
+<!-- FX controls -->
+<div id="fx-panel">
+  <div id="fx-title">Efeitos</div>
+  <label><input type="checkbox" id="fx-bloom" checked> Bloom</label>
+  <label><input type="checkbox" id="fx-ssao" checked> Ambient Occlusion</label>
+  <label><input type="checkbox" id="fx-dof" > Depth of Field</label>
+  <label><input type="checkbox" id="fx-vignette" checked> Vignette</label>
+  <label><input type="checkbox" id="fx-sss" checked> Skin SSS</label>
+</div>
+
+<div id="ui">
+  <div class="dpad">
+    <div></div><div class="db" id="bu">▲</div><div></div>
+    <div class="db" id="bl">◀</div><div style="border-radius:10px;background:rgba(0,0,0,0.2);"></div><div class="db" id="br">▶</div>
+    <div></div><div class="db" id="bd">▼</div><div></div>
+  </div>
+  <div class="extras">
+    <div class="eb active" id="b-idle">Parado</div>
+    <div class="eb" id="b-wave">Acenar</div>
+    <div class="eb" id="b-sit">Sentar</div>
+    <div class="eb" id="b-run">🏃 Correr</div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ============================================================
+// FX STATE
+// ============================================================
+const FX = {
+  bloom: true, ssao: true, dof: false,
+  vignette: true, sss: true
+};
+['bloom','ssao','dof','vignette','sss'].forEach(k=>{
+  document.getElementById('fx-'+k).addEventListener('change',e=>{
+    FX[k]=e.target.checked;
+  });
+});
+
+// ============================================================
+// RENDERER
+// ============================================================
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true, powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.15;
+renderer.physicallyCorrectLights = true;
+
+// Render targets
+const W = window.innerWidth, H = window.innerHeight;
+const rtMain = new THREE.WebGLRenderTarget(W, H, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBAFormat, type: THREE.HalfFloatType });
+const rtBlurH = new THREE.WebGLRenderTarget(W/2, H/2, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter });
+const rtBlurV = new THREE.WebGLRenderTarget(W/2, H/2, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter });
+const rtDepth = new THREE.WebGLRenderTarget(W, H, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBAFormat });
+const rtDof = new THREE.WebGLRenderTarget(W/4, H/4, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter });
+
+// Post-processing quad setup
+const postScene  = new THREE.Scene();
+const postCamera = new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+const quadGeo    = new THREE.PlaneGeometry(2,2);
+const VERT_PASS = `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position,1.0); }`;
+
+// --- Shaders (simplified but functional) ---
+const blurHShader = `
+  uniform sampler2D tDiffuse; uniform vec2 uResolution; uniform float uBloomThreshold; varying vec2 vUv;
+  vec3 sampleTex(vec2 uv){ return texture2D(tDiffuse, uv).rgb; }
+  void main(){
+    vec2 texel = 1.0 / uResolution;
+    vec3 col = sampleTex(vUv);
+    float brightness = dot(col, vec3(0.2126,0.7152,0.0722));
+    vec3 bright = col * max(0.0, brightness - uBloomThreshold);
+    vec3 blur = vec3(0.0);
+    float w[5]; w[0]=0.227; w[1]=0.194; w[2]=0.121; w[3]=0.054; w[4]=0.016;
+    blur += sampleTex(vUv) * w[0];
+    for(int i=1;i<5;i++){ float fi=float(i)*2.0;
+      blur += sampleTex(vUv+vec2(texel.x*fi,0.0)) * w[i];
+      blur += sampleTex(vUv-vec2(texel.x*fi,0.0)) * w[i];
+    }
+    gl_FragColor = vec4(blur * max(0.0, brightness - uBloomThreshold + 0.05), 1.0);
+  }`;
+const blurVShader = `
+  uniform sampler2D tDiffuse; uniform vec2 uResolution; varying vec2 vUv;
+  void main(){
+    vec2 texel = 1.0 / uResolution; vec3 blur = vec3(0.0);
+    float w[5]; w[0]=0.227; w[1]=0.194; w[2]=0.121; w[3]=0.054; w[4]=0.016;
+    blur += texture2D(tDiffuse, vUv).rgb * w[0];
+    for(int i=1;i<5;i++){ float fi=float(i)*2.0;
+      blur += texture2D(tDiffuse, vUv+vec2(0.0,texel.y*fi)).rgb * w[i];
+      blur += texture2D(tDiffuse, vUv-vec2(0.0,texel.y*fi)).rgb * w[i];
+    }
+    gl_FragColor = vec4(blur,1.0);
+  }`;
+const ssaoShader = `
+  uniform sampler2D tDiffuse; uniform sampler2D tDepth; uniform vec2 uResolution; uniform bool uEnabled; varying vec2 vUv;
+  float getDepth(vec2 uv){ return texture2D(tDepth, uv).r; }
+  void main(){
+    vec4 color = texture2D(tDiffuse, vUv); if(!uEnabled){ gl_FragColor = color; return; }
+    vec2 texel = 1.0 / uResolution; float depth = getDepth(vUv); float ao = 0.0;
+    float radius = 0.008; int samples = 8;
+    for(int i=0;i<8;i++){
+      float angle = float(i) * 0.7854; vec2 offset = vec2(cos(angle), sin(angle)) * radius;
+      float sDepth = getDepth(vUv + offset); float diff = depth - sDepth;
+      ao += clamp(diff * 80.0, 0.0, 1.0);
+    }
+    ao = 1.0 - ao / 8.0 * 0.65; gl_FragColor = vec4(color.rgb * ao, color.a);
+  }`;
+const dofShader = `
+  uniform sampler2D tDiffuse; uniform sampler2D tBlurred; uniform sampler2D tDepth; uniform float uFocusDepth; uniform float uFocusRange; uniform bool uEnabled; varying vec2 vUv;
+  void main(){
+    vec4 sharp = texture2D(tDiffuse, vUv); if(!uEnabled){ gl_FragColor = sharp; return; }
+    vec4 blurry = texture2D(tBlurred, vUv); float depth = texture2D(tDepth, vUv).r;
+    float blur = clamp(abs(depth - uFocusDepth) / uFocusRange, 0.0, 1.0); blur = smoothstep(0.0,1.0,blur);
+    gl_FragColor = mix(sharp, blurry, blur * 0.85);
+  }`;
+const compositeShader = `
+  uniform sampler2D tDiffuse; uniform sampler2D tBloom; uniform bool uBloom; uniform bool uVignette; uniform float uExposure; varying vec2 vUv;
+  vec3 aces(vec3 x){ return clamp((x*(2.51*x+0.03))/(x*(2.43*x+0.59)+0.14),0.0,1.0); }
+  void main(){
+    vec3 col = texture2D(tDiffuse, vUv).rgb;
+    if(uBloom){ vec3 bloom = texture2D(tBloom, vUv).rgb; col += bloom * 0.38; }
+    col *= uExposure; vec3 lum = vec3(dot(col,vec3(0.2126,0.7152,0.0722)));
+    col = mix(col * vec3(0.96,0.97,1.02), col * vec3(1.02,1.00,0.97), smoothstep(0.0,1.0,lum.r));
+    col = aces(col); col = pow(col, vec3(1.0/2.2));
+    if(uVignette){ vec2 uv2 = vUv * 2.0 - 1.0; float vig = 1.0 - dot(uv2*vec2(0.6,0.8), uv2*vec2(0.6,0.8)); vig = pow(clamp(vig,0.0,1.0), 0.5); col *= mix(0.62,1.0,vig); }
+    float seed = dot(vUv, vec2(127.1,311.7)); float noise = fract(sin(seed)*43758.5453); col += (noise-0.5)*0.018;
+    gl_FragColor = vec4(clamp(col,0.0,1.0), 1.0);
+  }`;
+
+// Post meshes
+const blurHMat = new THREE.ShaderMaterial({ vertexShader: VERT_PASS, fragmentShader: blurHShader, uniforms: { tDiffuse:{value:null}, uResolution:{value:new THREE.Vector2(W/2,H/2)}, uBloomThreshold:{value:0.55} } });
+const blurHQuad = new THREE.Mesh(quadGeo, blurHMat);
+const blurVMat = new THREE.ShaderMaterial({ vertexShader: VERT_PASS, fragmentShader: blurVShader, uniforms: { tDiffuse:{value:null}, uResolution:{value:new THREE.Vector2(W/2,H/2)} } });
+const blurVQuad = new THREE.Mesh(quadGeo, blurVMat);
+const ssaoMat = new THREE.ShaderMaterial({ vertexShader: VERT_PASS, fragmentShader: ssaoShader, uniforms: { tDiffuse:{value:null}, tDepth:{value:null}, uResolution:{value:new THREE.Vector2(W,H)}, uEnabled:{value:true} } });
+const ssaoQuad = new THREE.Mesh(quadGeo, ssaoMat);
+const dofMat = new THREE.ShaderMaterial({ vertexShader: VERT_PASS, fragmentShader: dofShader, uniforms: { tDiffuse:{value:null}, tBlurred:{value:null}, tDepth:{value:null}, uFocusDepth:{value:0.5}, uFocusRange:{value:0.15}, uEnabled:{value:false} } });
+const dofQuad = new THREE.Mesh(quadGeo, dofMat);
+const compositeMat = new THREE.ShaderMaterial({ vertexShader: VERT_PASS, fragmentShader: compositeShader, uniforms: { tDiffuse:{value:null}, tBloom:{value:null}, uBloom:{value:true}, uVignette:{value:true}, uExposure:{value:1.05} } });
+const compositeQuad = new THREE.Mesh(quadGeo, compositeMat);
+postScene.add(blurHQuad, blurVQuad, ssaoQuad, dofQuad, compositeQuad);
+
+window.addEventListener('resize',()=>{
+  const nw=window.innerWidth, nh=window.innerHeight;
+  renderer.setSize(nw,nh);
+  camera.aspect=nw/nh; camera.updateProjectionMatrix();
+  rtMain.setSize(nw,nh); rtDepth.setSize(nw,nh); rtBlurH.setSize(nw/2,nh/2); rtBlurV.setSize(nw/2,nh/2);
+  blurHMat.uniforms.uResolution.value.set(nw/2,nh/2);
+  blurVMat.uniforms.uResolution.value.set(nw/2,nh/2);
+  ssaoMat.uniforms.uResolution.value.set(nw,nh);
+});
+
+// ============================================================
+// SCENE & LIGHTS
+// ============================================================
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xd2d2d2);
+scene.fog = new THREE.Fog(0xd2d2d2, 22, 60);
+const camera = new THREE.PerspectiveCamera(42, window.innerWidth/window.innerHeight, 0.1, 100);
+camera.position.set(0,3.8,9);
+
+// Simple env map
+const pmremGen = new THREE.PMREMGenerator(renderer);
+function buildEnv() {
+  const cw=512,ch=256; const cv=document.createElement('canvas'); cv.width=cw; cv.height=ch;
+  const ctx=cv.getContext('2d'); const g=ctx.createLinearGradient(0,0,0,ch);
+  g.addColorStop(0,'#b0c0e0'); g.addColorStop(0.45,'#ccd8f0'); g.addColorStop(0.5,'#e5e5e5'); g.addColorStop(1,'#b8b8b8');
+  ctx.fillStyle=g; ctx.fillRect(0,0,cw,ch);
+  const rg=ctx.createRadialGradient(cw*0.65,ch*0.18,8,cw*0.65,ch*0.18,cw*0.42);
+  rg.addColorStop(0,'rgba(255,248,220,0.95)'); rg.addColorStop(1,'rgba(255,248,220,0)');
+  ctx.fillStyle=rg; ctx.fillRect(0,0,cw,ch);
+  const t=new THREE.CanvasTexture(cv); t.mapping=THREE.EquirectangularReflectionMapping;
+  return pmremGen.fromEquirectangular(t).texture;
+}
+const envMap = buildEnv();
+scene.environment = envMap;
+
+// Lights
+const keyLight = new THREE.DirectionalLight(0xfff4e0,4.8);
+keyLight.position.set(4,11,6); keyLight.castShadow=true;
+keyLight.shadow.mapSize.width=keyLight.shadow.mapSize.height=4096;
+keyLight.shadow.camera.near=0.5; keyLight.shadow.camera.far=60;
+keyLight.shadow.camera.left=-8; keyLight.shadow.camera.right=8;
+keyLight.shadow.camera.top=10; keyLight.shadow.camera.bottom=-4;
+keyLight.shadow.bias=-0.0006; keyLight.shadow.normalBias=0.02;
+scene.add(keyLight); scene.add(keyLight.target);
+const fillLight=new THREE.DirectionalLight(0xaabbff,1.3); fillLight.position.set(-7,5,3); scene.add(fillLight);
+const rimLight=new THREE.DirectionalLight(0xffe8cc,3.0); rimLight.position.set(-2,8,-10); scene.add(rimLight);
+const bounceLight=new THREE.DirectionalLight(0xdde8ff,0.7); bounceLight.position.set(0,-4,3); scene.add(bounceLight);
+scene.add(new THREE.HemisphereLight(0xdde8ff,0xc8c0a8,1.1));
+
+// Floor
+const floorMat=new THREE.MeshStandardMaterial({color:0xcccccc,roughness:0.9,metalness:0,envMap,envMapIntensity:0.3});
+const floorMesh=new THREE.Mesh(new THREE.PlaneGeometry(60,60),floorMat);
+floorMesh.rotation.x=-Math.PI/2; floorMesh.receiveShadow=true; scene.add(floorMesh);
+const grid=new THREE.GridHelper(60,60,0xbbbbbb,0xc5c5c5); grid.position.y=0.001; scene.add(grid);
+
+// ============================================================
+// LEGO-STYLE MATERIALS (cores específicas)
+// ============================================================
+function pbr(color,rough,metal,opts={}){ return new THREE.MeshStandardMaterial({ color:new THREE.Color(color), roughness:rough, metalness:metal, envMap, envMapIntensity: opts.envInt??1.0, ...opts }); }
+
+// Skin tones (moreno / marrom)
+const skinColor  = 0x8b5a2b;   // marrom médio
+const skinDark   = 0x6b4a1e;   // tom mais escuro para detalhes
+
+// Cores do terno e camisa
+const suitColor  = 0x0a1a3a;   // azul marinho profundo
+const suitLtColor= 0x1a2a4a;   // tom ligeiramente mais claro para detalhes
+const shirtColor = 0xffffff;   // branco
+const beardColor = 0x3a2a1a;   // marrom escuro para barba
+const eyeColor   = 0x2a1a0a;   // castanho escuro
+
+const M = {
+  skin:     pbr(skinColor, 0.4, 0.0, { envInt:0.6 }),
+  skinDark: pbr(skinDark,  0.5, 0.0, { envInt:0.6 }),
+  suit:     pbr(suitColor, 0.7, 0.02, { envInt:0.5 }),
+  suitLt:   pbr(suitLtColor,0.65,0.02, { envInt:0.5 }),
+  shirt:    pbr(shirtColor,0.6,0.00, { envInt:0.5 }),
+  beard:    pbr(beardColor,0.9,0.00, { envInt:0.02 }),
+  belt:     pbr(0x0d0d0d,0.55,0.02, { envInt:0.3 }),
+  buckle:   pbr(0xb8b8b8,0.28,0.92, { envInt:1.6 }),
+  shoe:     pbr(0x090909,0.16,0.05, { envInt:1.3 }),
+  shoeSole: pbr(0x1a1a1a,0.92,0.00),
+  sclera:   pbr(0xf5f0e8,0.28,0.00, { envInt:0.15 }),
+  iris:     pbr(0x3a2208,0.08,0.00, { envInt:0.9 }),
+  pupil:    new THREE.MeshBasicMaterial({color:0x040201}),
+  eyeHL:    new THREE.MeshBasicMaterial({color:0xffffff}),
+};
+
+// ============================================================
+// CONSTRUÇÃO LEGO® (peças simplificadas, formato cilíndrico/blocado)
+// ============================================================
+function castAll(g){ g.traverse(c=>{ if(c.isMesh){c.castShadow=true;c.receiveShadow=true;} }); return g; }
+
+// --- Perna (estilo LEGO) ---
+function makeLegoLeg(){
+  const g=new THREE.Group();
+  // Coxa
+  const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.7, 8), M.suit);
+  thigh.position.y = -0.35;
+  g.add(thigh);
+  // Pé
+  const foot = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.18, 0.5), M.shoe);
+  foot.position.set(0, -0.78, 0.12);
+  g.add(foot);
+  // Detalhe do sapato
+  const sole = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.06, 0.48), M.shoeSole);
+  sole.position.set(0, -0.87, 0.12);
+  g.add(sole);
+  return castAll(g);
+}
+
+// --- Tronco (camisa + paletó) ---
+function makeLegoTorso(){
+  const g=new THREE.Group();
+  // Base do torso (camisa por baixo)
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 1.0, 8), M.shirt);
+  base.position.y = 0.0;
+  g.add(base);
+  // Paletó (sobreposição)
+  const jacket = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.48, 0.9, 8), M.suit);
+  jacket.position.y = 0.05;
+  g.add(jacket);
+  // Gola / lapelas
+  const collarL = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.15, 0.1), M.suitLt);
+  collarL.position.set(-0.25, 0.4, 0.4);
+  collarL.rotation.z = 0.3;
+  g.add(collarL);
+  const collarR = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.15, 0.1), M.suitLt);
+  collarR.position.set(0.25, 0.4, 0.4);
+  collarR.rotation.z = -0.3;
+  g.add(collarR);
+  // Gravata? não, camisa social (um retângulo branco)
+  const shirtFront = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.5, 0.05), M.shirt);
+  shirtFront.position.set(0, 0.0, 0.48);
+  g.add(shirtFront);
+  // Botões
+  [-0.2,0.0,0.2].forEach(y=>{
+    const btn = new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.02,6), M.buckle);
+    btn.rotation.x = Math.PI/2;
+    btn.position.set(0, y, 0.48);
+    g.add(btn);
+  });
+  return castAll(g);
+}
+
+// --- Braço (LEGO articulado) ---
+function makeLegoArm(side){
+  const g=new THREE.Group();
+  const sign = side==='L' ? -1 : 1;
+  // Ombro (bola)
+  const shoulder = new THREE.Mesh(new THREE.SphereGeometry(0.2, 10, 8), M.suit);
+  shoulder.scale.set(1, 0.8, 1);
+  g.add(shoulder);
+  // Braço superior
+  const upper = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.14, 0.6, 7), M.suit);
+  upper.position.set(0, -0.3, 0);
+  g.add(upper);
+  // Cotovelo (articulação)
+  const elbow = new THREE.Mesh(new THREE.SphereGeometry(0.14, 8, 6), M.suitLt);
+  elbow.position.set(0, -0.6, 0);
+  g.add(elbow);
+  // Antebraço
+  const lower = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.10, 0.55, 7), M.shirt);
+  lower.position.set(0, -0.88, 0);
+  g.add(lower);
+  // Mão (estilo LEGO: gancho)
+  const hand = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.15, 5), M.skin);
+  hand.position.set(0, -1.15, 0);
+  g.add(hand);
+  const thumb = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 0.1), M.skin);
+  thumb.position.set(sign*0.08, -1.12, 0.05);
+  g.add(thumb);
+  return castAll(g);
+}
+
+// --- Cabeça LEGO (careca, barba, olhos expressivos) ---
+function makeLegoHead(){
+  const g=new THREE.Group();
+  // Cabeça base (cilindro/ esfera achatada)
+  const headBase = new THREE.Mesh(new THREE.SphereGeometry(0.42, 16, 12), M.skin);
+  headBase.scale.set(1, 1.1, 0.9);
+  headBase.position.y = 0.0;
+  g.add(headBase);
+
+  // Barba (sugestão: formas geométricas)
+  const beard = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.4, 0.25, 6), M.beard);
+  beard.position.set(0, -0.25, 0.35);
+  beard.rotation.x = 0.2;
+  g.add(beard);
+  const beardSideL = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.15, 0.1), M.beard);
+  beardSideL.position.set(-0.3, -0.15, 0.3);
+  beardSideL.rotation.z = 0.2;
+  g.add(beardSideL);
+  const beardSideR = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.15, 0.1), M.beard);
+  beardSideR.position.set(0.3, -0.15, 0.3);
+  beardSideR.rotation.z = -0.2;
+  g.add(beardSideR);
+  // Bigode
+  const mustache = new THREE.Mesh(new THREE.TorusGeometry(0.1, 0.03, 4, 10, Math.PI), M.beard);
+  mustache.rotation.x = Math.PI/2;
+  mustache.rotation.z = Math.PI;
+  mustache.position.set(0, -0.08, 0.45);
+  g.add(mustache);
+
+  // Olhos (estilo LEGO: círculos pretos com brilho)
+  [-1,1].forEach(s=>{
+    const eyeW = new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.08,0.02,8), new THREE.MeshStandardMaterial({color:0xffffff}));
+    eyeW.rotation.x = Math.PI/2;
+    eyeW.position.set(s*0.15, 0.15, 0.5);
+    g.add(eyeW);
+    const pupil = new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,0.03,6), M.pupil);
+    pupil.rotation.x = Math.PI/2;
+    pupil.position.set(s*0.15, 0.15, 0.52);
+    g.add(pupil);
+    const hl = new THREE.Mesh(new THREE.SphereGeometry(0.02,4,4), M.eyeHL);
+    hl.position.set(s*0.18, 0.19, 0.53);
+    g.add(hl);
+  });
+
+  // Nariz (simples)
+  const nose = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.08, 6), M.skinDark);
+  nose.position.set(0, 0.0, 0.55);
+  nose.rotation.x = 0.2;
+  g.add(nose);
+
+  return castAll(g);
+}
+
+// --- Montagem do personagem LEGO ---
+const character = new THREE.Group(); scene.add(character);
+
+const hips = new THREE.Group(); hips.position.y = 2.85; character.add(hips);
+
+// Pernas
+const legGroupL = new THREE.Group(); legGroupL.position.set(-0.2, 0, 0); hips.add(legGroupL);
+legGroupL.add(makeLegoLeg());
+const legGroupR = new THREE.Group(); legGroupR.position.set(0.2, 0, 0); hips.add(legGroupR);
+legGroupR.add(makeLegoLeg());
+
+// Torso
+const torsoGroup = new THREE.Group(); torsoGroup.position.y = 0.55; hips.add(torsoGroup);
+torsoGroup.add(makeLegoTorso());
+
+// Braços
+const armL = new THREE.Group(); armL.position.set(-0.55, 0.45, 0); torsoGroup.add(armL);
+armL.add(makeLegoArm('L'));
+const armR = new THREE.Group(); armR.position.set(0.55, 0.45, 0); torsoGroup.add(armR);
+armR.add(makeLegoArm('R'));
+
+// Cabeça
+const neck = new THREE.Group(); neck.position.set(0, 0.8, 0); torsoGroup.add(neck);
+const headGroup = new THREE.Group(); headGroup.position.y = 0.25; neck.add(headGroup);
+headGroup.add(makeLegoHead());
+
+// ============================================================
+// ANIMAÇÃO SIMPLES (idle, wave, walk, sit)
+// ============================================================
+const clock = new THREE.Clock();
+let walkPhase=0, wavePhase=0, breathPhase=0, headSwayP=0;
+let animState='idle', sitProgress=0, sitTarget=0;
+function lerp(a,b,t){ return a+(b-a)*t; }
+
+function applyWalk(ph, run){
+  const a = run?1.35:1.0;
+  legGroupL.rotation.x = Math.sin(ph)*0.4*a;
+  legGroupR.rotation.x = Math.sin(ph+Math.PI)*0.4*a;
+  hips.rotation.z = Math.sin(ph)*0.02;
+  hips.position.y = 2.85 + Math.abs(Math.sin(ph))*0.03*a;
+  armL.rotation.x = -Math.sin(ph)*0.3*a;
+  armR.rotation.x = Math.sin(ph)*0.3*a;
+}
+function applyIdle(dt){
+  breathPhase += dt*0.8; headSwayP += dt*0.3;
+  hips.position.y = 2.85 + Math.sin(breathPhase*0.5)*0.006;
+  headGroup.rotation.y = Math.sin(headSwayP)*0.02;
+  const t = dt*3;
+  armL.rotation.x = lerp(armL.rotation.x, 0, t);
+  armR.rotation.x = lerp(armR.rotation.x, 0, t);
+  legGroupL.rotation.x = lerp(legGroupL.rotation.x, 0, t);
+  legGroupR.rotation.x = lerp(legGroupR.rotation.x, 0, t);
+}
+function applyWave(dt){
+  wavePhase += dt*3.5;
+  armR.rotation.x = lerp(armR.rotation.x, -1.2, dt*4);
+  armR.rotation.z = lerp(armR.rotation.z, -0.3, dt*4);
+  armL.rotation.x = lerp(armL.rotation.x, 0.1, dt*2);
+ 
