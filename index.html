@@ -3,404 +3,641 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LEGO® Executive Suite - Kanban & Charts</title>
+    <title>LEGO® Autêntico - Gerente Executivo</title>
     <style>
         body {
             margin: 0;
             overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Arial', sans-serif;
         }
         #info {
             position: absolute;
             top: 20px;
             left: 20px;
-            background: rgba(0,0,0,0.7);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            pointer-events: none;
-            font-size: 14px;
+            background: rgba(0,0,0,0.8);
+            color: #ffd966;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: bold;
+            letter-spacing: 1px;
             backdrop-filter: blur(5px);
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 2px solid #ffd966;
             z-index: 100;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
         #controls {
             position: absolute;
-            bottom: 20px;
+            bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.8);
             color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 14px;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 16px;
             backdrop-filter: blur(5px);
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid #ffd966;
             z-index: 100;
             display: flex;
-            gap: 20px;
+            gap: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
         .key {
-            background: rgba(255,255,255,0.2);
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-family: monospace;
+            background: #ffd966;
+            color: #000;
+            padding: 5px 12px;
+            border-radius: 20px;
             font-weight: bold;
+            margin: 0 5px;
+        }
+        .badge {
+            position: absolute;
+            bottom: 100px;
+            right: 20px;
+            background: rgba(0,0,0,0.8);
+            color: #ffd966;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            border: 1px solid #ffd966;
+            z-index: 100;
         }
     </style>
 </head>
 <body>
     <div id="info">
-        <strong>LEGO® Executive Suite</strong> | Gerente de Terno Azul | Quadro Kanban | Gráficos de Gestão
+        🧱 LEGO® EXECUTIVE COLLECTION | GERENTE DE TERNO AZUL
     </div>
     <div id="controls">
-        <span><span class="key">WASD</span> mover câmera</span>
-        <span><span class="key">Clique + Arraste</span> rotacionar</span>
-        <span><span class="key">Scroll</span> zoom</span>
+        <span><span class="key">🖱️</span> Arrastar para rotacionar</span>
+        <span><span class="key">⏫⏬</span> Scroll para zoom</span>
+    </div>
+    <div class="badge">
+        ⚡ Anatomia LEGO autêntica | Mãos em gancho | Cabeça cilíndrica | Studs
     </div>
 
-    <!-- Importação do Three.js via CDN -->
     <script type="importmap">
         {
             "imports": {
-                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+                "three": "https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/"
             }
         }
     </script>
 
     <script type="module">
         import * as THREE from 'three';
-        import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
         // ============================================================
-        // MÓDULO: Personagem Gerente LEGO (careca, terno azul, barba)
+        // CORES LEGO® OFICIAIS (aproximadas)
         // ============================================================
-        function createLegoManager() {
-            const g = new THREE.Group();
+        const LEGO = {
+            // Pele morena (cor LEGO "Medium Brown" #8B5A2B)
+            skin: 0x8B5A2B,
+            // Azul marinho (cor LEGO "Dark Blue" #0A1F44)
+            suit: 0x0A1F44,
+            // Azul um pouco mais claro para detalhes
+            suitLight: 0x1A2F54,
+            // Branco (LEGO White)
+            white: 0xFFFFFF,
+            // Preto (LEGO Black)
+            black: 0x05131D,
+            // Cinza para mãos (LEGO Light Bluish Gray)
+            gray: 0xA0A5A9,
+            // Marrom para barba (LEGO Dark Brown)
+            brown: 0x352100,
+            // Amarelo para studs decorativos
+            yellow: 0xFFD966,
+            // Vermelho para gráfico
+            red: 0xC91A09,
+            // Verde para gráfico
+            green: 0x00852B,
+            // Azul para gráfico
+            blue: 0x0055BF,
+        };
 
-            const skin = new THREE.MeshStandardMaterial({ color: 0x8d5524 }); // pele morena
-            const suit = new THREE.MeshStandardMaterial({ color: 0x0a1f44 }); // azul marinho
-            const shirt = new THREE.MeshStandardMaterial({ color: 0xffffff }); // camisa branca
-            const black = new THREE.MeshStandardMaterial({ color: 0x111111 }); // barba
+        // ============================================================
+        // FUNÇÕES AUXILIARES PARA CRIAÇÃO DE PEÇAS LEGO
+        // ============================================================
+        
+        // Cria um stud (o pino redondo no topo das peças)
+        function createStud(color, radius = 0.08, height = 0.04) {
+            const geometry = new THREE.CylinderGeometry(radius, radius, height, 16);
+            const material = new THREE.MeshStandardMaterial({ color: color, roughness: 0.3, metalness: 0.1 });
+            const stud = new THREE.Mesh(geometry, material);
+            stud.castShadow = true;
+            stud.receiveShadow = true;
+            return stud;
+        }
 
-            // Cabeça (cilindro LEGO)
-            const head = new THREE.Mesh(
-                new THREE.CylinderGeometry(0.28, 0.28, 0.35, 32),
-                skin
-            );
-            head.position.y = 2.3;
-            g.add(head);
-
-            // Stud do cabelo (careca, então só um pequeno topo)
-            const stud = new THREE.Mesh(
-                new THREE.CylinderGeometry(0.12, 0.12, 0.08, 32),
-                skin
-            );
-            stud.position.y = 2.52;
-            g.add(stud);
-
-            // Barba (caixa preta)
-            const beard = new THREE.Mesh(
-                new THREE.BoxGeometry(0.36, 0.18, 0.15),
-                black
-            );
-            beard.position.set(0, 2.15, 0.28);
-            g.add(beard);
-
-            // Corpo (paletó)
-            const body = new THREE.Mesh(
-                new THREE.BoxGeometry(0.8, 1, 0.4),
-                suit
-            );
-            body.position.y = 1.6;
-            g.add(body);
-
-            // Frente da camisa
-            const shirtFront = new THREE.Mesh(
-                new THREE.BoxGeometry(0.3, 0.7, 0.02),
-                shirt
-            );
-            shirtFront.position.set(0, 1.6, 0.21);
-            g.add(shirtFront);
-
-            // Pernas
-            const leg1 = new THREE.Mesh(
-                new THREE.BoxGeometry(0.35, 0.9, 0.35),
-                suit
-            );
-            leg1.position.set(-0.2, 0.7, 0);
-            g.add(leg1);
-
-            const leg2 = leg1.clone();
-            leg2.position.x = 0.2;
-            g.add(leg2);
-
-            // Olhos simples (botões LEGO)
-            const eyeWhite = new THREE.MeshStandardMaterial({ color: 0xffffff });
-            const eyePupil = new THREE.MeshStandardMaterial({ color: 0x000000 });
+        // Cria uma peça base (bloco) com studs opcionais
+        function createBrick(width, height, depth, color, hasStuds = true, studColor = null) {
+            const group = new THREE.Group();
             
-            [-1, 1].forEach(side => {
-                const eyeBase = new THREE.Mesh(
-                    new THREE.CylinderGeometry(0.05, 0.05, 0.02, 8),
-                    eyeWhite
-                );
-                eyeBase.rotation.x = Math.PI / 2;
-                eyeBase.position.set(side * 0.12, 2.4, 0.32);
-                g.add(eyeBase);
-                
-                const pupil = new THREE.Mesh(
-                    new THREE.CylinderGeometry(0.025, 0.025, 0.03, 6),
-                    eyePupil
-                );
-                pupil.rotation.x = Math.PI / 2;
-                pupil.position.set(side * 0.12, 2.4, 0.34);
-                g.add(pupil);
-            });
+            // Corpo principal do bloco
+            const bodyGeo = new THREE.BoxGeometry(width, height, depth);
+            const bodyMat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.4, metalness: 0.0 });
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            body.castShadow = true;
+            body.receiveShadow = true;
+            body.position.y = height / 2;
+            group.add(body);
 
-            return g;
+            // Adiciona studs no topo
+            if (hasStuds) {
+                // Calcula quantos studs cabem (geralmente 1 stud a cada 0.4 unidades)
+                const studCountX = Math.max(1, Math.floor(width / 0.4));
+                const studCountZ = Math.max(1, Math.floor(depth / 0.4));
+                const startX = -width/2 + 0.2;
+                const startZ = -depth/2 + 0.2;
+                
+                for (let i = 0; i < studCountX; i++) {
+                    for (let j = 0; j < studCountZ; j++) {
+                        const stud = createStud(studColor || color, 0.07, 0.04);
+                        stud.position.set(
+                            startX + i * 0.4,
+                            height,
+                            startZ + j * 0.4
+                        );
+                        group.add(stud);
+                    }
+                }
+            }
+
+            return group;
+        }
+
+        // Cria uma cabeça LEGO (cilindro com topo arredondado)
+        function createLegoHead(skinColor) {
+            const group = new THREE.Group();
+            
+            // Parte principal da cabeça (cilindro)
+            const headGeo = new THREE.CylinderGeometry(0.28, 0.28, 0.35, 16);
+            const headMat = new THREE.MeshStandardMaterial({ color: skinColor, roughness: 0.3 });
+            const head = new THREE.Mesh(headGeo, headMat);
+            head.castShadow = true;
+            head.receiveShadow = true;
+            head.position.y = 0.175;
+            group.add(head);
+            
+            // Stud no topo (característico LEGO)
+            const stud = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.12, 0.12, 0.06, 12),
+                new THREE.MeshStandardMaterial({ color: skinColor, roughness: 0.3 })
+            );
+            stud.castShadow = true;
+            stud.receiveShadow = true;
+            stud.position.y = 0.355;
+            group.add(stud);
+            
+            return group;
+        }
+
+        // Cria mãos em formato de gancho (característico LEGO)
+        function createHand(color) {
+            const group = new THREE.Group();
+            
+            // Base da mão
+            const base = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.08, 0.08, 0.1, 6),
+                new THREE.MeshStandardMaterial({ color: color, roughness: 0.4 })
+            );
+            base.castShadow = true;
+            base.receiveShadow = true;
+            base.rotation.x = Math.PI / 2;
+            group.add(base);
+            
+            // Gancho (formato C característico)
+            const hook = new THREE.Mesh(
+                new THREE.TorusGeometry(0.06, 0.03, 4, 16, Math.PI / 2),
+                new THREE.MeshStandardMaterial({ color: color, roughness: 0.4 })
+            );
+            hook.castShadow = true;
+            hook.receiveShadow = true;
+            hook.rotation.z = Math.PI / 2;
+            hook.rotation.x = Math.PI / 2;
+            hook.position.set(0, 0, 0.06);
+            group.add(hook);
+            
+            return group;
         }
 
         // ============================================================
-        // MÓDULO: Escritório LEGO
+        // CRIAÇÃO DO PERSONAGEM GERENTE (ANATOMIA LEGO PERFEITA)
+        // ============================================================
+        function createAuthenticLegoManager() {
+            const group = new THREE.Group();
+
+            // PERNAS (duas peças separadas, como LEGO verdadeiro)
+            const legGeometry = new THREE.BoxGeometry(0.3, 0.4, 0.2);
+            const legMaterial = new THREE.MeshStandardMaterial({ color: LEGO.suit, roughness: 0.4 });
+            
+            // Perna esquerda
+            const legLeft = new THREE.Mesh(legGeometry, legMaterial);
+            legLeft.castShadow = true;
+            legLeft.receiveShadow = true;
+            legLeft.position.set(-0.15, 0.2, 0);
+            group.add(legLeft);
+            
+            // Perna direita
+            const legRight = new THREE.Mesh(legGeometry, legMaterial);
+            legRight.castShadow = true;
+            legRight.receiveShadow = true;
+            legRight.position.set(0.15, 0.2, 0);
+            group.add(legRight);
+
+            // QUADRIL (peça de conexão)
+            const hip = new THREE.Mesh(
+                new THREE.BoxGeometry(0.5, 0.15, 0.25),
+                new THREE.MeshStandardMaterial({ color: LEGO.suit, roughness: 0.4 })
+            );
+            hip.castShadow = true;
+            hip.receiveShadow = true;
+            hip.position.set(0, 0.45, 0);
+            group.add(hip);
+
+            // TRONCO (peça principal)
+            const torso = new THREE.Mesh(
+                new THREE.BoxGeometry(0.5, 0.7, 0.25),
+                new THREE.MeshStandardMaterial({ color: LEGO.suit, roughness: 0.4 })
+            );
+            torso.castShadow = true;
+            torso.receiveShadow = true;
+            torso.position.set(0, 0.95, 0);
+            group.add(torso);
+
+            // Camisa branca (detalhe frontal)
+            const shirt = new THREE.Mesh(
+                new THREE.BoxGeometry(0.25, 0.4, 0.05),
+                new THREE.MeshStandardMaterial({ color: LEGO.white, roughness: 0.6 })
+            );
+            shirt.castShadow = true;
+            shirt.receiveShadow = true;
+            shirt.position.set(0, 0.95, 0.13);
+            group.add(shirt);
+
+            // Gola do paletó
+            const collar = new THREE.Mesh(
+                new THREE.BoxGeometry(0.3, 0.1, 0.05),
+                new THREE.MeshStandardMaterial({ color: LEGO.suitLight, roughness: 0.4 })
+            );
+            collar.castShadow = true;
+            collar.receiveShadow = true;
+            collar.position.set(0, 1.2, 0.13);
+            group.add(collar);
+
+            // BRAÇOS (articulados no estilo LEGO)
+            
+            // Braço esquerdo (superior)
+            const armLeftUpper = new THREE.Mesh(
+                new THREE.BoxGeometry(0.2, 0.4, 0.2),
+                new THREE.MeshStandardMaterial({ color: LEGO.suit, roughness: 0.4 })
+            );
+            armLeftUpper.castShadow = true;
+            armLeftUpper.receiveShadow = true;
+            armLeftUpper.position.set(-0.4, 0.95, 0);
+            group.add(armLeftUpper);
+
+            // Braço direito (superior)
+            const armRightUpper = new THREE.Mesh(
+                new THREE.BoxGeometry(0.2, 0.4, 0.2),
+                new THREE.MeshStandardMaterial({ color: LEGO.suit, roughness: 0.4 })
+            );
+            armRightUpper.castShadow = true;
+            armRightUpper.receiveShadow = true;
+            armRightUpper.position.set(0.4, 0.95, 0);
+            group.add(armRightUpper);
+
+            // Antebraço esquerdo
+            const armLeftLower = new THREE.Mesh(
+                new THREE.BoxGeometry(0.18, 0.35, 0.18),
+                new THREE.MeshStandardMaterial({ color: LEGO.suitLight, roughness: 0.4 })
+            );
+            armLeftLower.castShadow = true;
+            armLeftLower.receiveShadow = true;
+            armLeftLower.position.set(-0.4, 0.55, 0);
+            group.add(armLeftLower);
+
+            // Antebraço direito
+            const armRightLower = new THREE.Mesh(
+                new THREE.BoxGeometry(0.18, 0.35, 0.18),
+                new THREE.MeshStandardMaterial({ color: LEGO.suitLight, roughness: 0.4 })
+            );
+            armRightLower.castShadow = true;
+            armRightLower.receiveShadow = true;
+            armRightLower.position.set(0.4, 0.55, 0);
+            group.add(armRightLower);
+
+            // Mãos em gancho (característica LEGO)
+            const handLeft = createHand(LEGO.gray);
+            handLeft.position.set(-0.4, 0.35, 0);
+            handLeft.rotation.z = 0.2;
+            group.add(handLeft);
+
+            const handRight = createHand(LEGO.gray);
+            handRight.position.set(0.4, 0.35, 0);
+            handRight.rotation.z = -0.2;
+            group.add(handRight);
+
+            // CABEÇA (estilo LEGO autêntico)
+            const head = createLegoHead(LEGO.skin);
+            head.position.set(0, 1.45, 0);
+            group.add(head);
+
+            // Barba (detalhe)
+            const beard = new THREE.Mesh(
+                new THREE.BoxGeometry(0.25, 0.12, 0.1),
+                new THREE.MeshStandardMaterial({ color: LEGO.brown, roughness: 0.8 })
+            );
+            beard.castShadow = true;
+            beard.receiveShadow = true;
+            beard.position.set(0, 1.3, 0.2);
+            group.add(beard);
+
+            // Olhos (estilo LEGO - pintados)
+            const eyeWhiteMat = new THREE.MeshStandardMaterial({ color: 0xFFFFFF });
+            const eyePupilMat = new THREE.MeshStandardMaterial({ color: 0x000000 });
+            
+            // Olho esquerdo
+            const eyeLeftWhite = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.05, 0.05, 0.02, 8),
+                eyeWhiteMat
+            );
+            eyeLeftWhite.rotation.x = Math.PI / 2;
+            eyeLeftWhite.position.set(-0.1, 1.5, 0.25);
+            group.add(eyeLeftWhite);
+            
+            const eyeLeftPupil = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.025, 0.025, 0.03, 6),
+                eyePupilMat
+            );
+            eyeLeftPupil.rotation.x = Math.PI / 2;
+            eyeLeftPupil.position.set(-0.1, 1.5, 0.27);
+            group.add(eyeLeftPupil);
+            
+            // Olho direito
+            const eyeRightWhite = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.05, 0.05, 0.02, 8),
+                eyeWhiteMat
+            );
+            eyeRightWhite.rotation.x = Math.PI / 2;
+            eyeRightWhite.position.set(0.1, 1.5, 0.25);
+            group.add(eyeRightWhite);
+            
+            const eyeRightPupil = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.025, 0.025, 0.03, 6),
+                eyePupilMat
+            );
+            eyeRightPupil.rotation.x = Math.PI / 2;
+            eyeRightPupil.position.set(0.1, 1.5, 0.27);
+            group.add(eyeRightPupil);
+
+            return group;
+        }
+
+        // ============================================================
+        // ESCRITÓRIO LEGO COM MESA E ACESSÓRIOS
         // ============================================================
         function createLegoOffice() {
             const office = new THREE.Group();
 
-            // Piso
+            // PISO (placa base grande)
             const floor = new THREE.Mesh(
-                new THREE.BoxGeometry(10, 0.3, 10),
-                new THREE.MeshStandardMaterial({ color: 0xd9d9d9 })
+                new THREE.BoxGeometry(12, 0.2, 12),
+                new THREE.MeshStandardMaterial({ color: 0xCCCCCC, roughness: 0.7 })
             );
-            floor.position.y = -0.15;
+            floor.position.y = -0.1;
+            floor.receiveShadow = true;
             office.add(floor);
 
-            // Mesa principal
-            const deskTop = new THREE.Mesh(
-                new THREE.BoxGeometry(2, 0.2, 1),
-                new THREE.MeshStandardMaterial({ color: 0x8b4513 })
-            );
-            deskTop.position.set(0, 1, 1);
-            office.add(deskTop);
-
-            // Pernas da mesa
-            for (let x of [-0.9, 0.9]) {
-                for (let z of [-0.4, 0.4]) {
-                    const leg = new THREE.Mesh(
-                        new THREE.BoxGeometry(0.1, 1, 0.1),
-                        new THREE.MeshStandardMaterial({ color: 0x333333 })
+            // Grade de studs no chão (característico LEGO)
+            for (let x = -5; x <= 5; x += 1) {
+                for (let z = -5; z <= 5; z += 1) {
+                    const stud = new THREE.Mesh(
+                        new THREE.CylinderGeometry(0.1, 0.1, 0.05, 8),
+                        new THREE.MeshStandardMaterial({ color: 0xAAAAAA, roughness: 0.5 })
                     );
-                    leg.position.set(x, 0.5, z + 1);
+                    stud.position.set(x, 0.05, z);
+                    stud.receiveShadow = true;
+                    office.add(stud);
+                }
+            }
+
+            // MESA EXECUTIVA LEGO
+            const deskGroup = new THREE.Group();
+            
+            // Tampo da mesa
+            const deskTop = createBrick(3, 0.2, 1.5, 0x8B4513, true, 0xFFD966);
+            deskTop.position.set(0, 1, 2);
+            office.add(deskTop);
+            
+            // Pernas da mesa (blocos empilhados)
+            for (let x of [-1.2, 1.2]) {
+                for (let z of [1.5, 2.5]) {
+                    const leg = createBrick(0.4, 1, 0.4, 0x333333, false);
+                    leg.position.set(x, 0.5, z);
                     office.add(leg);
                 }
             }
 
-            // Cadeira simples
-            const chairSeat = new THREE.Mesh(
-                new THREE.BoxGeometry(0.6, 0.1, 0.6),
-                new THREE.MeshStandardMaterial({ color: 0x4a4a4a })
-            );
-            chairSeat.position.set(0, 0.55, 2);
-            office.add(chairSeat);
-
-            const chairBack = new THREE.Mesh(
-                new THREE.BoxGeometry(0.6, 0.6, 0.1),
-                new THREE.MeshStandardMaterial({ color: 0x4a4a4a })
-            );
-            chairBack.position.set(0, 0.9, 2.3);
-            office.add(chairBack);
-
-            // Parede decorativa (opcional)
-            const wall = new THREE.Mesh(
-                new THREE.BoxGeometry(10, 3, 0.2),
-                new THREE.MeshStandardMaterial({ color: 0xcccccc })
-            );
-            wall.position.set(0, 1.5, -5);
-            office.add(wall);
+            // CADEIRA LEGO
+            const chairGroup = new THREE.Group();
+            
+            // Assento
+            const seat = createBrick(0.8, 0.15, 0.8, 0x4A4A4A, true, 0xAAAAAA);
+            seat.position.set(0, 0.6, 3.2);
+            office.add(seat);
+            
+            // Encosto
+            const backrest = createBrick(0.8, 0.6, 0.15, 0x4A4A4A, false);
+            backrest.position.set(0, 0.9, 3.6);
+            office.add(backrest);
+            
+            // Pés da cadeira
+            for (let x of [-0.3, 0.3]) {
+                for (let z of [3.0, 3.4]) {
+                    const foot = new THREE.Mesh(
+                        new THREE.CylinderGeometry(0.1, 0.1, 0.3, 6),
+                        new THREE.MeshStandardMaterial({ color: 0x333333 })
+                    );
+                    foot.position.set(x, 0.15, z);
+                    office.add(foot);
+                }
+            }
 
             return office;
         }
 
         // ============================================================
-        // MÓDULO: Quadro Kanban LEGO
+        // QUADRO KANBAN LEGO
         // ============================================================
-        function createKanbanBoard() {
+        function createLegoKanban() {
             const board = new THREE.Group();
 
             // Base do quadro
             const base = new THREE.Mesh(
-                new THREE.BoxGeometry(3, 2, 0.1),
-                new THREE.MeshStandardMaterial({ color: 0xffffff })
+                new THREE.BoxGeometry(4, 2.5, 0.2),
+                new THREE.MeshStandardMaterial({ color: 0xFFFFFF, roughness: 0.5 })
             );
-            base.position.y = 1;
+            base.position.set(0, 1.5, -3);
+            base.castShadow = true;
+            base.receiveShadow = true;
             board.add(base);
 
-            // Função para criar colunas
-            function column(x, color) {
-                const col = new THREE.Mesh(
-                    new THREE.BoxGeometry(0.8, 1.5, 0.05),
-                    new THREE.MeshStandardMaterial({ color })
-                );
-                col.position.set(x, 1, 0.06);
-                return col;
-            }
+            // Colunas (blocos LEGO coloridos)
+            const columns = [
+                { color: 0xFFCC00, x: -1.2, label: 'BACKLOG' }, // Amarelo
+                { color: 0x00CCFF, x: 0, label: 'DOING' },      // Azul
+                { color: 0x00CC66, x: 1.2, label: 'DONE' }      // Verde
+            ];
 
-            // Colunas: Backlog, Doing, Done
-            board.add(column(-1, 0xffcc00)); // amarelo
-            board.add(column(0, 0x00ccff));  // azul
-            board.add(column(1, 0x00cc66));  // verde
+            columns.forEach(col => {
+                // Coluna principal
+                const column = createBrick(1, 1.8, 0.1, col.color, true, 0xFFFFFF);
+                column.position.set(col.x, 1.5, -2.9);
+                board.add(column);
 
-            // Títulos das colunas (pequenos blocos)
-            const whiteMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
-            const blackMat = new THREE.MeshStandardMaterial({ color: 0x000000 });
-            
-            const titles = ['BACKLOG', 'DOING', 'DONE'];
-            [-1, 0, 1].forEach((x, i) => {
-                const titleBg = new THREE.Mesh(
-                    new THREE.BoxGeometry(0.7, 0.2, 0.02),
-                    whiteMat
+                // Título da coluna (pequeno bloco)
+                const titleBlock = createBrick(0.8, 0.2, 0.1, 0x333333, true, 0xFFFFFF);
+                titleBlock.position.set(col.x, 2.4, -2.9);
+                board.add(titleBlock);
+            });
+
+            // Post-its (pequenos blocos coloridos)
+            const notes = [
+                { pos: [-1.2, 1.2, -2.85], color: 0xFF9999 },
+                { pos: [-1.2, 0.8, -2.85], color: 0x99FF99 },
+                { pos: [0, 1.2, -2.85], color: 0x9999FF },
+                { pos: [0, 0.8, -2.85], color: 0xFFFF99 },
+                { pos: [1.2, 1.2, -2.85], color: 0xFF99FF },
+                { pos: [1.2, 0.8, -2.85], color: 0x99FFFF }
+            ];
+
+            notes.forEach(note => {
+                const postit = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.3, 0.1, 0.05),
+                    new THREE.MeshStandardMaterial({ color: note.color })
                 );
-                titleBg.position.set(x, 1.8, 0.07);
-                board.add(titleBg);
+                postit.position.set(note.pos[0], note.pos[1], note.pos[2]);
+                postit.castShadow = true;
+                board.add(postit);
             });
 
             return board;
         }
 
         // ============================================================
-        // MÓDULO: Gráficos LEGO (Barras e Pizza)
+        // GRÁFICOS LEGO (Barras e Pizza)
         // ============================================================
         function createLegoCharts() {
             const charts = new THREE.Group();
 
             // Base dos gráficos
-            const basePlate = new THREE.Mesh(
-                new THREE.BoxGeometry(3, 0.1, 1.5),
-                new THREE.MeshStandardMaterial({ color: 0xcccccc })
-            );
-            basePlate.position.set(0, 0.05, 0);
-            charts.add(basePlate);
+            const base = createBrick(3, 0.2, 1.5, 0xCCCCCC, true, 0xAAAAAA);
+            base.position.set(0, 1.2, 1.5);
+            charts.add(base);
 
             // GRÁFICO DE BARRAS (lado esquerdo)
-            const barGroup = new THREE.Group();
-            barGroup.position.set(-0.8, 0.15, 0);
+            const barData = [0.8, 1.2, 0.6, 1.0];
+            const barColors = [LEGO.red, LEGO.blue, LEGO.green, LEGO.yellow];
             
-            const barColors = [0xff6b6b, 0x4ecdc4, 0x45b7d1, 0x96ceb4];
-            const barHeights = [0.8, 1.2, 0.6, 1.0];
-            
-            barHeights.forEach((height, i) => {
-                const bar = new THREE.Mesh(
-                    new THREE.BoxGeometry(0.25, height, 0.25),
-                    new THREE.MeshStandardMaterial({ color: barColors[i % barColors.length] })
-                );
-                bar.position.set(i * 0.35 - 0.5, height/2, 0);
-                barGroup.add(bar);
-                
-                // Topo arredondado (stud)
-                const stud = new THREE.Mesh(
-                    new THREE.CylinderGeometry(0.1, 0.1, 0.05, 8),
-                    new THREE.MeshStandardMaterial({ color: barColors[i % barColors.length] })
-                );
-                stud.position.set(i * 0.35 - 0.5, height, 0);
-                barGroup.add(stud);
+            barData.forEach((height, i) => {
+                const bar = createBrick(0.3, height, 0.3, barColors[i], true, 0xFFFFFF);
+                bar.position.set(-1 + i * 0.5, 1.2 + height/2, 1.2);
+                charts.add(bar);
             });
-            
-            charts.add(barGroup);
 
-            // GRÁFICO DE PIZZA (lado direito)
-            const pieGroup = new THREE.Group();
-            pieGroup.position.set(0.8, 0.15, 0);
+            // GRÁFICO DE PIZZA (lado direito) - versão LEGO
+            const pizzaGroup = new THREE.Group();
+            pizzaGroup.position.set(1, 1.3, 1.5);
             
-            const pieColors = [0xff6b6b, 0x4ecdc4, 0x45b7d1];
-            const segments = [0.5, 0.3, 0.2]; // proporções
+            // Base circular da pizza
+            const pizzaBase = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.5, 0.5, 0.1, 24),
+                new THREE.MeshStandardMaterial({ color: 0xCCCCCC, roughness: 0.5 })
+            );
+            pizzaBase.castShadow = true;
+            pizzaBase.receiveShadow = true;
+            pizzaGroup.add(pizzaBase);
             
-            let angleStart = 0;
-            segments.forEach((seg, i) => {
-                const angleEnd = angleStart + seg * Math.PI * 2;
-                
-                // Criar fatia usando um cilindro com geometria de segmento (simplificado com caixas)
-                // Para simplicidade, usaremos pequenos blocos formando um círculo
+            // Fatias (pequenos blocos triangulares simulados)
+            const sliceColors = [LEGO.red, LEGO.blue, LEGO.green, LEGO.yellow];
+            for (let i = 0; i < 4; i++) {
+                const angle = (i / 4) * Math.PI * 2;
                 const slice = new THREE.Mesh(
-                    new THREE.CylinderGeometry(0.4, 0.4, 0.1, 32, 1),
-                    new THREE.MeshStandardMaterial({ color: pieColors[i] })
+                    new THREE.BoxGeometry(0.2, 0.05, 0.3),
+                    new THREE.MeshStandardMaterial({ color: sliceColors[i] })
                 );
-                slice.position.set(0, 0.05, 0);
-                pieGroup.add(slice);
-                
-                // Adicionar studs decorativos nas fatias (simulação)
-                for (let j = 0; j < 3; j++) {
-                    const stud = new THREE.Mesh(
-                        new THREE.CylinderGeometry(0.05, 0.05, 0.05, 6),
-                        new THREE.MeshStandardMaterial({ color: 0xffdd44 })
-                    );
-                    stud.position.set(
-                        Math.cos(angleStart + seg * Math.PI) * 0.2,
-                        0.1,
-                        Math.sin(angleStart + seg * Math.PI) * 0.2
-                    );
-                    pieGroup.add(stud);
-                }
-                
-                angleStart = angleEnd;
-            });
+                slice.position.set(Math.sin(angle) * 0.25, 1.35, Math.cos(angle) * 0.25);
+                slice.rotation.y = angle;
+                slice.castShadow = true;
+                pizzaGroup.add(slice);
+            }
             
-            charts.add(pieGroup);
+            charts.add(pizzaGroup);
 
             return charts;
         }
 
         // ============================================================
-        // CENA PRINCIPAL (main.js)
+        // CENA PRINCIPAL
         // ============================================================
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0xf0f0f0);
+        scene.background = new THREE.Color(0xE0E0E0);
 
-        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
-        camera.position.set(6, 5, 8);
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(8, 6, 12);
+        camera.lookAt(0, 2, 0);
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.shadowMap.bias = 0.0001;
         document.body.appendChild(renderer.domElement);
 
         // Controls
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.05;
-        controls.screenSpacePanning = true;
-        controls.maxPolarAngle = Math.PI / 2;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 1.0;
         controls.target.set(0, 2, 0);
+        controls.maxPolarAngle = Math.PI / 2.2;
 
         // Iluminação
-        const light = new THREE.DirectionalLight(0xffffff, 1);
-        light.position.set(5, 10, 5);
-        light.castShadow = true;
-        light.shadow.mapSize.width = 1024;
-        light.shadow.mapSize.height = 1024;
-        const d = 10;
-        light.shadow.camera.left = -d;
-        light.shadow.camera.right = d;
-        light.shadow.camera.top = d;
-        light.shadow.camera.bottom = -d;
-        light.shadow.camera.near = 1;
-        light.shadow.camera.far = 15;
-        scene.add(light);
-
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-        scene.add(ambientLight);
+        // Luz principal (direcional)
+        const mainLight = new THREE.DirectionalLight(0xFFF5E6, 1.2);
+        mainLight.position.set(5, 12, 8);
+        mainLight.castShadow = true;
+        mainLight.shadow.mapSize.width = 2048;
+        mainLight.shadow.mapSize.height = 2048;
+        mainLight.shadow.camera.near = 0.5;
+        mainLight.shadow.camera.far = 25;
+        mainLight.shadow.camera.left = -10;
+        mainLight.shadow.camera.right = 10;
+        mainLight.shadow.camera.top = 10;
+        mainLight.shadow.camera.bottom = -10;
+        scene.add(mainLight);
 
         // Luz de preenchimento
-        const fillLight = new THREE.DirectionalLight(0xccddff, 0.5);
+        const fillLight = new THREE.DirectionalLight(0xE0F0FF, 0.6);
         fillLight.position.set(-5, 5, 5);
         scene.add(fillLight);
 
-        // Adicionar uma grade no chão para referência
-        const gridHelper = new THREE.GridHelper(10, 20, 0x888888, 0x444444);
-        gridHelper.position.y = 0;
-        scene.add(gridHelper);
+        // Luz ambiente
+        const ambientLight = new THREE.AmbientLight(0xFFFFFF, 0.5);
+        scene.add(ambientLight);
+
+        // Luz de fundo para destacar silhueta
+        const backLight = new THREE.DirectionalLight(0xFFFFFF, 0.4);
+        backLight.position.set(-2, 5, -10);
+        scene.add(backLight);
 
         // ============================================================
-        // MONTAGEM DA CENA
+        // MONTAGEM DA CENA COMPLETA
         // ============================================================
         
         // Escritório
@@ -408,55 +645,62 @@
         office.position.set(0, 0, 0);
         scene.add(office);
 
-        // Gerente
-        const manager = createLegoManager();
-        manager.position.set(0, 0.15, 0.5); // ajuste para ficar atrás da mesa
-        manager.rotation.y = Math.PI / 4; // olhando para o quadro
+        // Gerente (posicionado atrás da mesa)
+        const manager = createAuthenticLegoManager();
+        manager.position.set(0, 0, 1.2);
+        manager.rotation.y = 0.2;
         scene.add(manager);
 
-        // Quadro Kanban (posicionado na parede)
-        const kanban = createKanbanBoard();
-        kanban.position.set(0, 1.5, -3.5);
+        // Quadro Kanban
+        const kanban = createLegoKanban();
+        kanban.position.set(0, 0, -2);
         scene.add(kanban);
 
-        // Gráficos LEGO (sobre a mesa)
+        // Gráficos na mesa
         const charts = createLegoCharts();
-        charts.position.set(0, 1.2, 1.2); // em cima da mesa
-        charts.rotation.y = 0.2;
+        charts.position.set(0, 0, 2.2);
         scene.add(charts);
-
-        // Adicionar alguns elementos decorativos: bloquinhos extras no chão
-        const blockMat = new THREE.MeshStandardMaterial({ color: 0xffaa00 });
-        for (let i = 0; i < 5; i++) {
-            const block = new THREE.Mesh(
-                new THREE.BoxGeometry(0.3, 0.3, 0.3),
-                blockMat
-            );
-            block.position.set(2 + i * 0.4, 0.15, 2);
-            scene.add(block);
-        }
 
         // ============================================================
         // ANIMAÇÃO
         // ============================================================
+        let clock = new THREE.Clock();
+
         function animate() {
             requestAnimationFrame(animate);
 
+            const delta = clock.getDelta();
+            const time = Date.now() * 0.001;
+
             // Pequena animação no gerente (respiração)
-            const time = Date.now() * 0.002;
-            manager.position.y = 0.15 + Math.sin(time) * 0.01;
+            manager.position.y = Math.sin(time * 2) * 0.01;
             
+            // Rotação automática da câmera (desabilitada quando o usuário interage)
             controls.update();
+
             renderer.render(scene, camera);
         }
 
         animate();
 
-        // Ajuste de resize
+        // ============================================================
+        // RESIZE HANDLER
+        // ============================================================
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Pausar auto-rotação ao interagir
+        renderer.domElement.addEventListener('mousedown', () => {
+            controls.autoRotate = false;
+        });
+
+        renderer.domElement.addEventListener('mouseup', () => {
+            setTimeout(() => {
+                controls.autoRotate = true;
+            }, 3000);
         });
     </script>
 </body>
