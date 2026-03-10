@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎮 VOXEL 360 - Gerador 3D com 4 Fotos</title>
+    <title>🎮 VOXEL 360 - Suporte a PNG Transparente</title>
     
     <!-- Three.js -->
     <script type="importmap">
@@ -29,7 +29,7 @@
             overflow: hidden;
         }
 
-        /* Fundo Matrix */
+        /* Fundo escuro para destacar transparência */
         body::before {
             content: '';
             position: fixed;
@@ -38,18 +38,13 @@
             width: 100%;
             height: 100%;
             background: repeating-linear-gradient(
-                0deg,
-                rgba(0, 255, 0, 0.03) 0px,
-                rgba(0, 0, 0, 0.5) 2px,
-                transparent 3px
+                45deg,
+                #0a0a1a 0px,
+                #0a0a1a 20px,
+                #1a1a2a 20px,
+                #1a1a2a 40px
             );
             pointer-events: none;
-            animation: scan 10s linear infinite;
-        }
-
-        @keyframes scan {
-            from { background-position: 0 0; }
-            to { background-position: 0 20px; }
         }
 
         .container {
@@ -59,10 +54,10 @@
             gap: 20px;
         }
 
-        /* Painel Esquerdo - Upload 4 Lados */
+        /* Painel Esquerdo */
         .left-panel {
-            width: 450px;
-            background: rgba(0, 20, 0, 0.9);
+            width: 500px;
+            background: rgba(0, 20, 0, 0.95);
             border: 2px solid #00ff00;
             padding: 20px;
             display: flex;
@@ -71,6 +66,7 @@
             backdrop-filter: blur(5px);
             box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
             overflow-y: auto;
+            z-index: 10;
         }
 
         .title {
@@ -78,7 +74,6 @@
             font-weight: bold;
             color: #00ff00;
             text-shadow: 0 0 10px #00ff00;
-            margin-bottom: 10px;
             text-align: center;
             border-bottom: 2px solid #00ff00;
             padding-bottom: 10px;
@@ -86,12 +81,29 @@
 
         .subtitle {
             font-size: 12px;
-            color: #00aa00;
+            color: #00ffff;
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
 
-        /* Grade de Upload 4 Lados */
+        /* Dica de transparência */
+        .transparency-tip {
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid #00ff00;
+            padding: 10px;
+            font-size: 11px;
+            color: #00ffff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .tip-icon {
+            font-size: 20px;
+        }
+
+        /* Grade de Upload */
         .upload-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -100,7 +112,7 @@
         }
 
         .upload-slot {
-            background: rgba(0, 30, 0, 0.8);
+            background: rgba(0, 30, 0, 0.9);
             border: 2px dashed #00ff00;
             padding: 15px;
             text-align: center;
@@ -111,13 +123,13 @@
 
         .upload-slot:hover {
             border-color: #00ffff;
-            background: rgba(0, 50, 0, 0.8);
+            background: rgba(0, 50, 0, 0.9);
             transform: scale(1.02);
         }
 
         .upload-slot.completed {
             border-color: #ffff00;
-            background: rgba(0, 80, 0, 0.8);
+            background: rgba(0, 80, 0, 0.9);
         }
 
         .slot-label {
@@ -130,23 +142,53 @@
         .slot-preview {
             width: 100%;
             height: 100px;
-            background: rgba(0, 0, 0, 0.5);
+            background: repeating-conic-gradient(#1a1a2a 0deg 90deg, #2a2a3a 90deg 180deg);
+            background-size: 20px 20px;
             margin-bottom: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            position: relative;
+        }
+
+        /* Fundo xadrez para mostrar transparência */
+        .slot-preview::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-conic-gradient(#333 0deg 90deg, #444 90deg 180deg);
+            background-size: 10px 10px;
+            opacity: 0.5;
+            z-index: 0;
         }
 
         .slot-preview img {
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
+            position: relative;
+            z-index: 1;
+            image-rendering: pixelated;
         }
 
         .slot-status {
             font-size: 10px;
             color: #00aa00;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .transparency-badge {
+            background: rgba(0, 255, 0, 0.2);
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 8px;
+            color: #00ffff;
         }
 
         .slot-input {
@@ -188,7 +230,7 @@
 
         /* Controles */
         .controls {
-            background: rgba(0, 20, 0, 0.8);
+            background: rgba(0, 20, 0, 0.9);
             border: 1px solid #00ff00;
             padding: 15px;
         }
@@ -219,6 +261,29 @@
             background: #00ff00;
             border: 2px solid #00ffff;
             cursor: pointer;
+        }
+
+        select {
+            width: 100%;
+            background: #001a00;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 8px;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Checkbox para transparência */
+        .transparency-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .transparency-control input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #00ff00;
         }
 
         /* Botões */
@@ -279,7 +344,7 @@
             color: #00aa00;
         }
 
-        /* Painel Direito - Visualizador */
+        /* Painel Direito */
         .right-panel {
             flex: 1;
             background: #000;
@@ -291,9 +356,10 @@
             width: 100%;
             height: 100%;
             position: relative;
+            background: #0a0a1a;
         }
 
-        /* Overlay de informações */
+        /* Overlay */
         .info-overlay {
             position: absolute;
             top: 20px;
@@ -317,7 +383,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.95);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -378,10 +444,13 @@
         <!-- Painel Esquerdo -->
         <div class="left-panel">
             <div class="title">
-                🎮 VOXEL 360° 🎮
+                🎮 VOXEL 360° PNG 🎮
             </div>
-            <div class="subtitle">
-                UPLOAD DAS 4 FACES (FRENTE, TRÁS, ESQUERDA, DIREITA)
+            
+            <!-- Dica de transparência -->
+            <div class="transparency-tip">
+                <span class="tip-icon">🔍</span>
+                <span>PNG com transparência: fundo xadrez mostra áreas transparentes</span>
             </div>
 
             <!-- Grid de Upload 4 Lados -->
@@ -390,32 +459,44 @@
                 <div class="upload-slot" id="slot-front">
                     <div class="slot-label">⬆️ FRENTE</div>
                     <div class="slot-preview" id="preview-front"></div>
-                    <div class="slot-status" id="status-front">⏳ Aguardando...</div>
-                    <input type="file" class="slot-input" id="file-front" accept="image/*">
+                    <div class="slot-status" id="status-front">
+                        <span>⏳ Aguardando...</span>
+                        <span class="transparency-badge" id="alpha-front">-</span>
+                    </div>
+                    <input type="file" class="slot-input" id="file-front" accept="image/png,image/jpeg,image/webp">
                 </div>
 
                 <!-- TRÁS -->
                 <div class="upload-slot" id="slot-back">
                     <div class="slot-label">⬇️ TRÁS</div>
                     <div class="slot-preview" id="preview-back"></div>
-                    <div class="slot-status" id="status-back">⏳ Aguardando...</div>
-                    <input type="file" class="slot-input" id="file-back" accept="image/*">
+                    <div class="slot-status" id="status-back">
+                        <span>⏳ Aguardando...</span>
+                        <span class="transparency-badge" id="alpha-back">-</span>
+                    </div>
+                    <input type="file" class="slot-input" id="file-back" accept="image/png,image/jpeg,image/webp">
                 </div>
 
                 <!-- ESQUERDA -->
                 <div class="upload-slot" id="slot-left">
                     <div class="slot-label">⬅️ ESQUERDA</div>
                     <div class="slot-preview" id="preview-left"></div>
-                    <div class="slot-status" id="status-left">⏳ Aguardando...</div>
-                    <input type="file" class="slot-input" id="file-left" accept="image/*">
+                    <div class="slot-status" id="status-left">
+                        <span>⏳ Aguardando...</span>
+                        <span class="transparency-badge" id="alpha-left">-</span>
+                    </div>
+                    <input type="file" class="slot-input" id="file-left" accept="image/png,image/jpeg,image/webp">
                 </div>
 
                 <!-- DIREITA -->
                 <div class="upload-slot" id="slot-right">
                     <div class="slot-label">➡️ DIREITA</div>
                     <div class="slot-preview" id="preview-right"></div>
-                    <div class="slot-status" id="status-right">⏳ Aguardando...</div>
-                    <input type="file" class="slot-input" id="file-right" accept="image/*">
+                    <div class="slot-status" id="status-right">
+                        <span>⏳ Aguardando...</span>
+                        <span class="transparency-badge" id="alpha-right">-</span>
+                    </div>
+                    <input type="file" class="slot-input" id="file-right" accept="image/png,image/jpeg,image/webp">
                 </div>
             </div>
 
@@ -430,7 +511,7 @@
                 </div>
             </div>
 
-            <!-- Controles Avançados -->
+            <!-- Controles de Transparência -->
             <div class="controls">
                 <div class="control-group">
                     <div class="control-label">
@@ -442,26 +523,31 @@
 
                 <div class="control-group">
                     <div class="control-label">
-                        <span>DETALHAMENTO</span>
-                        <span id="detail-value">75%</span>
+                        <span>LIMIAR TRANSPARÊNCIA</span>
+                        <span id="alpha-threshold-value">50%</span>
                     </div>
-                    <input type="range" class="slider" id="voxel-detail" min="25" max="100" value="75">
+                    <input type="range" class="slider" id="alpha-threshold" min="0" max="100" value="50">
+                </div>
+
+                <div class="transparency-control">
+                    <input type="checkbox" id="preserve-alpha" checked>
+                    <label for="preserve-alpha">🎨 Preservar transparência original</label>
                 </div>
 
                 <div class="control-group">
                     <div class="control-label">MODO DE COR</div>
-                    <select id="color-mode" style="width:100%;background:#001a00;color:#00ff00;border:1px solid #00ff00;padding:5px;">
-                        <option value="rgb">🌈 RGB Realista</option>
-                        <option value="neon" selected>💡 Neon Cyber</option>
+                    <select id="color-mode">
+                        <option value="rgb">🌈 RGB com Transparência</option>
+                        <option value="neon" selected>💡 Neon (preserva alpha)</option>
                         <option value="retro">🕹️ Retro 8-bit</option>
-                        <option value="bw">⚫⚪ Preto e Branco</option>
+                        <option value="alpha">🔍 Mostrar Alpha</option>
                     </select>
                 </div>
             </div>
 
             <!-- Botões -->
             <button class="btn" id="generate-btn" disabled>
-                🎲 GERAR MODELO 360° 🎲
+                🎲 GERAR VOXEL COM TRANSPARÊNCIA 🎲
             </button>
 
             <!-- Stats -->
@@ -475,8 +561,8 @@
                     <div class="stat-label">FACES</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-value" id="stat-colors">0</div>
-                    <div class="stat-label">CORES</div>
+                    <div class="stat-value" id="stat-alpha">0%</div>
+                    <div class="stat-label">TRANSPARÊNCIA</div>
                 </div>
                 <div class="stat">
                     <div class="stat-value" id="stat-poly">0</div>
@@ -498,26 +584,23 @@
         <!-- Painel Direito -->
         <div class="right-panel">
             <div id="canvas-container">
-                <!-- Info Overlay -->
                 <div class="info-overlay">
-                    <div class="info-item">🎯 MODO: 4 FACES</div>
-                    <div class="info-item">📐 ÂNGULOS: 360°</div>
+                    <div class="info-item">🎯 MODO: TRANSPARENTE</div>
+                    <div class="info-item">📐 FUNDO: XADREZ</div>
                     <div class="info-item" id="info-coords">📍 X:0 Y:0 Z:0</div>
                 </div>
 
-                <!-- Loading -->
                 <div class="loading-overlay" id="loading-overlay">
                     <div class="spinner"></div>
                     <div class="loading-text" id="loading-text">
-                        PROCESSANDO 4 FACES...
+                        PROCESSANDO TRANSPARÊNCIA...
                     </div>
                 </div>
 
-                <!-- Hint Bar -->
                 <div class="hint-bar" id="hint-bar">
                     <div class="hint-item"><span>🖱️</span> ROTACIONAR</div>
                     <div class="hint-item"><span>⚡</span> ZOOM</div>
-                    <div class="hint-item"><span>🎮</span> 360° VIEW</div>
+                    <div class="hint-item"><span>🎨</span> ALPHA PRESERVADO</div>
                 </div>
             </div>
         </div>
@@ -531,17 +614,23 @@
         // ==================== CONFIGURAÇÃO THREE.JS ====================
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x000000);
+        scene.background = new THREE.Color(0x0a0a1a);
 
-        // Câmera isométrica
+        // Câmera
         const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
         camera.position.set(6, 4, 8);
         camera.lookAt(0, 0, 0);
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+        const renderer = new THREE.WebGLRenderer({ 
+            antialias: true, 
+            alpha: true,
+            preserveDrawingBuffer: true
+        });
         renderer.setSize(container.clientWidth, container.clientHeight);
         renderer.setPixelRatio(1);
         renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.setClearColor(0x0a0a1a, 1);
         container.appendChild(renderer.domElement);
 
         const controls = new OrbitControls(camera, renderer.domElement);
@@ -570,6 +659,32 @@
         grid.position.y = -0.5;
         scene.add(grid);
 
+        // Fundo xadrez para mostrar transparência
+        const checkerboardTexture = (() => {
+            const canvas = document.createElement('canvas');
+            canvas.width = 64;
+            canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#1a1a2a';
+            ctx.fillRect(0, 0, 64, 64);
+            ctx.fillStyle = '#2a2a3a';
+            ctx.fillRect(0, 0, 32, 32);
+            ctx.fillRect(32, 32, 32, 32);
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(8, 8);
+            return texture;
+        })();
+
+        const checkerPlane = new THREE.Mesh(
+            new THREE.PlaneGeometry(20, 20),
+            new THREE.MeshBasicMaterial({ map: checkerboardTexture, side: THREE.DoubleSide })
+        );
+        checkerPlane.rotation.x = -Math.PI / 2;
+        checkerPlane.position.y = -0.51;
+        scene.add(checkerPlane);
+
         // ==================== ESTADO GLOBAL ====================
         const images = {
             front: null,
@@ -583,6 +698,13 @@
             back: null,
             left: null,
             right: null
+        };
+
+        const alphaInfo = {
+            front: 0,
+            back: 0,
+            left: 0,
+            right: 0
         };
 
         let currentModel = null;
@@ -610,6 +732,13 @@
             right: document.getElementById('status-right')
         };
 
+        const alphaBadges = {
+            front: document.getElementById('alpha-front'),
+            back: document.getElementById('alpha-back'),
+            left: document.getElementById('alpha-left'),
+            right: document.getElementById('alpha-right')
+        };
+
         const files = {
             front: document.getElementById('file-front'),
             back: document.getElementById('file-back'),
@@ -630,14 +759,15 @@
         // Stats
         const statVoxels = document.getElementById('stat-voxels');
         const statFaces = document.getElementById('stat-faces');
-        const statColors = document.getElementById('stat-colors');
+        const statAlpha = document.getElementById('stat-alpha');
         const statPoly = document.getElementById('stat-poly');
 
         // Controles
         const resSlider = document.getElementById('voxel-res');
         const resValue = document.getElementById('res-value');
-        const detailSlider = document.getElementById('voxel-detail');
-        const detailValue = document.getElementById('detail-value');
+        const alphaThreshold = document.getElementById('alpha-threshold');
+        const alphaThresholdValue = document.getElementById('alpha-threshold-value');
+        const preserveAlpha = document.getElementById('preserve-alpha');
         const colorMode = document.getElementById('color-mode');
 
         // ==================== EVENT LISTENERS ====================
@@ -645,8 +775,8 @@
             resValue.textContent = e.target.value + '³';
         });
 
-        detailSlider.addEventListener('input', (e) => {
-            detailValue.textContent = e.target.value + '%';
+        alphaThreshold.addEventListener('input', (e) => {
+            alphaThresholdValue.textContent = e.target.value + '%';
         });
 
         // Configurar upload para cada lado
@@ -677,31 +807,12 @@
             });
         });
 
-        // Mouse tracking para coordenadas
-        renderer.domElement.addEventListener('mousemove', (e) => {
-            const rect = renderer.domElement.getBoundingClientRect();
-            const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-            const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-            
-            const raycaster = new THREE.Raycaster();
-            raycaster.setFromCamera({x, y}, camera);
-            
-            const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-            const point = new THREE.Vector3();
-            raycaster.ray.intersectPlane(plane, point);
-            
-            if (point) {
-                infoCoords.textContent = `📍 X:${Math.round(point.x)} Y:${Math.round(point.y)} Z:${Math.round(point.z)}`;
-            }
-        });
-
         // ==================== FUNÇÕES DE UPLOAD ====================
         async function handleImageUpload(side, file) {
             if (!file.type.startsWith('image/')) return;
 
             const reader = new FileReader();
             reader.onload = (e) => {
-                // Salvar imagem
                 images[side] = e.target.result;
                 
                 // Criar preview
@@ -710,26 +821,49 @@
                 previews[side].innerHTML = '';
                 previews[side].appendChild(img);
                 
-                // Atualizar status
-                status[side].textContent = '✅ CARREGADO';
-                status[side].style.color = '#00ff00';
-                slots[side].classList.add('completed');
-                
-                // Carregar dados da imagem para análise
+                // Carregar dados da imagem com transparência
                 const imgData = new Image();
                 imgData.onload = () => {
                     const canvas = document.createElement('canvas');
                     canvas.width = 64;
                     canvas.height = 64;
-                    const ctx = canvas.getContext('2d');
+                    const ctx = canvas.getContext('2d', { alpha: true });
+                    
+                    // Limpar com transparente
+                    ctx.clearRect(0, 0, 64, 64);
                     ctx.drawImage(imgData, 0, 0, 64, 64);
+                    
                     imageData[side] = ctx.getImageData(0, 0, 64, 64);
+                    
+                    // Calcular porcentagem de transparência
+                    let alphaSum = 0;
+                    const data = imageData[side].data;
+                    for (let i = 3; i < data.length; i += 4) {
+                        alphaSum += data[i] / 255;
+                    }
+                    const alphaPercent = Math.round((alphaSum / (data.length / 4)) * 100);
+                    alphaInfo[side] = alphaPercent;
+                    
+                    // Atualizar badge de transparência
+                    alphaBadges[side].textContent = `α ${alphaPercent}%`;
+                    alphaBadges[side].style.color = alphaPercent > 50 ? '#00ffff' : '#ff6666';
+                    
+                    // Atualizar status
+                    const statusSpan = status[side].querySelector('span');
+                    if (statusSpan) statusSpan.textContent = '✅ CARREGADO';
+                    status[side].style.color = '#00ff00';
+                    slots[side].classList.add('completed');
                     
                     // Atualizar contador
                     uploadedCount = Object.values(imageData).filter(d => d !== null).length;
                     progressFill.style.width = (uploadedCount * 25) + '%';
                     progressCount.textContent = `${uploadedCount}/4`;
                     statFaces.textContent = `${uploadedCount}/4`;
+                    
+                    // Calcular média de transparência
+                    const alphaValues = Object.values(alphaInfo);
+                    const avgAlpha = alphaValues.reduce((a, b) => a + b, 0) / alphaValues.length;
+                    statAlpha.textContent = Math.round(avgAlpha) + '%';
                     
                     // Habilitar botão quando todas as 4 forem carregadas
                     if (uploadedCount === 4) {
@@ -741,7 +875,7 @@
             reader.readAsDataURL(file);
         }
 
-        // ==================== GERAR VOXEL 360° ====================
+        // ==================== GERAR VOXEL COM TRANSPARÊNCIA ====================
         generateBtn.addEventListener('click', async () => {
             if (uploadedCount < 4) return;
 
@@ -751,7 +885,8 @@
             hintBar.classList.remove('show');
             
             const resolution = parseInt(resSlider.value);
-            const detail = parseInt(detailSlider.value) / 100;
+            const threshold = parseInt(alphaThreshold.value) / 100;
+            const preserve = preserveAlpha.checked;
             const mode = colorMode.value;
             
             // Simular progresso
@@ -759,7 +894,7 @@
             const interval = setInterval(() => {
                 progress += 5;
                 if (progress <= 90) {
-                    loadingText.textContent = `PROCESSANDO 4 FACES... ${progress}%`;
+                    loadingText.textContent = `PROCESSANDO TRANSPARÊNCIA... ${progress}%`;
                 }
             }, 100);
             
@@ -769,8 +904,8 @@
                 // Remover modelo anterior
                 if (currentModel) scene.remove(currentModel);
                 
-                // Gerar voxel 360
-                const model = generateVoxel360(imageData, resolution, detail, mode);
+                // Gerar voxel com transparência
+                const model = generateVoxelWithAlpha(imageData, resolution, threshold, preserve, mode);
                 scene.add(model);
                 currentModel = model;
                 
@@ -778,16 +913,6 @@
                 const voxelCount = resolution * resolution * resolution;
                 statVoxels.textContent = voxelCount.toLocaleString();
                 statPoly.textContent = (voxelCount * 6).toLocaleString();
-                
-                // Contar cores
-                const colors = new Set();
-                model.traverse((child) => {
-                    if (child.isMesh) {
-                        const color = child.material.color;
-                        colors.add(`${color.r},${color.g},${color.b}`);
-                    }
-                });
-                statColors.textContent = colors.size;
                 
                 clearInterval(interval);
                 loadingOverlay.classList.remove('active');
@@ -804,39 +929,48 @@
             }
         });
 
-        // ==================== GERADOR PRINCIPAL ====================
-        function generateVoxel360(imageData, resolution, detail, mode) {
+        // ==================== GERADOR COM TRANSPARÊNCIA ====================
+        function generateVoxelWithAlpha(imageData, resolution, threshold, preserve, mode) {
             const group = new THREE.Group();
             const size = 2.0;
-            const half = size / 2;
             
-            // Processar cada voxel no espaço 3D
             for (let x = 0; x < resolution; x++) {
                 for (let y = 0; y < resolution; y++) {
                     for (let z = 0; z < resolution; z++) {
-                        // Normalizar coordenadas (0-1)
                         const nx = x / (resolution - 1);
                         const ny = y / (resolution - 1);
                         const nz = z / (resolution - 1);
                         
-                        // Determinar cor baseada nas 4 faces
-                        const color = calculateVoxelColor(nx, ny, nz, imageData, mode, detail);
+                        // Calcular cor e alpha
+                        const result = calculateVoxelColorWithAlpha(nx, ny, nz, imageData, mode);
                         
-                        // Pular voxels vazios (transparentes)
-                        if (color.a < 0.1) continue;
+                        // Aplicar threshold de transparência
+                        if (result.a < threshold) continue;
                         
-                        // Criar cubo
+                        // Criar material com transparência
                         const geometry = new THREE.BoxGeometry(size/resolution * 0.9, size/resolution * 0.9, size/resolution * 0.9);
-                        const material = new THREE.MeshStandardMaterial({
-                            color: color,
-                            emissive: mode === 'neon' ? color : 0x000000,
-                            roughness: 0.3,
-                            metalness: 0.1
-                        });
+                        
+                        let material;
+                        if (preserve && result.a < 0.95) {
+                            material = new THREE.MeshStandardMaterial({
+                                color: result.color,
+                                transparent: true,
+                                opacity: result.a,
+                                emissive: mode === 'neon' ? result.color : 0x000000,
+                                roughness: 0.3,
+                                metalness: 0.1
+                            });
+                        } else {
+                            material = new THREE.MeshStandardMaterial({
+                                color: result.color,
+                                emissive: mode === 'neon' ? result.color : 0x000000,
+                                roughness: 0.3,
+                                metalness: 0.1
+                            });
+                        }
                         
                         const cube = new THREE.Mesh(geometry, material);
                         
-                        // Posicionar
                         cube.position.set(
                             (nx - 0.5) * size,
                             (ny - 0.5) * size,
@@ -853,59 +987,46 @@
             return group;
         }
 
-        // ==================== CALCULAR COR DO VOXEL ====================
-        function calculateVoxelColor(nx, ny, nz, imageData, mode, detail) {
+        // ==================== CALCULAR COR COM ALPHA ====================
+        function calculateVoxelColorWithAlpha(nx, ny, nz, imageData, mode) {
             // Mapear coordenadas para cada face
-            const front = getPixelFromFace(imageData.front, nx, ny); // Frente (Z+)
-            const back = getPixelFromFace(imageData.back, 1 - nx, ny); // Trás (Z-)
-            const left = getPixelFromFace(imageData.left, nz, ny); // Esquerda (X-)
-            const right = getPixelFromFace(imageData.right, 1 - nz, ny); // Direita (X+)
+            const front = getPixelWithAlpha(imageData.front, nx, ny);
+            const back = getPixelWithAlpha(imageData.back, 1 - nx, ny);
+            const left = getPixelWithAlpha(imageData.left, nz, ny);
+            const right = getPixelWithAlpha(imageData.right, 1 - nz, ny);
             
-            // Pesar cores baseado na direção
-            let r = 0, g = 0, b = 0, a = 0;
-            
-            // Fator de influência baseado no ângulo
+            // Fatores de influência
             const frontFactor = Math.max(0, nz);
             const backFactor = Math.max(0, 1 - nz);
             const leftFactor = Math.max(0, 1 - nx);
             const rightFactor = Math.max(0, nx);
             
-            // Somar contribuições
-            if (front) {
-                r += front.r * frontFactor;
-                g += front.g * frontFactor;
-                b += front.b * frontFactor;
-                a += front.a * frontFactor;
-            }
+            // Pesos considerando alpha
+            let r = 0, g = 0, b = 0, a = 0, totalWeight = 0;
             
-            if (back) {
-                r += back.r * backFactor;
-                g += back.g * backFactor;
-                b += back.b * backFactor;
-                a += back.a * backFactor;
-            }
+            const contributions = [
+                { data: front, factor: frontFactor },
+                { data: back, factor: backFactor },
+                { data: left, factor: leftFactor },
+                { data: right, factor: rightFactor }
+            ];
             
-            if (left) {
-                r += left.r * leftFactor;
-                g += left.g * leftFactor;
-                b += left.b * leftFactor;
-                a += left.a * leftFactor;
-            }
+            contributions.forEach(c => {
+                if (c.data) {
+                    const weight = c.factor * c.data.a;
+                    r += c.data.r * weight;
+                    g += c.data.g * weight;
+                    b += c.data.b * weight;
+                    a += c.data.a * weight;
+                    totalWeight += weight;
+                }
+            });
             
-            if (right) {
-                r += right.r * rightFactor;
-                g += right.g * rightFactor;
-                b += right.b * rightFactor;
-                a += right.a * rightFactor;
-            }
-            
-            // Normalizar
-            const total = frontFactor + backFactor + leftFactor + rightFactor;
-            if (total > 0) {
-                r /= total;
-                g /= total;
-                b /= total;
-                a /= total;
+            if (totalWeight > 0) {
+                r /= totalWeight;
+                g /= totalWeight;
+                b /= totalWeight;
+                a /= totalWeight;
             }
             
             // Aplicar modo de cor
@@ -919,27 +1040,25 @@
                     );
                     break;
                 case 'retro':
-                    // Reduzir para 16 cores
                     color = new THREE.Color(
                         Math.floor(r * 4) / 4,
                         Math.floor(g * 4) / 4,
                         Math.floor(b * 4) / 4
                     );
                     break;
-                case 'bw':
-                    const gray = (r + g + b) / 3;
-                    color = new THREE.Color(gray, gray, gray);
+                case 'alpha':
+                    // Modo especial: mostrar alpha como cor
+                    color = new THREE.Color(a, a, a);
                     break;
                 default: // rgb
                     color = new THREE.Color(r, g, b);
             }
             
-            color.a = a;
-            return color;
+            return { color, a };
         }
 
-        // ==================== PEGAR PIXEL DA FACE ====================
-        function getPixelFromFace(data, u, v) {
+        // ==================== PEGAR PIXEL COM ALPHA ====================
+        function getPixelWithAlpha(data, u, v) {
             if (!data) return null;
             
             const x = Math.floor(u * 63);
@@ -972,7 +1091,7 @@
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `voxel-360-${Date.now()}.glb`;
+                    a.download = `voxel-transparente-${Date.now()}.glb`;
                     a.click();
                     URL.revokeObjectURL(url);
                 },
@@ -982,13 +1101,15 @@
 
         // ==================== RESET ====================
         resetBtn.addEventListener('click', () => {
-            // Resetar imagens
             Object.keys(images).forEach(side => {
                 images[side] = null;
                 imageData[side] = null;
+                alphaInfo[side] = 0;
                 previews[side].innerHTML = '';
-                status[side].textContent = '⏳ Aguardando...';
+                const statusSpan = status[side].querySelector('span');
+                if (statusSpan) statusSpan.textContent = '⏳ Aguardando...';
                 status[side].style.color = '#00aa00';
+                alphaBadges[side].textContent = '-';
                 slots[side].classList.remove('completed');
                 files[side].value = '';
             });
@@ -997,6 +1118,7 @@
             progressFill.style.width = '0%';
             progressCount.textContent = '0/4';
             statFaces.textContent = '0/4';
+            statAlpha.textContent = '0%';
             generateBtn.disabled = true;
             downloadBtn.disabled = true;
             
@@ -1007,7 +1129,6 @@
             
             statVoxels.textContent = '0';
             statPoly.textContent = '0';
-            statColors.textContent = '0';
             
             controls.autoRotate = true;
             hintBar.classList.remove('show');
