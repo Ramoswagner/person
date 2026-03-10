@@ -1,84 +1,545 @@
-<script type="module">
-    import * as THREE from 'three';
-    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Avatar Viewer</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&family=Share+Tech+Mono&display=swap');
 
-    // ... (Configuração de Cena, Luz e Câmera igual ao anterior) ...
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    let model, mixer;
-    let acoes = {}; // Guardará as animações: flying, opening, jumping
-    let acaoAtual;
-    const teclas = {};
+  body {
+    background: #050810;
+    color: #e0e8ff;
+    font-family: 'Rajdhani', sans-serif;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+  }
 
-    const loader = new GLTFLoader();
-    loader.load('man_in_suit.glb', (gltf) => {
-        model = gltf.scene;
-        scene.add(model);
+  #canvas-container {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+  }
 
-        mixer = new THREE.AnimationMixer(model);
+  canvas { display: block; }
 
-        // Mapeia as animações pelo nome exato que você definiu
-        gltf.animations.forEach((clip) => {
-            const nome = clip.name.toLowerCase();
-            acoes[nome] = mixer.clipAction(clip);
-            console.log("Animação carregada:", nome);
-        });
+  /* HUD — painel de controles */
+  #hud {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    pointer-events: none;
+  }
 
-        // Define 'flying' como animação padrão (Idle/Andar)
-        if (acoes['flying']) {
-            acaoAtual = acoes['flying'];
-            acaoAtual.play();
-        }
+  .hud-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: #4a7aff;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
 
-        animate();
-    });
+  .keys-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 44px);
+    grid-template-rows: repeat(2, 44px);
+    gap: 6px;
+  }
 
-    // Detectar Teclas
-    window.addEventListener('keydown', (e) => teclas[e.code] = true);
-    window.addEventListener('keyup', (e) => teclas[e.code] = false);
+  .key {
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgba(74, 122, 255, 0.3);
+    border-radius: 8px;
+    background: rgba(10, 15, 40, 0.7);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    color: rgba(180, 200, 255, 0.5);
+    transition: all 0.1s;
+    pointer-events: none;
+    box-shadow: 0 0 0 0 rgba(74,122,255,0);
+  }
 
-    // Função para trocar de animação suavemente (Crossfade)
-    function transicaoPara(novaAnimacao, loop = true) {
-        const proxima = acoes[novaAnimacao];
-        if (!proxima || proxima === acaoAtual) return;
+  .key.active, .key.pressed {
+    border-color: #4a7aff;
+    color: #fff;
+    background: rgba(74, 122, 255, 0.2);
+    box-shadow: 0 0 16px rgba(74,122,255,0.4), inset 0 0 8px rgba(74,122,255,0.1);
+  }
 
-        proxima.reset();
-        proxima.setLoop(loop ? THREE.LoopRepeat : THREE.LoopOnce);
-        proxima.clampWhenFinished = true; // Para no último frame se não for loop
-        
-        proxima.play();
-        acaoAtual.crossFadeTo(proxima, 0.2, true);
-        acaoAtual = proxima;
-    }
+  .key-w { grid-column: 2; grid-row: 1; }
+  .key-a { grid-column: 1; grid-row: 2; }
+  .key-s { grid-column: 2; grid-row: 2; }
+  .key-d { grid-column: 3; grid-row: 2; }
 
-    const clock = new THREE.Clock();
+  /* Status top-left */
+  #status {
+    position: fixed;
+    top: 24px;
+    left: 24px;
+    z-index: 10;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: rgba(74,122,255,0.6);
+    line-height: 2;
+    pointer-events: none;
+  }
 
-    function animate() {
-        requestAnimationFrame(animate);
-        const delta = clock.getDelta();
-        if (mixer) mixer.update(delta);
+  #status span { color: #8ab4ff; }
 
-        if (model) {
-            // MOVIMENTAÇÃO (W, A, S, D)
-            let movendo = false;
+  /* Cursor personalizado */
+  body { cursor: crosshair; }
 
-            if (teclas['KeyW']) { model.translateZ(0.1); movendo = true; }
-            if (teclas['KeyS']) { model.translateZ(-0.1); movendo = true; }
-            if (teclas['KeyA']) { model.rotation.y += 0.05; movendo = true; }
-            if (teclas['KeyD']) { model.rotation.y -= 0.05; movendo = true; }
+  /* Grade do chão (CSS overlay decorativo) */
+  #grid-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background:
+      linear-gradient(rgba(74,122,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(74,122,255,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 100%, black 30%, transparent 100%);
+  }
 
-            // LÓGICA DE TROCA DE ANIMAÇÃO
-            if (teclas['Space']) {
-                transicaoPara('jumping', false); // Pular (uma vez)
-            } else if (teclas['KeyE']) { // E para abrir porta
-                transicaoPara('opening', false);
-            } else if (movendo) {
-                transicaoPara('flying'); // Voar/Andar enquanto move
-            } else {
-                // Se quiser uma animação de parado (Idle), coloque aqui. 
-                // Se não, ele continuará em 'flying' (flutuando parado).
-            }
-        }
+  /* Loading */
+  #loading {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: #050810;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    transition: opacity 0.8s;
+  }
 
-        renderer.render(scene, camera);
-    }
+  #loading.hidden { opacity: 0; pointer-events: none; }
+
+  .loader-bar-wrap {
+    width: 200px;
+    height: 2px;
+    background: rgba(74,122,255,0.15);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .loader-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #4a7aff, #a0c0ff);
+    border-radius: 2px;
+    transition: width 0.3s;
+    box-shadow: 0 0 10px #4a7aff;
+  }
+
+  .loader-text {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: #4a7aff;
+  }
+
+  /* Vinheta */
+  #vignette {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 50%, rgba(5,8,16,0.7) 100%);
+  }
+
+  /* Tip câmera */
+  #cam-tip {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 10;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: rgba(74,122,255,0.4);
+    text-align: right;
+    line-height: 2;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="loader-text">CARREGANDO MODELO</div>
+  <div class="loader-bar-wrap"><div class="loader-bar" id="loader-bar"></div></div>
+  <div class="loader-text" id="loader-pct">0%</div>
+</div>
+
+<div id="canvas-container"></div>
+<div id="grid-overlay"></div>
+<div id="vignette"></div>
+
+<div id="status">
+  POS &nbsp;<span id="st-pos">0.0 / 0.0</span><br>
+  DIR &nbsp;<span id="st-dir">NORTE</span><br>
+  VEL &nbsp;<span id="st-vel">0.00</span>
+</div>
+
+<div id="cam-tip">
+  ARRASTAR → ORBITAR<br>
+  SCROLL &nbsp;→ ZOOM
+</div>
+
+<div id="hud">
+  <div class="hud-label">movimento</div>
+  <div class="keys-grid">
+    <div class="key key-w" id="k-w">W</div>
+    <div class="key key-a" id="k-a">A</div>
+    <div class="key key-s" id="k-s">S</div>
+    <div class="key key-d" id="k-d">D</div>
+  </div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js"
+  }
+}
 </script>
+
+<script type="module">
+import * as THREE from 'three';
+
+// ─── GLTFLoader inline (r128 CDN não tem addons, declaramos manualmente) ───
+class GLTFLoader extends THREE.Loader {
+  constructor(manager) { super(manager); }
+  load(url, onLoad, onProgress, onError) {
+    const scope = this;
+    const loader = new THREE.FileLoader(this.manager);
+    loader.setPath(this.path);
+    loader.setResponseType('arraybuffer');
+    loader.setRequestHeader(this.requestHeader);
+    loader.setWithCredentials(this.withCredentials);
+    loader.load(url, function(data) {
+      try { scope.parse(data, '', onLoad, onError); }
+      catch(e) { if (onError) onError(e); else console.error(e); }
+    }, onProgress, onError);
+  }
+  parse(data, path, onLoad, onError) {
+    // Usa o parser embutido do three r128 via ObjectLoader como fallback
+    // Para GLB real precisamos do script externo
+    onError && onError(new Error('Use script externo'));
+  }
+}
+
+// ─── Cena ───────────────────────────────────────────────────────────────────
+const container = document.getElementById('canvas-container');
+const W = () => window.innerWidth;
+const H = () => window.innerHeight;
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(W(), H());
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
+renderer.outputEncoding = THREE.sRGBEncoding;
+container.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x050810);
+scene.fog = new THREE.FogExp2(0x050810, 0.045);
+
+// ─── Câmera ─────────────────────────────────────────────────────────────────
+const camera = new THREE.PerspectiveCamera(55, W()/H(), 0.1, 100);
+camera.position.set(0, 3, 7);
+camera.lookAt(0, 1, 0);
+
+// ─── Iluminação ─────────────────────────────────────────────────────────────
+const ambLight = new THREE.AmbientLight(0x8898cc, 0.6);
+scene.add(ambLight);
+
+const dirLight = new THREE.DirectionalLight(0xffffff, 1.4);
+dirLight.position.set(5, 10, 5);
+dirLight.castShadow = true;
+dirLight.shadow.mapSize.set(2048, 2048);
+dirLight.shadow.camera.near = 0.1;
+dirLight.shadow.camera.far = 50;
+dirLight.shadow.camera.left = -10;
+dirLight.shadow.camera.right = 10;
+dirLight.shadow.camera.top = 10;
+dirLight.shadow.camera.bottom = -10;
+scene.add(dirLight);
+
+const rimLight = new THREE.DirectionalLight(0x4a7aff, 0.8);
+rimLight.position.set(-5, 3, -5);
+scene.add(rimLight);
+
+const fillLight = new THREE.PointLight(0x2040a0, 0.5, 20);
+fillLight.position.set(0, 2, -3);
+scene.add(fillLight);
+
+// ─── Chão ───────────────────────────────────────────────────────────────────
+const groundGeo = new THREE.PlaneGeometry(40, 40, 20, 20);
+const groundMat = new THREE.MeshStandardMaterial({
+  color: 0x0a0f28,
+  metalness: 0.1,
+  roughness: 0.9,
+});
+const ground = new THREE.Mesh(groundGeo, groundMat);
+ground.rotation.x = -Math.PI / 2;
+ground.receiveShadow = true;
+scene.add(ground);
+
+// Grade luminosa no chão
+const gridHelper = new THREE.GridHelper(40, 40, 0x1a2a6a, 0x0d1535);
+gridHelper.position.y = 0.001;
+scene.add(gridHelper);
+
+// Círculo de destaque sob o avatar
+const ringGeo = new THREE.RingGeometry(0.55, 0.65, 64);
+const ringMat = new THREE.MeshBasicMaterial({ color: 0x4a7aff, side: THREE.DoubleSide, transparent: true, opacity: 0.5 });
+const ring = new THREE.Mesh(ringGeo, ringMat);
+ring.rotation.x = -Math.PI / 2;
+ring.position.y = 0.005;
+scene.add(ring);
+
+// ─── Orbit Controls manual ──────────────────────────────────────────────────
+let orbitState = { active: false, startX: 0, startY: 0, theta: 0.3, phi: 0.4, radius: 7, targetTheta: 0.3, targetPhi: 0.4, targetRadius: 7 };
+const CAM_TARGET = new THREE.Vector3(0, 1, 0);
+
+renderer.domElement.addEventListener('mousedown', e => {
+  orbitState.active = true;
+  orbitState.startX = e.clientX;
+  orbitState.startY = e.clientY;
+});
+window.addEventListener('mouseup', () => orbitState.active = false);
+window.addEventListener('mousemove', e => {
+  if (!orbitState.active) return;
+  const dx = (e.clientX - orbitState.startX) * 0.005;
+  const dy = (e.clientY - orbitState.startY) * 0.005;
+  orbitState.startX = e.clientX;
+  orbitState.startY = e.clientY;
+  orbitState.targetTheta -= dx;
+  orbitState.targetPhi = Math.max(0.1, Math.min(1.4, orbitState.targetPhi + dy));
+});
+renderer.domElement.addEventListener('wheel', e => {
+  orbitState.targetRadius = Math.max(2, Math.min(18, orbitState.targetRadius + e.deltaY * 0.01));
+}, { passive: true });
+
+// Touch orbit (mobile)
+let lastTouch = null;
+renderer.domElement.addEventListener('touchstart', e => { lastTouch = e.touches[0]; }, { passive: true });
+renderer.domElement.addEventListener('touchmove', e => {
+  if (!lastTouch || e.touches.length !== 1) return;
+  const t = e.touches[0];
+  const dx = (t.clientX - lastTouch.clientX) * 0.007;
+  orbitState.targetTheta -= dx;
+  lastTouch = t;
+}, { passive: true });
+
+function updateCamera(modelPos) {
+  orbitState.theta += (orbitState.targetTheta - orbitState.theta) * 0.08;
+  orbitState.phi   += (orbitState.targetPhi   - orbitState.phi)   * 0.08;
+  orbitState.radius+= (orbitState.targetRadius - orbitState.radius)* 0.08;
+
+  CAM_TARGET.lerp(modelPos.clone().add(new THREE.Vector3(0,1,0)), 0.1);
+
+  camera.position.set(
+    CAM_TARGET.x + orbitState.radius * Math.sin(orbitState.theta) * Math.cos(orbitState.phi),
+    CAM_TARGET.y + orbitState.radius * Math.sin(orbitState.phi),
+    CAM_TARGET.z + orbitState.radius * Math.cos(orbitState.theta) * Math.cos(orbitState.phi),
+  );
+  camera.lookAt(CAM_TARGET);
+}
+
+// ─── Teclado ────────────────────────────────────────────────────────────────
+const teclas = {};
+window.addEventListener('keydown', e => { teclas[e.code] = true;  updateKeyUI(); });
+window.addEventListener('keyup',   e => { teclas[e.code] = false; updateKeyUI(); });
+
+const keyEls = { KeyW: 'k-w', KeyA: 'k-a', KeyS: 'k-s', KeyD: 'k-d' };
+function updateKeyUI() {
+  for (const [code, id] of Object.entries(keyEls)) {
+    document.getElementById(id).classList.toggle('active', !!teclas[code]);
+  }
+}
+
+// ─── Status HUD ─────────────────────────────────────────────────────────────
+const stPos = document.getElementById('st-pos');
+const stDir = document.getElementById('st-dir');
+const stVel = document.getElementById('st-vel');
+const DIRS = ['NORTE','NOROESTE','OESTE','SUDOESTE','SUL','SUDESTE','LESTE','NORDESTE'];
+
+function updateStatus(model, vel) {
+  stPos.textContent = `${model.position.x.toFixed(1)} / ${model.position.z.toFixed(1)}`;
+  const angle = ((model.rotation.y % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
+  stDir.textContent = DIRS[Math.round(angle / (Math.PI/4)) % 8];
+  stVel.textContent = vel.toFixed(2);
+}
+
+// ─── Carrega GLB via fetch + parse ──────────────────────────────────────────
+let model = null;
+let mixer = null;
+let acaoAtual = null;
+const acoes = {};
+
+const loaderBar = document.getElementById('loader-bar');
+const loaderPct = document.getElementById('loader-pct');
+const loadingEl = document.getElementById('loading');
+
+// Carrega o GLB usando three.js r128 com DRACOLoader opcional
+async function carregarGLB(url) {
+  // Importa GLTFLoader do CDN unpkg (compatível com r128)
+  const script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js';
+  document.head.appendChild(script);
+
+  await new Promise(resolve => script.onload = resolve);
+
+  return new Promise((resolve, reject) => {
+    const loader = new THREE.GLTFLoader();
+    loader.load(
+      url,
+      resolve,
+      xhr => {
+        if (xhr.lengthComputable) {
+          const pct = Math.round(xhr.loaded / xhr.total * 100);
+          loaderBar.style.width = pct + '%';
+          loaderPct.textContent = pct + '%';
+        }
+      },
+      reject
+    );
+  });
+}
+
+carregarGLB('man_in_suit.glb').then(gltf => {
+  model = gltf.scene;
+  model.traverse(child => {
+    if (child.isMesh) {
+      child.castShadow = true;
+      child.receiveShadow = true;
+    }
+  });
+
+  // Centraliza e escala o modelo automaticamente
+  const box = new THREE.Box3().setFromObject(model);
+  const size = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+  const maxDim = Math.max(size.x, size.y, size.z);
+  const scale = 1.8 / maxDim;
+  model.scale.setScalar(scale);
+  model.position.set(-center.x * scale, -box.min.y * scale, -center.z * scale);
+  scene.add(model);
+
+  // Animações
+  if (gltf.animations.length > 0) {
+    mixer = new THREE.AnimationMixer(model);
+    gltf.animations.forEach(clip => {
+      const nome = clip.name.toLowerCase();
+      acoes[nome] = mixer.clipAction(clip);
+      console.log('Animacao:', nome);
+    });
+    // Toca a primeira animação disponível como idle
+    const primeiraAnim = Object.values(acoes)[0];
+    if (primeiraAnim) { acaoAtual = primeiraAnim; acaoAtual.play(); }
+  }
+
+  // Esconde loading
+  loaderBar.style.width = '100%';
+  loaderPct.textContent = '100%';
+  setTimeout(() => loadingEl.classList.add('hidden'), 600);
+
+  animate();
+}).catch(err => {
+  console.error('Erro ao carregar GLB:', err);
+  loaderPct.textContent = 'ERRO — coloque o .glb na mesma pasta';
+});
+
+// ─── Troca de animação com crossfade ────────────────────────────────────────
+function transicaoPara(nome, loop = true) {
+  const proxima = acoes[nome];
+  if (!proxima || proxima === acaoAtual) return;
+  proxima.reset();
+  proxima.setLoop(loop ? THREE.LoopRepeat : THREE.LoopOnce);
+  proxima.clampWhenFinished = true;
+  proxima.play();
+  if (acaoAtual) acaoAtual.crossFadeTo(proxima, 0.2, true);
+  acaoAtual = proxima;
+}
+
+// ─── Loop principal ─────────────────────────────────────────────────────────
+const clock = new THREE.Clock();
+const VELOCIDADE = 4.0;
+const ROTACAO = 2.5;
+
+function animate() {
+  requestAnimationFrame(animate);
+  const delta = clock.getDelta();
+
+  if (mixer) mixer.update(delta);
+
+  let vel = 0;
+  if (model) {
+    let movendo = false;
+
+    if (teclas['KeyW']) { model.translateZ(-VELOCIDADE * delta); movendo = true; vel = VELOCIDADE; }
+    if (teclas['KeyS']) { model.translateZ( VELOCIDADE * delta); movendo = true; vel = VELOCIDADE * 0.6; }
+    if (teclas['KeyA']) { model.rotation.y += ROTACAO * delta; movendo = true; }
+    if (teclas['KeyD']) { model.rotation.y -= ROTACAO * delta; movendo = true; }
+
+    // Limita ao plano
+    model.position.x = Math.max(-18, Math.min(18, model.position.x));
+    model.position.z = Math.max(-18, Math.min(18, model.position.z));
+    model.position.y = 0;
+
+    // Anel acompanha o modelo
+    ring.position.x = model.position.x;
+    ring.position.z = model.position.z;
+
+    // Pulso do anel
+    const pulse = 0.5 + 0.5 * Math.sin(Date.now() * 0.003);
+    ringMat.opacity = 0.2 + 0.3 * pulse;
+
+    // Troca animação se tiver
+    if (Object.keys(acoes).length > 1) {
+      const nomes = Object.keys(acoes);
+      if (movendo && nomes.length > 1) transicaoPara(nomes[1]);
+      else transicaoPara(nomes[0]);
+    }
+
+    updateCamera(model.position);
+    updateStatus(model, vel);
+  }
+
+  renderer.render(scene, camera);
+}
+
+// ─── Resize ─────────────────────────────────────────────────────────────────
+window.addEventListener('resize', () => {
+  camera.aspect = W() / H();
+  camera.updateProjectionMatrix();
+  renderer.setSize(W(), H());
+});
+</script>
+</body>
+</html>
