@@ -233,10 +233,10 @@ container.appendChild(renderer.domElement);
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x050810);
 
-// ─── Câmera com zoom NORMAL ─────────────────────────────────────────────────
+// ─── Câmera BEM AFASTADA ─────────────────────────────────────────────────
 const camera = new THREE.PerspectiveCamera(45, W()/H(), 0.1, 1000);
-camera.position.set(5, 3, 8); // Distância confortável
-camera.lookAt(0, 1.5, 0);
+camera.position.set(10, 5, 15); // Muito mais longe
+camera.lookAt(0, 1, 0);
 
 // ─── Iluminação ─────────────────────────────────────────────────────────────
 const ambLight = new THREE.AmbientLight(0x404060);
@@ -248,41 +248,37 @@ dirLight.castShadow = true;
 dirLight.shadow.mapSize.set(1024, 1024);
 scene.add(dirLight);
 
-const backLight = new THREE.DirectionalLight(0x4a7aff, 0.5);
-backLight.position.set(-5, 0, -5);
-scene.add(backLight);
-
-// ─── Chão com grade visível ─────────────────────────────────────────────────
-const gridHelper = new THREE.GridHelper(30, 30, 0x4a7aff, 0x1a2a6a);
+// ─── Chão com grade GRANDE para referência ─────────────────────────────────
+const gridHelper = new THREE.GridHelper(40, 40, 0x4a7aff, 0x2a3a7a);
 gridHelper.position.y = 0;
 scene.add(gridHelper);
 
-const groundMat = new THREE.MeshStandardMaterial({ color: 0x0a0f28, roughness: 0.8, metalness: 0.2 });
-const ground = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), groundMat);
-ground.rotation.x = -Math.PI / 2;
-ground.position.y = -0.01;
-ground.receiveShadow = true;
-scene.add(ground);
-
-// ─── Esfera de referência para ver escala ─────────────────────────────────
-const esferaRef = new THREE.Mesh(
-  new THREE.SphereGeometry(0.2),
+// ─── Esferas de referência para ver escala ─────────────────────────────────
+const ref1 = new THREE.Mesh(
+  new THREE.SphereGeometry(0.5),
   new THREE.MeshStandardMaterial({ color: 0xffaa00 })
 );
-esferaRef.position.set(2, 0.2, 2);
-scene.add(esferaRef);
+ref1.position.set(3, 0.5, 3);
+scene.add(ref1);
 
-// ─── Controles de órbita simples ──────────────────────────────────────────
+const ref2 = new THREE.Mesh(
+  new THREE.SphereGeometry(0.5),
+  new THREE.MeshStandardMaterial({ color: 0x00aaff })
+);
+ref2.position.set(-3, 0.5, -3);
+scene.add(ref2);
+
+// ─── Controles de órbita ──────────────────────────────────────────
 let orbitState = { 
   active: false, 
   startX: 0, 
   startY: 0, 
-  theta: 0.5, 
+  theta: 0.3, 
   phi: 0.4, 
-  radius: 8, 
-  targetTheta: 0.5, 
+  radius: 15, // Começa BEM LONGE
+  targetTheta: 0.3, 
   targetPhi: 0.4, 
-  targetRadius: 8 
+  targetRadius: 15 
 };
 
 renderer.domElement.addEventListener('mousedown', e => {
@@ -304,7 +300,7 @@ window.addEventListener('mousemove', e => {
 });
 
 renderer.domElement.addEventListener('wheel', e => {
-  orbitState.targetRadius = Math.max(4, Math.min(15, orbitState.targetRadius + e.deltaY * 0.01));
+  orbitState.targetRadius = Math.max(8, Math.min(30, orbitState.targetRadius + e.deltaY * 0.01));
   e.preventDefault();
 }, { passive: false });
 
@@ -313,7 +309,7 @@ function updateCamera(targetPos) {
   orbitState.phi += (orbitState.targetPhi - orbitState.phi) * 0.1;
   orbitState.radius += (orbitState.targetRadius - orbitState.radius) * 0.1;
 
-  const center = targetPos.clone().add(new THREE.Vector3(0, 1.2, 0));
+  const center = targetPos.clone().add(new THREE.Vector3(0, 1.5, 0));
   
   camera.position.x = center.x + orbitState.radius * Math.sin(orbitState.theta) * Math.cos(orbitState.phi);
   camera.position.y = center.y + orbitState.radius * Math.sin(orbitState.phi);
@@ -342,17 +338,17 @@ function updateStatus(model, vel) {
   stVel.textContent = vel.toFixed(2);
 }
 
-// ─── Cria um personagem em escala HUMANA ─────────────────────────────────
+// ─── Cria um personagem PEQUENO (1 unidade = 1 metro) ────────────────────
 function criarPersonagem() {
   const grupo = new THREE.Group();
 
-  // Corpo (altura ~1.8m em escala)
-  const corpoGeo = new THREE.CylinderGeometry(0.3, 0.3, 1.6);
-  const corpoMat = new THREE.MeshStandardMaterial({ color: 0x4a7aff, emissive: 0x1a2a6a });
+  // Corpo (1.7m de altura)
+  const corpoGeo = new THREE.CylinderGeometry(0.3, 0.3, 1.5);
+  const corpoMat = new THREE.MeshStandardMaterial({ color: 0x4a7aff });
   const corpo = new THREE.Mesh(corpoGeo, corpoMat);
   corpo.castShadow = true;
   corpo.receiveShadow = true;
-  corpo.position.y = 0.8;
+  corpo.position.y = 0.75;
   grupo.add(corpo);
 
   // Cabeça
@@ -361,39 +357,39 @@ function criarPersonagem() {
   const cabeca = new THREE.Mesh(cabecaGeo, cabecaMat);
   cabeca.castShadow = true;
   cabeca.receiveShadow = true;
-  cabeca.position.y = 1.7;
+  cabeca.position.y = 1.6;
   grupo.add(cabeca);
 
   // Braços
-  const bracoGeo = new THREE.BoxGeometry(0.2, 0.8, 0.2);
+  const bracoGeo = new THREE.BoxGeometry(0.2, 0.7, 0.2);
   const bracoMat = new THREE.MeshStandardMaterial({ color: 0x3a5fcc });
   
   const bracoEsq = new THREE.Mesh(bracoGeo, bracoMat);
   bracoEsq.castShadow = true;
   bracoEsq.receiveShadow = true;
-  bracoEsq.position.set(-0.4, 1.1, 0);
+  bracoEsq.position.set(-0.4, 1.0, 0);
   grupo.add(bracoEsq);
   
   const bracoDir = new THREE.Mesh(bracoGeo, bracoMat);
   bracoDir.castShadow = true;
   bracoDir.receiveShadow = true;
-  bracoDir.position.set(0.4, 1.1, 0);
+  bracoDir.position.set(0.4, 1.0, 0);
   grupo.add(bracoDir);
 
   // Pernas
-  const pernaGeo = new THREE.BoxGeometry(0.2, 0.8, 0.2);
+  const pernaGeo = new THREE.BoxGeometry(0.2, 0.7, 0.2);
   const pernaMat = new THREE.MeshStandardMaterial({ color: 0x2a4a9a });
   
   const pernaEsq = new THREE.Mesh(pernaGeo, pernaMat);
   pernaEsq.castShadow = true;
   pernaEsq.receiveShadow = true;
-  pernaEsq.position.set(-0.15, 0.4, 0);
+  pernaEsq.position.set(-0.15, 0.35, 0);
   grupo.add(pernaEsq);
   
   const pernaDir = new THREE.Mesh(pernaGeo, pernaMat);
   pernaDir.castShadow = true;
   pernaDir.receiveShadow = true;
-  pernaDir.position.set(0.15, 0.4, 0);
+  pernaDir.position.set(0.15, 0.35, 0);
   grupo.add(pernaDir);
 
   return grupo;
@@ -411,7 +407,7 @@ renderer.domElement.setAttribute('tabindex', '0');
 renderer.domElement.style.outline = 'none';
 renderer.domElement.focus();
 
-// Tenta carregar o GLB, se falhar usa personagem simples
+// Tenta carregar o GLB com escala FORÇADAMENTE PEQUENA
 const loader = new GLTFLoader();
 
 loader.load(
@@ -420,19 +416,27 @@ loader.load(
     console.log('GLB carregado!');
     personagem = gltf.scene;
     
-    // Ajusta escala para tamanho HUMANO (1.8m de altura)
+    // FORÇA uma escala MUITO pequena (0.02) - ajuste este valor!
+    const escalaForcada = 0.02; // Começa com 2% do tamanho original
+    personagem.scale.setScalar(escalaForcada);
+    
+    // Verifica o tamanho resultante
     const box = new THREE.Box3().setFromObject(personagem);
     const altura = box.max.y - box.min.y;
-    const escalaDesejada = 1.8 / altura; // 1.8 metros de altura
-    personagem.scale.setScalar(escalaDesejada);
+    console.log('Altura após escala:', altura);
     
-    // Centraliza na base (pés no chão)
+    // Se ainda estiver muito grande, reduz mais
+    if (altura > 3) {
+      console.log('Ainda muito grande, reduzindo mais');
+      personagem.scale.setScalar(escalaForcada * 0.1);
+    }
+    
+    // Centraliza na base
     box.setFromObject(personagem);
     const minY = box.min.y;
     personagem.position.y = -minY;
     
     scene.add(personagem);
-    console.log('Escala aplicada:', escalaDesejada, 'Altura final:', box.max.y - box.min.y);
 
     // Animações
     if (gltf.animations && gltf.animations.length > 0) {
@@ -456,7 +460,7 @@ loader.load(
   function(error) {
     console.log('Usando personagem simples');
     personagem = criarPersonagem();
-    personagem.position.y = 0; // Pés no chão
+    personagem.position.y = 0;
     scene.add(personagem);
     
     loaderBar.style.width = '100%';
@@ -469,35 +473,24 @@ loader.load(
 
 // ─── Animação de caminhada ────────────────────────────────────────────────
 let tempoPasso = 0;
-const VELOCIDADE = 2.5;
-const ROTACAO = 1.8;
+const VELOCIDADE = 2.0;
+const ROTACAO = 1.5;
 
 function animarCaminhada(delta, movendo) {
-  if (!personagem || mixer) return; // Se tem mixer, deixa as animações do GLB
+  if (!personagem || mixer) return;
   
   if (movendo) {
     tempoPasso += delta * 6;
-    // Balanço dos braços
     personagem.children.forEach(child => {
-      if (child.position.x < -0.3) { // Braço esquerdo
+      if (Math.abs(child.position.x) > 0.3) { // Braços
         child.rotation.x = Math.sin(tempoPasso) * 0.6;
       }
-      if (child.position.x > 0.3) { // Braço direito
-        child.rotation.x = Math.sin(tempoPasso + Math.PI) * 0.6;
-      }
-      if (Math.abs(child.position.x) < 0.2 && child.position.y < 0.6) { // Pernas
-        if (child.position.x < 0) { // Perna esquerda
-          child.rotation.x = Math.sin(tempoPasso) * 0.5;
-        } else { // Perna direita
-          child.rotation.x = Math.sin(tempoPasso + Math.PI) * 0.5;
-        }
+      if (Math.abs(child.position.x) < 0.2 && child.position.y < 0.5) { // Pernas
+        child.rotation.x = Math.sin(tempoPasso + (child.position.x < 0 ? 0 : Math.PI)) * 0.5;
       }
     });
   } else {
-    // Volta ao neutro
-    personagem.children.forEach(child => {
-      child.rotation.x = 0;
-    });
+    personagem.children.forEach(child => child.rotation.x = 0);
     tempoPasso = 0;
   }
 }
@@ -513,7 +506,6 @@ function animate() {
 
   if (personagem) {
     let movendo = false;
-    const posAnt = personagem.position.clone();
 
     // Movimento
     if (teclas['KeyW'] || teclas['ArrowUp']) {
@@ -534,13 +526,13 @@ function animate() {
     }
 
     // Limites
-    personagem.position.x = Math.max(-12, Math.min(12, personagem.position.x));
-    personagem.position.z = Math.max(-12, Math.min(12, personagem.position.z));
+    personagem.position.x = Math.max(-15, Math.min(15, personagem.position.x));
+    personagem.position.z = Math.max(-15, Math.min(15, personagem.position.z));
 
-    // Mantém Y no chão
+    // Mantém no chão
     personagem.position.y = 0;
 
-    // Animação de caminhada
+    // Animação
     animarCaminhada(delta, movendo);
 
     // Atualiza câmera e HUD
