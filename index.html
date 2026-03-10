@@ -220,35 +220,14 @@
 <script type="importmap">
 {
   "imports": {
-    "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js"
+    "three": "https://unpkg.com/three@0.128.0/build/three.module.js"
   }
 }
 </script>
 
 <script type="module">
 import * as THREE from 'three';
-
-// ─── GLTFLoader inline (r128 CDN não tem addons, declaramos manualmente) ───
-class GLTFLoader extends THREE.Loader {
-  constructor(manager) { super(manager); }
-  load(url, onLoad, onProgress, onError) {
-    const scope = this;
-    const loader = new THREE.FileLoader(this.manager);
-    loader.setPath(this.path);
-    loader.setResponseType('arraybuffer');
-    loader.setRequestHeader(this.requestHeader);
-    loader.setWithCredentials(this.withCredentials);
-    loader.load(url, function(data) {
-      try { scope.parse(data, '', onLoad, onError); }
-      catch(e) { if (onError) onError(e); else console.error(e); }
-    }, onProgress, onError);
-  }
-  parse(data, path, onLoad, onError) {
-    // Usa o parser embutido do three r128 via ObjectLoader como fallback
-    // Para GLB real precisamos do script externo
-    onError && onError(new Error('Use script externo'));
-  }
-}
+import { GLTFLoader } from 'https://unpkg.com/three@0.128.0/examples/jsm/loaders/GLTFLoader.js';
 
 // ─── Cena ───────────────────────────────────────────────────────────────────
 const container = document.getElementById('canvas-container');
@@ -270,8 +249,8 @@ scene.background = new THREE.Color(0x050810);
 scene.fog = new THREE.FogExp2(0x050810, 0.045);
 
 // ─── Câmera ─────────────────────────────────────────────────────────────────
-const camera = new THREE.PerspectiveCamera(55, W()/H(), 0.1, 100);
-camera.position.set(0, 3, 7);
+const camera = new THREE.PerspectiveCamera(45, W()/H(), 0.1, 100); // Zoom reduzido (55->45)
+camera.position.set(0, 2, 8); // Mais distante
 camera.lookAt(0, 1, 0);
 
 // ─── Iluminação ─────────────────────────────────────────────────────────────
@@ -316,7 +295,7 @@ gridHelper.position.y = 0.001;
 scene.add(gridHelper);
 
 // Círculo de destaque sob o avatar
-const ringGeo = new THREE.RingGeometry(0.55, 0.65, 64);
+const ringGeo = new THREE.RingGeometry(0.8, 1.0, 64); // Maior
 const ringMat = new THREE.MeshBasicMaterial({ color: 0x4a7aff, side: THREE.DoubleSide, transparent: true, opacity: 0.5 });
 const ring = new THREE.Mesh(ringGeo, ringMat);
 ring.rotation.x = -Math.PI / 2;
@@ -324,7 +303,7 @@ ring.position.y = 0.005;
 scene.add(ring);
 
 // ─── Orbit Controls manual ──────────────────────────────────────────────────
-let orbitState = { active: false, startX: 0, startY: 0, theta: 0.3, phi: 0.4, radius: 7, targetTheta: 0.3, targetPhi: 0.4, targetRadius: 7 };
+let orbitState = { active: false, startX: 0, startY: 0, theta: 0.3, phi: 0.4, radius: 8, targetTheta: 0.3, targetPhi: 0.4, targetRadius: 8 };
 const CAM_TARGET = new THREE.Vector3(0, 1, 0);
 
 renderer.domElement.addEventListener('mousedown', e => {
@@ -343,7 +322,7 @@ window.addEventListener('mousemove', e => {
   orbitState.targetPhi = Math.max(0.1, Math.min(1.4, orbitState.targetPhi + dy));
 });
 renderer.domElement.addEventListener('wheel', e => {
-  orbitState.targetRadius = Math.max(2, Math.min(18, orbitState.targetRadius + e.deltaY * 0.01));
+  orbitState.targetRadius = Math.max(3, Math.min(15, orbitState.targetRadius + e.deltaY * 0.01)); // Zoom limits ajustados
 }, { passive: true });
 
 // Touch orbit (mobile)
@@ -374,8 +353,19 @@ function updateCamera(modelPos) {
 
 // ─── Teclado ────────────────────────────────────────────────────────────────
 const teclas = {};
-window.addEventListener('keydown', e => { teclas[e.code] = true;  updateKeyUI(); });
-window.addEventListener('keyup',   e => { teclas[e.code] = false; updateKeyUI(); });
+window.addEventListener('keydown', e => { 
+  teclas[e.code] = true;  
+  updateKeyUI();
+  
+  // Previne scroll da página com setas
+  if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+    e.preventDefault();
+  }
+});
+window.addEventListener('keyup',   e => { 
+  teclas[e.code] = false; 
+  updateKeyUI(); 
+});
 
 const keyEls = { KeyW: 'k-w', KeyA: 'k-a', KeyS: 'k-s', KeyD: 'k-d' };
 function updateKeyUI() {
@@ -397,96 +387,116 @@ function updateStatus(model, vel) {
   stVel.textContent = vel.toFixed(2);
 }
 
-// ─── Carrega GLB via fetch + parse ──────────────────────────────────────────
+// ─── Carrega GLB ──────────────────────────────────────────────────────────
 let model = null;
 let mixer = null;
 let acaoAtual = null;
 const acoes = {};
-let modelBaseY = 0; // posição Y correta após centralização
+let modelBaseY = 0;
 
 const loaderBar = document.getElementById('loader-bar');
 const loaderPct = document.getElementById('loader-pct');
 const loadingEl = document.getElementById('loading');
 
-// Carrega o GLB usando three.js r128 com DRACOLoader opcional
-async function carregarGLB(url) {
-  // Importa GLTFLoader do CDN unpkg (compatível com r128)
-  const script = document.createElement('script');
-  script.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js';
-  document.head.appendChild(script);
+// Auto-foco no canvas
+renderer.domElement.setAttribute('tabindex', '0');
+renderer.domElement.style.outline = 'none';
+renderer.domElement.focus();
+window.addEventListener('click', () => renderer.domElement.focus());
 
-  await new Promise(resolve => script.onload = resolve);
+// Carrega o GLB
+const loader = new GLTFLoader();
 
-  return new Promise((resolve, reject) => {
-    const loader = new THREE.GLTFLoader();
-    loader.load(
-      url,
-      resolve,
-      xhr => {
-        if (xhr.lengthComputable) {
-          const pct = Math.round(xhr.loaded / xhr.total * 100);
-          loaderBar.style.width = pct + '%';
-          loaderPct.textContent = pct + '%';
+loader.load(
+  'novo.glb',
+  function(gltf) {
+    console.log('GLB carregado:', gltf);
+    model = gltf.scene;
+    
+    // Log da estrutura para debug
+    model.traverse(child => {
+      if (child.isMesh) {
+        console.log('Mesh encontrada:', child.name, child.position);
+        child.castShadow = true;
+        child.receiveShadow = true;
+        
+        // Tenta identificar pés duplicados pelo nome
+        if (child.name.toLowerCase().includes('foot') || child.name.toLowerCase().includes('pe')) {
+          console.log('Possível pé:', child.name);
         }
-      },
-      reject
-    );
-  });
-}
-
-carregarGLB('novo.glb').then(gltf => {
-  model = gltf.scene;
-  model.traverse(child => {
-    if (child.isMesh) {
-      child.castShadow = true;
-      child.receiveShadow = true;
-    }
-  });
-
-  // Centraliza e escala o modelo automaticamente
-  const box = new THREE.Box3().setFromObject(model);
-  const size = box.getSize(new THREE.Vector3());
-  const alturaReal = size.y;
-  const scale = 1.75 / alturaReal; // normaliza para altura humana
-  model.scale.setScalar(scale);
-  // Recalcula bbox após escala para pés no chão
-  const box2 = new THREE.Box3().setFromObject(model);
-  const center2 = box2.getCenter(new THREE.Vector3());
-  modelBaseY = -box2.min.y;
-  model.position.set(-center2.x, modelBaseY, -center2.z);
-  scene.add(model);
-  console.log('Altura:', alturaReal.toFixed(2), '| Escala:', scale.toFixed(3));
-
-  // Animações
-  if (gltf.animations.length > 0) {
-    mixer = new THREE.AnimationMixer(model);
-    gltf.animations.forEach(clip => {
-      const nome = clip.name.toLowerCase();
-      acoes[nome] = mixer.clipAction(clip);
-      console.log('Animacao:', nome);
+      }
     });
-    // Toca a primeira animação disponível como idle
-    const primeiraAnim = Object.values(acoes)[0];
-    if (primeiraAnim) { acaoAtual = primeiraAnim; acaoAtual.play(); }
+
+    // Centraliza e escala o modelo automaticamente
+    const box = new THREE.Box3().setFromObject(model);
+    const size = box.getSize(new THREE.Vector3());
+    const center = box.getCenter(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const scale = 2.0 / maxDim; // Escala um pouco maior
+    model.scale.setScalar(scale);
+    modelBaseY = -box.min.y * scale;
+    model.position.set(-center.x * scale, modelBaseY, -center.z * scale);
+    
+    console.log('Modelo centralizado:', {size, center, scale, baseY: modelBaseY});
+    scene.add(model);
+
+    // Animações
+    if (gltf.animations && gltf.animations.length > 0) {
+      console.log('Animações encontradas:', gltf.animations.map(a => a.name));
+      mixer = new THREE.AnimationMixer(model);
+      gltf.animations.forEach(clip => {
+        const nome = clip.name.toLowerCase();
+        acoes[nome] = mixer.clipAction(clip);
+        console.log('Animação registrada:', nome);
+      });
+      
+      // Por padrão, toca a primeira animação em loop
+      const primeiraAnim = Object.values(acoes)[0];
+      if (primeiraAnim) { 
+        acaoAtual = primeiraAnim; 
+        acaoAtual.play(); 
+        console.log('Tocando animação inicial');
+      }
+    } else {
+      console.log('Nenhuma animação encontrada no GLB');
+    }
+
+    // Esconde loading
+    loaderBar.style.width = '100%';
+    loaderPct.textContent = '100%';
+    setTimeout(() => loadingEl.classList.add('hidden'), 600);
+
+    animate();
+  },
+  function(xhr) {
+    if (xhr.lengthComputable) {
+      const pct = Math.round(xhr.loaded / xhr.total * 100);
+      loaderBar.style.width = pct + '%';
+      loaderPct.textContent = pct + '%';
+    }
+  },
+  function(error) {
+    console.error('Erro ao carregar GLB:', error);
+    loaderPct.textContent = 'ERRO — coloque novo.glb na mesma pasta';
   }
-
-  // Esconde loading
-  loaderBar.style.width = '100%';
-  loaderPct.textContent = '100%';
-  setTimeout(() => loadingEl.classList.add('hidden'), 600);
-
-  animate();
-}).catch(err => {
-  console.error('Erro ao carregar GLB:', err);
-  loaderPct.textContent = 'ERRO — coloque o .glb na mesma pasta';
-});
+);
 
 // ─── Troca de animação com crossfade ────────────────────────────────────────
 function transicaoPara(nome, loop = true) {
+  if (Object.keys(acoes).length === 0) return;
+  
   // Busca pelo nome exato ou parcial (ex: "walking" encontra "walking (1)")
   const chave = Object.keys(acoes).find(k => k.includes(nome));
   const proxima = chave ? acoes[chave] : null;
-  if (!proxima || proxima === acaoAtual) return;
+  
+  if (!proxima) {
+    console.log('Animação não encontrada:', nome);
+    return;
+  }
+  
+  if (proxima === acaoAtual) return;
+  
+  console.log('Trocando animação para:', chave, 'loop:', loop);
   proxima.reset();
   proxima.setLoop(loop ? THREE.LoopRepeat : THREE.LoopOnce);
   proxima.clampWhenFinished = true;
@@ -495,48 +505,15 @@ function transicaoPara(nome, loop = true) {
   acaoAtual = proxima;
 }
 
-// Nomes das animações Mixamo (busca parcial, case-insensitive)
-const ANIM_IDLE    = 'opening';  // parado — usa opening em loop suave
-const ANIM_WALK    = 'walking';  // andando
-const ANIM_ACTION  = 'opening';  // tecla E
-
-// ─── Auto-foco: garante que o canvas captura teclado sem precisar clicar ────
-renderer.domElement.setAttribute('tabindex', '0');
-renderer.domElement.style.outline = 'none';
-renderer.domElement.focus();
-window.addEventListener('click', () => renderer.domElement.focus());
-// Também escuta no window para não depender de foco
-window.addEventListener('keydown', e => {
-  if (['KeyW','KeyS','KeyA','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)) {
-    e.preventDefault(); // evita scroll da página
-  }
-}, { passive: false });
+// Nomes das animações (ajuste conforme seu GLB)
+const ANIM_IDLE    = 'idle';     // Tente 'idle', 'stand', 'opening'
+const ANIM_WALK    = 'walk';     // Tente 'walk', 'walking', 'run'
+const ANIM_ACTION  = 'opening';  // Tecla E
 
 // ─── Loop principal ─────────────────────────────────────────────────────────
 const clock = new THREE.Clock();
-const VELOCIDADE = 4.0;
-const ROTACAO = 2.2;
-
-// Bob procedural — simula balanço de caminhada sem animação
-let bobTempo = 0;
-let bobVelAtual = 0;
-
-function aplicarBob(movendo, delta) {
-  if (!model) return;
-  // Se tem animação Mixamo, não aplica bob procedural (conflita com skeleton)
-  if (Object.keys(acoes).length > 0) {
-    model.position.y = modelBaseY;
-    return;
-  }
-  // Bob procedural só quando não há animação
-  const velAlvo = movendo ? 1 : 0;
-  bobVelAtual += (velAlvo - bobVelAtual) * 8 * delta;
-  bobTempo += delta * bobVelAtual * 8;
-  const bobY = Math.abs(Math.sin(bobTempo)) * 0.04 * bobVelAtual;
-  const bobTilt = Math.sin(bobTempo) * 0.015 * bobVelAtual;
-  model.position.y = modelBaseY + bobY;
-  model.rotation.z = bobTilt;
-}
+const VELOCIDADE = 3.0; // Velocidade reduzida
+const ROTACAO = 2.0;
 
 function animate() {
   requestAnimationFrame(animate);
@@ -548,10 +525,12 @@ function animate() {
   if (model) {
     let movendo = false;
 
+    // MOVIMENTO - Verifica se as teclas estão funcionando
     if (teclas['KeyW'] || teclas['ArrowUp']) {
       model.translateZ(-VELOCIDADE * delta);
       movendo = true;
       vel = VELOCIDADE;
+      console.log('Movendo para frente', model.position);
     }
     if (teclas['KeyS'] || teclas['ArrowDown']) {
       model.translateZ(VELOCIDADE * delta * 0.6);
@@ -567,12 +546,12 @@ function animate() {
       movendo = true;
     }
 
-    // Limita ao plano (só X e Z — Y é gerenciado pelo bob/animação)
+    // Limita ao plano
     model.position.x = Math.max(-18, Math.min(18, model.position.x));
     model.position.z = Math.max(-18, Math.min(18, model.position.z));
-
-    // Mantém no chão (corrige Y sempre)
-    aplicarBob(movendo, delta);
+    
+    // Mantém Y fixo no chão (sem bob por enquanto para testar)
+    model.position.y = modelBaseY;
 
     // Anel acompanha o modelo
     ring.position.x = model.position.x;
@@ -583,14 +562,14 @@ function animate() {
     ringMat.opacity = movendo ? 0.6 : (0.2 + 0.3 * pulse);
     ring.scale.setScalar(movendo ? 1.15 : 1.0);
 
-    // Lógica de animação com nomes Mixamo
+    // Lógica de animação
     if (Object.keys(acoes).length > 0) {
       if (teclas['KeyE']) {
-        transicaoPara(ANIM_ACTION, false); // opening — uma vez
+        transicaoPara(ANIM_ACTION, false);
       } else if (movendo) {
-        transicaoPara(ANIM_WALK, true);    // walking em loop
+        transicaoPara(ANIM_WALK, true);
       } else {
-        transicaoPara(ANIM_IDLE, true);    // idle/opening suave
+        transicaoPara(ANIM_IDLE, true);
       }
     }
 
@@ -607,6 +586,9 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(W(), H());
 });
+
+// Debug: mostra teclas pressionadas
+window.addEventListener('keydown', e => console.log('Tecla:', e.code));
 </script>
 </body>
 </html>
