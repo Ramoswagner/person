@@ -432,7 +432,7 @@ async function carregarGLB(url) {
   });
 }
 
-carregarGLB('man_in_suit.glb').then(gltf => {
+carregarGLB('mano.glb').then(gltf => {
   model = gltf.scene;
   model.traverse(child => {
     if (child.isMesh) {
