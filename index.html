@@ -219,35 +219,14 @@
 <script type="importmap">
 {
   "imports": {
-    "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js"
+    "three": "https://unpkg.com/three@0.128.0/build/three.module.js"
   }
 }
 </script>
 
 <script type="module">
 import * as THREE from 'three';
-
-// ─── GLTFLoader inline (r128 CDN não tem addons, declaramos manualmente) ───
-class GLTFLoader extends THREE.Loader {
-  constructor(manager) { super(manager); }
-  load(url, onLoad, onProgress, onError) {
-    const scope = this;
-    const loader = new THREE.FileLoader(this.manager);
-    loader.setPath(this.path);
-    loader.setResponseType('arraybuffer');
-    loader.setRequestHeader(this.requestHeader);
-    loader.setWithCredentials(this.withCredentials);
-    loader.load(url, function(data) {
-      try { scope.parse(data, '', onLoad, onError); }
-      catch(e) { if (onError) onError(e); else console.error(e); }
-    }, onProgress, onError);
-  }
-  parse(data, path, onLoad, onError) {
-    // Usa o parser embutido do three r128 via ObjectLoader como fallback
-    // Para GLB real precisamos do script externo
-    onError && onError(new Error('Use script externo'));
-  }
-}
+import { GLTFLoader } from 'https://unpkg.com/three@0.128.0/examples/jsm/loaders/GLTFLoader.js';
 
 // ─── Cena ───────────────────────────────────────────────────────────────────
 const container = document.getElementById('canvas-container');
@@ -396,7 +375,7 @@ function updateStatus(model, vel) {
   stVel.textContent = vel.toFixed(2);
 }
 
-// ─── Carrega GLB via fetch + parse ──────────────────────────────────────────
+// ─── Carrega GLB ──────────────────────────────────────────────────────────
 let model = null;
 let mixer = null;
 let acaoAtual = null;
@@ -406,74 +385,62 @@ const loaderBar = document.getElementById('loader-bar');
 const loaderPct = document.getElementById('loader-pct');
 const loadingEl = document.getElementById('loading');
 
-// Carrega o GLB usando three.js r128 com DRACOLoader opcional
-async function carregarGLB(url) {
-  // Importa GLTFLoader do CDN unpkg (compatível com r128)
-  const script = document.createElement('script');
-  script.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js';
-  document.head.appendChild(script);
+// Carrega o GLB
+const loader = new GLTFLoader();
 
-  await new Promise(resolve => script.onload = resolve);
-
-  return new Promise((resolve, reject) => {
-    const loader = new THREE.GLTFLoader();
-    loader.load(
-      url,
-      resolve,
-      xhr => {
-        if (xhr.lengthComputable) {
-          const pct = Math.round(xhr.loaded / xhr.total * 100);
-          loaderBar.style.width = pct + '%';
-          loaderPct.textContent = pct + '%';
-        }
-      },
-      reject
-    );
-  });
-}
-
-carregarGLB('mano.glb').then(gltf => {
-  model = gltf.scene;
-  model.traverse(child => {
-    if (child.isMesh) {
-      child.castShadow = true;
-      child.receiveShadow = true;
-    }
-  });
-
-  // Centraliza e escala o modelo automaticamente
-  const box = new THREE.Box3().setFromObject(model);
-  const size = box.getSize(new THREE.Vector3());
-  const center = box.getCenter(new THREE.Vector3());
-  const maxDim = Math.max(size.x, size.y, size.z);
-  const scale = 1.8 / maxDim;
-  model.scale.setScalar(scale);
-  model.position.set(-center.x * scale, -box.min.y * scale, -center.z * scale);
-  scene.add(model);
-
-  // Animações
-  if (gltf.animations.length > 0) {
-    mixer = new THREE.AnimationMixer(model);
-    gltf.animations.forEach(clip => {
-      const nome = clip.name.toLowerCase();
-      acoes[nome] = mixer.clipAction(clip);
-      console.log('Animacao:', nome);
+loader.load(
+  'man_in_suit.glb',
+  function(gltf) {
+    model = gltf.scene;
+    model.traverse(child => {
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+      }
     });
-    // Toca a primeira animação disponível como idle
-    const primeiraAnim = Object.values(acoes)[0];
-    if (primeiraAnim) { acaoAtual = primeiraAnim; acaoAtual.play(); }
+
+    // Centraliza e escala o modelo automaticamente
+    const box = new THREE.Box3().setFromObject(model);
+    const size = box.getSize(new THREE.Vector3());
+    const center = box.getCenter(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const scale = 1.8 / maxDim;
+    model.scale.setScalar(scale);
+    model.position.set(-center.x * scale, -box.min.y * scale, -center.z * scale);
+    scene.add(model);
+
+    // Animações
+    if (gltf.animations && gltf.animations.length > 0) {
+      mixer = new THREE.AnimationMixer(model);
+      gltf.animations.forEach(clip => {
+        const nome = clip.name.toLowerCase();
+        acoes[nome] = mixer.clipAction(clip);
+        console.log('Animacao:', nome);
+      });
+      // Toca a primeira animação disponível como idle
+      const primeiraAnim = Object.values(acoes)[0];
+      if (primeiraAnim) { acaoAtual = primeiraAnim; acaoAtual.play(); }
+    }
+
+    // Esconde loading
+    loaderBar.style.width = '100%';
+    loaderPct.textContent = '100%';
+    setTimeout(() => loadingEl.classList.add('hidden'), 600);
+
+    animate();
+  },
+  function(xhr) {
+    if (xhr.lengthComputable) {
+      const pct = Math.round(xhr.loaded / xhr.total * 100);
+      loaderBar.style.width = pct + '%';
+      loaderPct.textContent = pct + '%';
+    }
+  },
+  function(error) {
+    console.error('Erro ao carregar GLB:', error);
+    loaderPct.textContent = 'ERRO — coloque o .glb na mesma pasta';
   }
-
-  // Esconde loading
-  loaderBar.style.width = '100%';
-  loaderPct.textContent = '100%';
-  setTimeout(() => loadingEl.classList.add('hidden'), 600);
-
-  animate();
-}).catch(err => {
-  console.error('Erro ao carregar GLB:', err);
-  loaderPct.textContent = 'ERRO — coloque o .glb na mesma pasta';
-});
+);
 
 // ─── Troca de animação com crossfade ────────────────────────────────────────
 function transicaoPara(nome, loop = true) {
