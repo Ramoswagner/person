@@ -3,321 +3,590 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Avatar - Controle WASD</title>
+    <title>GLB Walker - Estilo Zelda (Câmera em Terceira Pessoa)</title>
     <style>
-        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: #111122; }
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
         #info {
-            position: absolute; top: 20px; left: 20px;
-            background: rgba(0,0,0,0.7); color: white;
-            padding: 10px 20px; border-radius: 8px;
-            pointer-events: none; z-index: 10;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            z-index: 10;
             backdrop-filter: blur(5px);
-            border-left: 4px solid #ff3366;
+            border-left: 4px solid #4CAF50;
+            pointer-events: none;
         }
-        #info h1 { margin: 0; font-size: 1.1rem; font-weight: 500; }
-        #info p  { margin: 4px 0 0; font-size: 0.8rem; opacity: 0.7; }
+
+        #controls-hint {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            z-index: 10;
+            backdrop-filter: blur(5px);
+            border-right: 4px solid #4CAF50;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            pointer-events: none;
+        }
+
+        #controls-hint span {
+            color: #4CAF50;
+            font-weight: bold;
+            display: inline-block;
+            width: 25px;
+        }
+
+        #status {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            color: white;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(5px);
+            z-index: 15;
+            border-left: 3px solid #4CAF50;
+        }
 
         #loading {
-            position: absolute; top: 50%; left: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
             transform: translate(-50%, -50%);
-            color: white; font-size: 1.1rem;
-            background: rgba(0,0,0,0.7); padding: 15px 30px;
-            border-radius: 50px; z-index: 100;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            font-size: 1.2rem;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px 40px;
+            border-radius: 60px;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            border: 1px solid #4CAF50;
             transition: opacity 0.5s;
         }
-        #loading.hidden { opacity: 0; pointer-events: none; }
-        .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #fff; animation: spin 1s linear infinite; margin-right: 8px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* HUD teclas */
-        #hud {
-            position: absolute; bottom: 28px; left: 50%;
-            transform: translateX(-50%);
-            display: flex; flex-direction: column; align-items: center; gap: 8px;
-            pointer-events: none; z-index: 20;
+        #loading.hidden {
+            opacity: 0;
+            pointer-events: none;
         }
-        .hud-hint { font-family: monospace; font-size: 10px; letter-spacing: 2px; color: rgba(255,51,102,0.6); text-transform: uppercase; }
-        .keys-row { display: flex; gap: 6px; }
-        .key {
-            width: 42px; height: 42px;
-            border: 1px solid rgba(255,51,102,0.3); border-radius: 8px;
-            background: rgba(20,10,20,0.7); backdrop-filter: blur(6px);
-            display: flex; align-items: center; justify-content: center;
-            font-family: monospace; font-size: 14px; font-weight: bold;
-            color: rgba(255,150,150,0.4); transition: all 0.08s;
-        }
-        .key.on { border-color: #ff3366; color: #fff; background: rgba(255,51,102,0.2); box-shadow: 0 0 14px rgba(255,51,102,0.5); }
-        .key.empty { visibility: hidden; }
 
-        /* status animação */
-        #anim-status {
-            position: absolute; bottom: 130px; left: 50%;
-            transform: translateX(-50%);
-            color: rgba(255,255,255,0.7); background: rgba(0,0,0,0.5);
-            padding: 4px 14px; border-radius: 20px; font-size: 0.78rem;
-            backdrop-filter: blur(5px); z-index: 15; pointer-events: none;
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(76, 175, 80, 0.3);
+            border-radius: 50%;
+            border-top-color: #4CAF50;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .control-btn {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: 2px solid #4CAF50;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            transition: all 0.2s ease;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .control-btn:hover {
+            background: #4CAF50;
+            transform: scale(1.1);
+        }
+
+        #speed-control {
+            position: absolute;
+            bottom: 100px;
+            right: 30px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 15px;
+            border-radius: 40px;
+            backdrop-filter: blur(5px);
+            border: 1px solid #4CAF50;
+            z-index: 20;
+            width: 200px;
+        }
+
+        #speed-control input {
+            width: 100%;
+            margin: 5px 0;
+            accent-color: #4CAF50;
         }
     </style>
 </head>
 <body>
-
-<div id="info">
-    <h1>🚶 Avatar — Controle WASD</h1>
-    <p>W/S andar &nbsp;|&nbsp; A/D girar &nbsp;|&nbsp; E abrir &nbsp;|&nbsp; Mouse orbitar</p>
-</div>
-
-<div id="loading"><span class="spinner"></span> Carregando modelo...</div>
-<div id="anim-status">⚡ idle</div>
-
-<div id="hud">
-    <div class="hud-hint">movimento</div>
-    <div class="keys-row">
-        <div class="key empty">·</div>
-        <div class="key" id="k-w">W</div>
-        <div class="key empty">·</div>
+    <div id="info">
+        <h2>🎮 Estilo Zelda - Câmera em Terceira Pessoa</h2>
+        <p>Modelo: novo.glb | Andando continuamente enquanto pressiona</p>
     </div>
-    <div class="keys-row">
-        <div class="key" id="k-a">A</div>
-        <div class="key" id="k-s">S</div>
-        <div class="key" id="k-d">D</div>
+
+    <div id="controls-hint">
+        <div><span>W</span> Frente</div>
+        <div><span>S</span> Trás</div>
+        <div><span>A</span> Esquerda</div>
+        <div><span>D</span> Direita</div>
+        <div><span>Q</span> Rotacionar Esquerda</div>
+        <div><span>E</span> Rotacionar Direita</div>
+        <div><span>Shift</span> Correr</div>
+        <div style="margin-top: 10px; color: #4CAF50;">⬤ Solte as teclas para parar</div>
     </div>
-    <div class="hud-hint" style="margin-top:2px">E — opening</div>
-</div>
 
-<script type="importmap">
-{
-    "imports": {
-        "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
-        "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
-    }
-}
-</script>
+    <div id="status">
+        🚶 Parado | Posição: 0, 0
+    </div>
 
-<script type="module">
-import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+    <div id="speed-control">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+            <span>🐢</span>
+            <span id="speed-value">Velocidade: 2.0x</span>
+            <span>🐇</span>
+        </div>
+        <input type="range" id="speed-slider" min="0.5" max="4" step="0.1" value="2.0">
+    </div>
 
-// ── Cena ──────────────────────────────────────────────────────────────────
-const scene    = new THREE.Scene();
-scene.background = new THREE.Color(0x111122);
-scene.fog        = new THREE.FogExp2(0x111122, 0.03);
+    <button class="control-btn" id="reset-pos" title="Resetar Posição">⟲</button>
 
-const camera = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.1, 1000);
-camera.position.set(0, 2, 6);
-camera.lookAt(0, 1, 0);
+    <div id="loading">
+        <span class="spinner"></span> Carregando modelo...
+    </div>
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(innerWidth, innerHeight);
-renderer.setPixelRatio(devicePixelRatio);
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-renderer.outputEncoding = THREE.sRGBEncoding;
-renderer.toneMapping   = THREE.ACESFilmicToneMapping;
-document.body.appendChild(renderer.domElement);
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+            }
+        }
+    </script>
 
-// ── Orbit Controls (mouse) ────────────────────────────────────────────────
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping    = true;
-controls.dampingFactor    = 0.06;
-controls.screenSpacePanning = true;
-controls.maxPolarAngle    = Math.PI / 2;
-controls.minDistance      = 2;
-controls.maxDistance      = 20;
-controls.target.set(0, 1, 0);
+    <script type="module">
+        import * as THREE from 'three';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-// ── Luzes ─────────────────────────────────────────────────────────────────
-scene.add(new THREE.AmbientLight(0x606080, 1.0));
+        // --- Configuração inicial ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x1a1a2e);
+        scene.fog = new THREE.Fog(0x1a1a2e, 15, 40);
 
-const dir = new THREE.DirectionalLight(0xffffff, 1.5);
-dir.position.set(5, 10, 7);
-dir.castShadow = true;
-dir.shadow.mapSize.set(1024, 1024);
-dir.shadow.camera.near = 0.5;
-dir.shadow.camera.far  = 30;
-dir.shadow.camera.left = dir.shadow.camera.bottom = -8;
-dir.shadow.camera.right = dir.shadow.camera.top  =  8;
-scene.add(dir);
+        // Câmera em estilo Zelda (terceira pessoa fixa atrás do personagem)
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 4, 8); // Posição inicial da câmera
 
-scene.add(Object.assign(new THREE.PointLight(0xff3366, 0.5), { position: new THREE.Vector3( 4, 2, 4) }));
-scene.add(Object.assign(new THREE.PointLight(0x33ccff, 0.4), { position: new THREE.Vector3(-4, 2,-4) }));
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.body.appendChild(renderer.domElement);
 
-// ── Chão ──────────────────────────────────────────────────────────────────
-const grid = new THREE.GridHelper(30, 30, 0xff3366, 0x333355);
-scene.add(grid);
+        // --- Iluminação ---
+        const ambientLight = new THREE.AmbientLight(0x404060);
+        scene.add(ambientLight);
 
-const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(30, 30),
-    new THREE.MeshStandardMaterial({ color: 0x1a1a2e, roughness: 0.9 })
-);
-floor.rotation.x = -Math.PI/2;
-floor.receiveShadow = true;
-scene.add(floor);
+        // Luz principal (sol)
+        const sunLight = new THREE.DirectionalLight(0xffeedd, 1.2);
+        sunLight.position.set(10, 20, 5);
+        sunLight.castShadow = true;
+        sunLight.receiveShadow = true;
+        sunLight.shadow.mapSize.width = 2048;
+        sunLight.shadow.mapSize.height = 2048;
+        sunLight.shadow.camera.near = 0.5;
+        sunLight.shadow.camera.far = 50;
+        sunLight.shadow.camera.left = -15;
+        sunLight.shadow.camera.right = 15;
+        sunLight.shadow.camera.top = 15;
+        sunLight.shadow.camera.bottom = -15;
+        scene.add(sunLight);
 
-// Anel sob o avatar
-const ringMat = new THREE.MeshBasicMaterial({ color: 0xff3366, side: THREE.DoubleSide, transparent: true, opacity: 0.4 });
-const ring    = new THREE.Mesh(new THREE.RingGeometry(0.35, 0.45, 48), ringMat);
-ring.rotation.x = -Math.PI/2;
-ring.position.y = 0.01;
-scene.add(ring);
+        // Luz de preenchimento
+        const fillLight = new THREE.PointLight(0x4466aa, 0.6);
+        fillLight.position.set(-5, 5, 10);
+        scene.add(fillLight);
 
-// Estrelas
-const starPos = new Float32Array(2000*3).map(() => (Math.random()-.5)*300);
-const starGeo = new THREE.BufferGeometry();
-starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
-scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0x888888, size: 0.15 })));
+        // Luz de fundo
+        const backLight = new THREE.PointLight(0xaa66ff, 0.3);
+        backLight.position.set(0, 3, -10);
+        scene.add(backLight);
 
-// ── Teclado ───────────────────────────────────────────────────────────────
-const keys = {};
-const keyMap = { KeyW:'k-w', KeyA:'k-a', KeyS:'k-s', KeyD:'k-d' };
+        // --- Cenário com referências visuais ---
+        
+        // Chão com grama (textura procedural)
+        const groundGeometry = new THREE.CircleGeometry(30, 64);
+        const groundMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x2a2a3a,
+            roughness: 0.8,
+            metalness: 0.1
+        });
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        ground.position.y = 0;
+        ground.receiveShadow = true;
+        scene.add(ground);
 
-window.addEventListener('keydown', e => {
-    keys[e.code] = true;
-    if (['KeyW','KeyS','KeyA','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))
-        e.preventDefault();
-    Object.entries(keyMap).forEach(([c,id]) =>
-        document.getElementById(id).classList.toggle('on', !!keys[c])
-    );
-});
-window.addEventListener('keyup', e => {
-    keys[e.code] = false;
-    Object.entries(keyMap).forEach(([c,id]) =>
-        document.getElementById(id).classList.toggle('on', !!keys[c])
-    );
-});
+        // Grade decorativa
+        const gridHelper = new THREE.GridHelper(30, 20, 0x4CAF50, 0x335533);
+        gridHelper.position.y = 0.01;
+        scene.add(gridHelper);
 
-// ── Modelo ────────────────────────────────────────────────────────────────
-let model = null, mixer = null, acaoAtual = null, acoes = {}, baseY = 0;
-const loadingEl  = document.getElementById('loading');
-const animStatus = document.getElementById('anim-status');
+        // Círculos concêntricos para referência de distância
+        const ringMaterial = new THREE.LineBasicMaterial({ color: 0x4CAF50, opacity: 0.3, transparent: true });
+        for (let i = 1; i <= 4; i++) {
+            const points = [];
+            const radius = i * 3;
+            for (let angle = 0; angle <= Math.PI * 2; angle += 0.1) {
+                points.push(new THREE.Vector3(Math.cos(angle) * radius, 0.02, Math.sin(angle) * radius));
+            }
+            const ringGeometry = new THREE.BufferGeometry().setFromPoints(points);
+            const ringLine = new THREE.LineLoop(ringGeometry, ringMaterial);
+            scene.add(ringLine);
+        }
 
-new GLTFLoader().load(
-    'novo.glb',
-    gltf => {
-        model = gltf.scene;
-        model.traverse(c => {
-            if (c.isMesh) {
-                c.castShadow = c.receiveShadow = true;
-                // preserva material original, só ajusta sombra
+        // Pequenos marcadores de direção
+        const markerMat = new THREE.MeshStandardMaterial({ color: 0x4CAF50 });
+        for (let i = -4; i <= 4; i++) {
+            for (let j = -4; j <= 4; j++) {
+                if (i === 0 && j === 0) continue;
+                const marker = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.2), markerMat);
+                marker.position.set(i * 2, 0.1, j * 2);
+                marker.castShadow = true;
+                marker.receiveShadow = true;
+                scene.add(marker);
+            }
+        }
+
+        // Árvores simples para referência
+        const treeTrunkGeo = new THREE.CylinderGeometry(0.3, 0.4, 2);
+        const treeTopGeo = new THREE.ConeGeometry(0.8, 1.5, 8);
+        const trunkMat = new THREE.MeshStandardMaterial({ color: 0x8B5A2B });
+        const topMat = new THREE.MeshStandardMaterial({ color: 0x2E7D32 });
+        
+        const treePositions = [
+            [6, 0, 6], [-6, 0, -6], [8, 0, -4], [-8, 0, 5], [5, 0, -7], [-5, 0, 8]
+        ];
+        
+        treePositions.forEach(pos => {
+            const trunk = new THREE.Mesh(treeTrunkGeo, trunkMat);
+            trunk.position.set(pos[0], 1, pos[2]);
+            trunk.castShadow = true;
+            trunk.receiveShadow = true;
+            scene.add(trunk);
+            
+            const top = new THREE.Mesh(treeTopGeo, topMat);
+            top.position.set(pos[0], 2.5, pos[2]);
+            top.castShadow = true;
+            top.receiveShadow = true;
+            scene.add(top);
+        });
+
+        // --- Variáveis do personagem ---
+        let character = null;
+        let mixer = null;
+        let clock = new THREE.Clock();
+        
+        // Estado do personagem
+        const characterState = {
+            position: new THREE.Vector3(0, 0, 0),
+            rotation: 0,
+            speed: 2.0,
+            isMoving: false,
+            moveDirection: new THREE.Vector3(0, 0, 0),
+            // Teclas pressionadas
+            keys: {
+                w: false, a: false, s: false, d: false,
+                q: false, e: false,
+                shift: false
+            }
+        };
+
+        // Elementos DOM
+        const loadingEl = document.getElementById('loading');
+        const statusEl = document.getElementById('status');
+        const speedSlider = document.getElementById('speed-slider');
+        const speedValue = document.getElementById('speed-value');
+        const resetBtn = document.getElementById('reset-pos');
+
+        // Speed slider
+        speedSlider.addEventListener('input', (e) => {
+            characterState.speed = parseFloat(e.target.value);
+            speedValue.textContent = `Velocidade: ${characterState.speed.toFixed(1)}x`;
+        });
+
+        // Reset position
+        resetBtn.addEventListener('click', () => {
+            if (character) {
+                character.position.set(0, 0, 0);
+                character.rotation.y = 0;
+                characterState.position.set(0, 0, 0);
+                characterState.rotation = 0;
             }
         });
 
-        // ── Escala automática ─────────────────────────────────────────
-        model.scale.set(1, 1, 1);                          // reset
-        let box = new THREE.Box3().setFromObject(model);
-        const sz = box.getSize(new THREE.Vector3());
-        const escala = 1.75 / sz.y;                        // normaliza para 1.75m
-        model.scale.setScalar(escala);
+        // --- Sistema de teclado (segura para andar, solta para parar) ---
+        window.addEventListener('keydown', (e) => {
+            switch(e.code) {
+                case 'KeyW': characterState.keys.w = true; e.preventDefault(); break;
+                case 'KeyS': characterState.keys.s = true; e.preventDefault(); break;
+                case 'KeyA': characterState.keys.a = true; e.preventDefault(); break;
+                case 'KeyD': characterState.keys.d = true; e.preventDefault(); break;
+                case 'KeyQ': characterState.keys.q = true; e.preventDefault(); break;
+                case 'KeyE': characterState.keys.e = true; e.preventDefault(); break;
+                case 'ShiftLeft':
+                case 'ShiftRight':
+                    characterState.keys.shift = true;
+                    characterState.speed = 3.5;
+                    speedSlider.value = 3.5;
+                    speedValue.textContent = 'Velocidade: 3.5x';
+                    e.preventDefault();
+                    break;
+            }
+        });
 
-        // Centraliza pés no chão
-        box = new THREE.Box3().setFromObject(model);
-        const ctr = box.getCenter(new THREE.Vector3());
-        baseY = -box.min.y;
-        model.position.set(-ctr.x, baseY, -ctr.z);
-        scene.add(model);
+        window.addEventListener('keyup', (e) => {
+            switch(e.code) {
+                case 'KeyW': characterState.keys.w = false; e.preventDefault(); break;
+                case 'KeyS': characterState.keys.s = false; e.preventDefault(); break;
+                case 'KeyA': characterState.keys.a = false; e.preventDefault(); break;
+                case 'KeyD': characterState.keys.d = false; e.preventDefault(); break;
+                case 'KeyQ': characterState.keys.q = false; e.preventDefault(); break;
+                case 'KeyE': characterState.keys.e = false; e.preventDefault(); break;
+                case 'ShiftLeft':
+                case 'ShiftRight':
+                    characterState.keys.shift = false;
+                    characterState.speed = parseFloat(speedSlider.value);
+                    e.preventDefault();
+                    break;
+            }
+        });
 
-        // Câmera e orbit focam no centro do avatar
-        const topo = baseY + 1.75;
-        const meio = baseY + 1.75 / 2;
-        controls.target.set(0, meio, 0);
-        camera.position.set(0, meio + 0.5, 4);
-        camera.lookAt(0, meio, 0);
+        // Prevenir rolagem da página com as setas
+        window.addEventListener('keydown', (e) => {
+            if (e.code.startsWith('Key') || e.code.startsWith('Shift')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
 
-        // ── Animações ─────────────────────────────────────────────────
-        if (gltf.animations?.length) {
-            mixer = new THREE.AnimationMixer(model);
-            gltf.animations.forEach(clip => {
-                const n = clip.name.toLowerCase();
-                acoes[n] = mixer.clipAction(clip);
-                console.log('anim:', n);
-            });
-            // toca walking ou primeira disponível como idle
-            const idle = acoes['walking'] || Object.values(acoes)[0];
-            if (idle) { acaoAtual = idle; acaoAtual.play(); }
-        }
-
-        loadingEl.classList.add('hidden');
-    },
-    xhr => {
-        if (xhr.lengthComputable)
-            loadingEl.innerHTML = `<span class="spinner"></span> ${Math.round(xhr.loaded/xhr.total*100)}%`;
-    },
-    err => {
-        loadingEl.innerHTML = '❌ novo.glb não encontrado na pasta';
-        console.error(err);
-    }
-);
-
-// ── Troca de animação ─────────────────────────────────────────────────────
-function ir(nome, loop = true) {
-    const chave = Object.keys(acoes).find(k => k.includes(nome));
-    if (!chave) return;
-    const prox = acoes[chave];
-    if (prox === acaoAtual) return;
-    prox.reset();
-    prox.setLoop(loop ? THREE.LoopRepeat : THREE.LoopOnce);
-    prox.clampWhenFinished = true;
-    prox.play();
-    if (acaoAtual) acaoAtual.crossFadeTo(prox, 0.2, true);
-    acaoAtual = prox;
-    animStatus.textContent = '⚡ ' + chave;
-}
-
-// ── Loop ──────────────────────────────────────────────────────────────────
-const clock = new THREE.Clock();
-const VEL = 3.0, ROT = 2.0;
-
-function animate() {
-    requestAnimationFrame(animate);
-    const dt = Math.min(clock.getDelta(), 0.05);
-    if (mixer) mixer.update(dt);
-
-    if (model) {
-        let mv = false;
-
-        if (keys['KeyW'] || keys['ArrowUp'])    { model.translateZ(-VEL * dt); mv = true; }
-        if (keys['KeyS'] || keys['ArrowDown'])  { model.translateZ( VEL * dt * 0.6); mv = true; }
-        if (keys['KeyA'] || keys['ArrowLeft'])  { model.rotation.y += ROT * dt; mv = true; }
-        if (keys['KeyD'] || keys['ArrowRight']) { model.rotation.y -= ROT * dt; mv = true; }
-
-        // mantém no chão
-        model.position.x = Math.max(-14, Math.min(14, model.position.x));
-        model.position.z = Math.max(-14, Math.min(14, model.position.z));
-        model.position.y = baseY;
-
-        // anel acompanha
-        ring.position.x = model.position.x;
-        ring.position.z = model.position.z;
-        ringMat.opacity = mv ? 0.6 : 0.2 + 0.2 * Math.abs(Math.sin(Date.now() * 0.003));
-
-        // câmera segue avatar (orbit target)
-        controls.target.lerp(
-            new THREE.Vector3(model.position.x, baseY + 1.75/2, model.position.z),
-            0.08
+        // --- Carregar o modelo GLB ---
+        const loader = new GLTFLoader();
+        
+        loader.load(
+            'novo.glb',
+            (gltf) => {
+                character = gltf.scene;
+                
+                character.position.set(0, 0, 0);
+                character.traverse((node) => {
+                    if (node.isMesh) {
+                        node.castShadow = true;
+                        node.receiveShadow = true;
+                    }
+                });
+                
+                scene.add(character);
+                
+                // Configurar animações
+                if (gltf.animations && gltf.animations.length > 0) {
+                    mixer = new THREE.AnimationMixer(character);
+                    
+                    gltf.animations.forEach((clip) => {
+                        const action = mixer.clipAction(clip);
+                        action.play();
+                    });
+                    
+                    // Inicialmente pausar a animação (personagem parado)
+                    if (mixer) {
+                        mixer.timeScale = 0; // Começa parado
+                    }
+                }
+                
+                loadingEl.classList.add('hidden');
+                console.log('Personagem carregado!');
+            },
+            (xhr) => {
+                const percent = Math.floor((xhr.loaded / xhr.total) * 100);
+                loadingEl.innerHTML = `<span class="spinner"></span> Carregando... ${percent}%`;
+            },
+            (error) => {
+                console.error('Erro:', error);
+                loadingEl.innerHTML = '❌ Erro ao carregar. Criando placeholder...';
+                
+                // Placeholder com formato humanoide
+                const group = new THREE.Group();
+                
+                // Corpo
+                const bodyGeo = new THREE.CylinderGeometry(0.4, 0.4, 1.5);
+                const bodyMat = new THREE.MeshStandardMaterial({ color: 0x4CAF50 });
+                const body = new THREE.Mesh(bodyGeo, bodyMat);
+                body.position.y = 0.75;
+                body.castShadow = true;
+                body.receiveShadow = true;
+                group.add(body);
+                
+                // Cabeça
+                const headGeo = new THREE.SphereGeometry(0.3);
+                const headMat = new THREE.MeshStandardMaterial({ color: 0xffaa00 });
+                const head = new THREE.Mesh(headGeo, headMat);
+                head.position.y = 1.65;
+                head.castShadow = true;
+                head.receiveShadow = true;
+                group.add(head);
+                
+                character = group;
+                character.position.set(0, 0, 0);
+                scene.add(character);
+                
+                loadingEl.classList.add('hidden');
+            }
         );
 
-        // animações
-        if (Object.keys(acoes).length > 0) {
-            if (keys['KeyE'])  ir('opening', false);
-            else if (mv)       ir('walking', true);
-            else               ir(Object.keys(acoes)[0], true);
+        // --- Sistema de movimento estilo Zelda ---
+        function updateMovement(delta) {
+            if (!character) return;
+            
+            // Calcular direção do movimento baseado nas teclas pressionadas
+            const moveX = (characterState.keys.d ? 1 : 0) - (characterState.keys.a ? 1 : 0);
+            const moveZ = (characterState.keys.s ? 1 : 0) - (characterState.keys.w ? 1 : 0);
+            
+            // Rotação (Q/E)
+            if (characterState.keys.q) {
+                characterState.rotation += 2 * delta;
+            }
+            if (characterState.keys.e) {
+                characterState.rotation -= 2 * delta;
+            }
+            
+            // Aplicar rotação ao personagem
+            character.rotation.y = characterState.rotation;
+            
+            // Verificar se está se movendo
+            const isMoving = moveX !== 0 || moveZ !== 0;
+            characterState.isMoving = isMoving;
+            
+            // Controlar animação (andar quando move, parar quando não move)
+            if (mixer) {
+                // Se estiver se movendo, velocidade normal, senão para a animação
+                mixer.timeScale = isMoving ? 1 : 0;
+            }
+            
+            // Se não estiver se movendo, não atualiza posição
+            if (!isMoving) {
+                // Atualizar status
+                statusEl.innerHTML = `🚶 Parado | Posição: ${character.position.x.toFixed(1)}, ${character.position.z.toFixed(1)}`;
+                return;
+            }
+            
+            // Calcular movimento baseado na rotação do personagem
+            const speed = characterState.speed * delta * 3;
+            
+            // Direção no espaço local do personagem
+            if (moveZ !== 0 || moveX !== 0) {
+                // Vetor de movimento na direção da câmera (estilo Zelda - movimento relativo à câmera)
+                // Mas por enquanto, vamos usar movimento relativo ao personagem
+                const forward = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), characterState.rotation);
+                const right = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), characterState.rotation);
+                
+                const movement = new THREE.Vector3()
+                    .addScaledVector(forward, -moveZ * speed)  // Invertido porque Z negativo é frente
+                    .addScaledVector(right, moveX * speed);
+                
+                character.position.x += movement.x;
+                character.position.z += movement.z;
+                
+                // Atualizar estado
+                characterState.position.copy(character.position);
+            }
+            
+            // Atualizar status
+            statusEl.innerHTML = `🚶 Andando | Posição: ${character.position.x.toFixed(1)}, ${character.position.z.toFixed(1)} | Ângulo: ${(characterState.rotation * 180 / Math.PI).toFixed(0)}°`;
         }
-    }
 
-    controls.update();
-    renderer.render(scene, camera);
-}
+        // --- Sistema de câmera estilo Zelda (terceira pessoa fixa) ---
+        function updateCamera() {
+            if (!character) return;
+            
+            // Posição da câmera relativa ao personagem
+            // Distância, altura e ângulo fixes (estilo Zelda clássico)
+            const distance = 8;
+            const height = 4;
+            const lookAtHeight = 1.5; // Altura para olhar (peito do personagem)
+            
+            // Ângulo fixo da câmera (ligeiramente acima e atrás)
+            // Em Zelda, a câmera geralmente está atrás do personagem, mas com ângulo fixo
+            const cameraAngle = characterState.rotation + Math.PI / 4; // 45° atrás do personagem
+            
+            // Calcular posição da câmera baseada na rotação do personagem
+            const cameraX = character.position.x + Math.sin(cameraAngle) * distance;
+            const cameraZ = character.position.z + Math.cos(cameraAngle) * distance;
+            const cameraY = character.position.y + height;
+            
+            camera.position.set(cameraX, cameraY, cameraZ);
+            camera.lookAt(
+                character.position.x,
+                character.position.y + lookAtHeight,
+                character.position.z
+            );
+        }
 
-animate();
+        // --- Animação principal ---
+        function animate() {
+            requestAnimationFrame(animate);
 
-window.addEventListener('resize', () => {
-    camera.aspect = innerWidth / innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(innerWidth, innerHeight);
-});
-</script>
+            const delta = Math.min(clock.getDelta(), 0.1); // Limitar delta máximo
+
+            // Atualizar animação do personagem
+            if (mixer) {
+                mixer.update(delta);
+            }
+
+            // Atualizar movimento
+            updateMovement(delta);
+            
+            // Atualizar câmera (sempre após o movimento)
+            updateCamera();
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // --- Resize ---
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // --- Prevenir menu de contexto ---
+        window.addEventListener('contextmenu', e => e.preventDefault());
+    </script>
 </body>
 </html>
