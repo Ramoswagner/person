@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visualizador GLB - Walking Animation</title>
+    <title>GLB Walker - Controle de Movimento 360°</title>
     <style>
         body {
             margin: 0;
@@ -17,62 +17,56 @@
             left: 20px;
             background: rgba(0, 0, 0, 0.7);
             color: white;
-            padding: 10px 20px;
+            padding: 15px 25px;
             border-radius: 8px;
-            pointer-events: none;
             z-index: 10;
             backdrop-filter: blur(5px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             border-left: 4px solid #ff3366;
         }
 
-        #info h1 {
-            margin: 0;
-            font-size: 1.2rem;
-            font-weight: 500;
-            letter-spacing: 1px;
-        }
-
-        #info p {
-            margin: 5px 0 0;
-            font-size: 0.9rem;
-            opacity: 0.8;
-        }
-
-        #controls {
+        #controls-panel {
             position: absolute;
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(30, 30, 40, 0.8);
+            background: rgba(30, 30, 40, 0.9);
             backdrop-filter: blur(10px);
             color: white;
-            padding: 15px 25px;
-            border-radius: 50px;
+            padding: 20px 30px;
+            border-radius: 60px;
             display: flex;
-            gap: 20px;
+            gap: 30px;
             z-index: 20;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .control-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
         }
 
         .control-btn {
             background: rgba(255,255,255,0.1);
             border: none;
             color: white;
-            padding: 8px 20px;
-            border-radius: 30px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
             cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 500;
+            font-size: 1.5rem;
+            font-weight: bold;
             transition: all 0.2s ease;
-            letter-spacing: 0.5px;
             border: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .control-btn:hover {
             background: #ff3366;
-            transform: translateY(-2px);
+            transform: scale(1.1);
             box-shadow: 0 5px 15px rgba(255,51,102,0.4);
         }
 
@@ -81,18 +75,61 @@
             color: white;
         }
 
+        #speed-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0,0,0,0.3);
+            padding: 5px 15px;
+            border-radius: 30px;
+        }
+
+        #speed-value {
+            min-width: 45px;
+            text-align: center;
+            color: #ff3366;
+            font-weight: bold;
+        }
+
+        #joystick-area {
+            position: absolute;
+            bottom: 150px;
+            right: 30px;
+            width: 120px;
+            height: 120px;
+            background: rgba(30,30,40,0.6);
+            backdrop-filter: blur(5px);
+            border-radius: 60px;
+            border: 2px solid rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 25;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        #joystick {
+            width: 50px;
+            height: 50px;
+            background: #ff3366;
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(255,51,102,0.5);
+            transition: transform 0.1s ease;
+        }
+
         #status {
             position: absolute;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: rgba(255,255,255,0.8);
+            bottom: 180px;
+            left: 30px;
+            color: white;
             background: rgba(0,0,0,0.5);
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.8rem;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-size: 0.9rem;
             backdrop-filter: blur(5px);
             z-index: 15;
+            border-left: 3px solid #ff3366;
         }
 
         #loading {
@@ -102,12 +139,12 @@
             transform: translate(-50%, -50%);
             color: white;
             font-size: 1.2rem;
-            background: rgba(0,0,0,0.6);
-            padding: 15px 30px;
-            border-radius: 50px;
+            background: rgba(0,0,0,0.8);
+            padding: 20px 40px;
+            border-radius: 60px;
             z-index: 100;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid #ff3366;
             transition: opacity 0.5s;
         }
 
@@ -118,11 +155,11 @@
 
         .spinner {
             display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255,255,255,0.3);
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,51,102,0.3);
             border-radius: 50%;
-            border-top-color: #fff;
+            border-top-color: #ff3366;
             animation: spin 1s ease-in-out infinite;
             margin-right: 10px;
         }
@@ -130,28 +167,75 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+
+        .key-hint {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.5);
+            color: rgba(255,255,255,0.7);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            backdrop-filter: blur(5px);
+            z-index: 10;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .key-hint span {
+            color: #ff3366;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <div id="info">
-        <h1>🚶 Novo.glb - Walking Animation</h1>
-        <p>Modelo 3D com animação de caminhada do Adobe</p>
+        <h2>🚶 Controle de Personagem 360°</h2>
+        <p>Modelo: novo.glb | Use WASD ou Joystick para mover</p>
     </div>
 
-    <div id="status">⚡ Animação: Walking</div>
+    <div id="status">
+        🎮 Posição: X:0.00, Y:0.00, Z:0.00 | Ângulo: 0°
+    </div>
 
-    <div id="controls">
-        <button class="control-btn active" id="playBtn">▶ Play</button>
-        <button class="control-btn" id="pauseBtn">⏸ Pause</button>
-        <button class="control-btn" id="resetBtn">⟲ Reset</button>
-        <button class="control-btn" id="gridBtn">⬚ Grid</button>
+    <div id="controls-panel">
+        <div class="control-group">
+            <button class="control-btn" id="move-fwd" title="Frente (W)">▲</button>
+            <button class="control-btn" id="move-left" title="Esquerda (A)">◀</button>
+            <button class="control-btn" id="move-bwd" title="Trás (S)">▼</button>
+            <button class="control-btn" id="move-right" title="Direita (D)">▶</button>
+        </div>
+        
+        <div class="control-group">
+            <button class="control-btn" id="rotate-left" title="Rotacionar Esquerda (Q)">↺</button>
+            <button class="control-btn" id="rotate-right" title="Rotacionar Direita (E)">↻</button>
+        </div>
+
+        <div id="speed-control">
+            <span>🐢</span>
+            <input type="range" id="speed-slider" min="0.5" max="3" step="0.1" value="1.5">
+            <span id="speed-value">1.5x</span>
+            <span>🐇</span>
+        </div>
+
+        <div class="control-group">
+            <button class="control-btn" id="reset-pos" title="Resetar Posição">⟲</button>
+            <button class="control-btn" id="grid-btn" title="Toggle Grid">⬚</button>
+        </div>
+    </div>
+
+    <div id="joystick-area">
+        <div id="joystick"></div>
+    </div>
+
+    <div class="key-hint">
+        <span>WASD</span> Mover | <span>Q/E</span> Rotacionar | <span>Shift</span> Correr | <span>Espaço</span> Pular? (em breve)
     </div>
 
     <div id="loading">
         <span class="spinner"></span> Carregando modelo...
     </div>
 
-    <!-- Importação das bibliotecas -->
     <script type="importmap">
         {
             "imports": {
@@ -168,343 +252,401 @@
 
         // --- Configuração inicial ---
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x111122); // Cor de fundo escura
-        
-        // Câmera
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(5, 2, 8);
-        camera.lookAt(0, 1, 0);
+        scene.background = new THREE.Color(0x111122);
+        scene.fog = new THREE.Fog(0x111122, 10, 30);
 
-        // Renderizador
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+        // Câmera que segue o personagem
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(5, 3, 8);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true; // Ativar sombras para melhor visualização
+        renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         renderer.setPixelRatio(window.devicePixelRatio);
         document.body.appendChild(renderer.domElement);
 
-        // Controles de órbita
+        // Controles da câmera (agora em modo "seguir")
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.05;
-        controls.screenSpacePanning = true;
-        controls.maxPolarAngle = Math.PI / 2; // Impedir de ir abaixo do chão
+        controls.maxPolarAngle = Math.PI / 2.2;
         controls.minDistance = 3;
-        controls.maxDistance = 20;
+        controls.maxDistance = 15;
         controls.target.set(0, 1, 0);
 
-        // --- Iluminação ---
-        
-        // Luz ambiente suave
+        // --- Iluminação (igual ao anterior) ---
         const ambientLight = new THREE.AmbientLight(0x404060);
         scene.add(ambientLight);
 
-        // Luz principal (direcional) para sombras
         const dirLight = new THREE.DirectionalLight(0xffffff, 1);
         dirLight.position.set(5, 10, 7);
         dirLight.castShadow = true;
         dirLight.receiveShadow = true;
         dirLight.shadow.mapSize.width = 1024;
         dirLight.shadow.mapSize.height = 1024;
-        const d = 10;
+        const d = 15;
         dirLight.shadow.camera.left = -d;
         dirLight.shadow.camera.right = d;
         dirLight.shadow.camera.top = d;
         dirLight.shadow.camera.bottom = -d;
         dirLight.shadow.camera.near = 1;
-        dirLight.shadow.camera.far = 15;
+        dirLight.shadow.camera.far = 20;
         scene.add(dirLight);
 
-        // Luz de preenchimento
+        // Luzes coloridas
         const fillLight = new THREE.PointLight(0x4466cc, 0.5);
         fillLight.position.set(-5, 3, 5);
         scene.add(fillLight);
-
-        // Luz de fundo
-        const backLight = new THREE.PointLight(0xffaa33, 0.3);
-        backLight.position.set(0, 2, -8);
-        scene.add(backLight);
-
-        // Luzes coloridas para efeito
+        
         const colorLight1 = new THREE.PointLight(0xff3366, 0.4);
         colorLight1.position.set(3, 1, 3);
         scene.add(colorLight1);
 
-        const colorLight2 = new THREE.PointLight(0x33ccff, 0.4);
-        colorLight2.position.set(-3, 1, -3);
-        scene.add(colorLight2);
-
-        // --- Chão com grade e reflexo ---
-        
-        // Grade principal
-        const gridHelper = new THREE.GridHelper(20, 20, 0xff3366, 0x444466);
+        // --- Cenário ---
+        // Chão com grade
+        const gridHelper = new THREE.GridHelper(30, 30, 0xff3366, 0x444466);
         gridHelper.position.y = 0;
         scene.add(gridHelper);
 
-        // Chão semi-transparente para reflexo
-        const planeGeometry = new THREE.CircleGeometry(12, 32);
-        const planeMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0x1a1a2e, 
-            transparent: true, 
-            opacity: 0.25,
-            side: THREE.DoubleSide
+        // Chão sólido
+        const groundGeometry = new THREE.CircleGeometry(20, 32);
+        const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x1a1a2e, roughness: 0.6, metalness: 0.1 });
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        ground.position.y = 0;
+        ground.receiveShadow = true;
+        scene.add(ground);
+
+        // Adicionar alguns objetos de referência
+        const cubeMat = new THREE.MeshStandardMaterial({ color: 0x33ccff, emissive: 0x113355 });
+        const cubePositions = [
+            [3, 0.5, 3], [-3, 0.5, -3], [4, 0.5, -2], [-4, 0.5, 2], [2, 0.5, -4]
+        ];
+        
+        cubePositions.forEach(pos => {
+            const cube = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), cubeMat);
+            cube.position.set(pos[0], pos[1], pos[2]);
+            cube.castShadow = true;
+            cube.receiveShadow = true;
+            scene.add(cube);
+            
+            // Pequeno pino embaixo
+            const pin = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.2), new THREE.MeshStandardMaterial({ color: 0xffaa00 }));
+            pin.position.set(pos[0], 0.1, pos[2]);
+            scene.add(pin);
         });
-        const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-        plane.rotation.x = -Math.PI / 2;
-        plane.position.y = 0.01;
-        plane.receiveShadow = true;
-        scene.add(plane);
 
-        // Eixos de referência (opcional, comentado para não poluir)
-        // const axesHelper = new THREE.AxesHelper(5);
-        // scene.add(axesHelper);
-
-        // Pequenas esferas de referência no chão
-        const sphereGeo = new THREE.SphereGeometry(0.1, 16);
-        const sphereMat = new THREE.MeshStandardMaterial({ color: 0xff3366 });
-        for (let i = -4; i <= 4; i+=2) {
-            for (let j = -4; j <= 4; j+=2) {
-                const sphere = new THREE.Mesh(sphereGeo, sphereMat);
-                sphere.position.set(i, 0.1, j);
-                sphere.castShadow = true;
-                sphere.receiveShadow = true;
-                scene.add(sphere);
+        // Algumas colunas
+        const pillarGeo = new THREE.CylinderGeometry(0.3, 0.3, 2);
+        const pillarMat = new THREE.MeshStandardMaterial({ color: 0x8866ff });
+        for (let i = -5; i <= 5; i+=2.5) {
+            for (let j = -5; j <= 5; j+=2.5) {
+                if (Math.random() > 0.7) {
+                    const pillar = new THREE.Mesh(pillarGeo, pillarMat);
+                    pillar.position.set(i, 1, j);
+                    pillar.castShadow = true;
+                    pillar.receiveShadow = true;
+                    scene.add(pillar);
+                }
             }
         }
 
-        // --- Variáveis do modelo ---
-        let model = null;
+        // --- Variáveis do personagem ---
+        let character = null;
         let mixer = null;
         let clock = new THREE.Clock();
         
-        // Estado da animação
-        let isPlaying = true;
-        
-        // Controles de grade
-        let gridVisible = true;
+        // Posição e rotação
+        const characterState = {
+            position: new THREE.Vector3(0, 0, 0),
+            rotation: 0, // em radianos
+            speed: 1.5,
+            moveFwd: false,
+            moveBwd: false,
+            moveLeft: false,
+            moveRight: false,
+            rotateLeft: false,
+            rotateRight: false
+        };
 
         // Elementos DOM
         const loadingEl = document.getElementById('loading');
         const statusEl = document.getElementById('status');
-        const playBtn = document.getElementById('playBtn');
-        const pauseBtn = document.getElementById('pauseBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        const gridBtn = document.getElementById('gridBtn');
+        const speedSlider = document.getElementById('speed-slider');
+        const speedValue = document.getElementById('speed-value');
+        const gridBtn = document.getElementById('grid-btn');
+        
+        // Controles de movimento
+        document.getElementById('move-fwd').addEventListener('mousedown', () => characterState.moveFwd = true);
+        document.getElementById('move-fwd').addEventListener('mouseup', () => characterState.moveFwd = false);
+        document.getElementById('move-fwd').addEventListener('mouseleave', () => characterState.moveFwd = false);
+        
+        document.getElementById('move-bwd').addEventListener('mousedown', () => characterState.moveBwd = true);
+        document.getElementById('move-bwd').addEventListener('mouseup', () => characterState.moveBwd = false);
+        document.getElementById('move-bwd').addEventListener('mouseleave', () => characterState.moveBwd = false);
+        
+        document.getElementById('move-left').addEventListener('mousedown', () => characterState.moveLeft = true);
+        document.getElementById('move-left').addEventListener('mouseup', () => characterState.moveLeft = false);
+        document.getElementById('move-left').addEventListener('mouseleave', () => characterState.moveLeft = false);
+        
+        document.getElementById('move-right').addEventListener('mousedown', () => characterState.moveRight = true);
+        document.getElementById('move-right').addEventListener('mouseup', () => characterState.moveRight = false);
+        document.getElementById('move-right').addEventListener('mouseleave', () => characterState.moveRight = false);
+        
+        document.getElementById('rotate-left').addEventListener('mousedown', () => characterState.rotateLeft = true);
+        document.getElementById('rotate-left').addEventListener('mouseup', () => characterState.rotateLeft = false);
+        document.getElementById('rotate-left').addEventListener('mouseleave', () => characterState.rotateLeft = false);
+        
+        document.getElementById('rotate-right').addEventListener('mousedown', () => characterState.rotateRight = true);
+        document.getElementById('rotate-right').addEventListener('mouseup', () => characterState.rotateRight = false);
+        document.getElementById('rotate-right').addEventListener('mouseleave', () => characterState.rotateRight = false);
+        
+        document.getElementById('reset-pos').addEventListener('click', () => {
+            if (character) {
+                character.position.set(0, 0, 0);
+                character.rotation.y = 0;
+                characterState.position.set(0, 0, 0);
+                characterState.rotation = 0;
+                controls.target.set(0, 1, 0);
+            }
+        });
 
-        // --- Carregar o modelo GLB ---
+        // Speed slider
+        speedSlider.addEventListener('input', (e) => {
+            characterState.speed = parseFloat(e.target.value);
+            speedValue.textContent = characterState.speed.toFixed(1) + 'x';
+        });
+
+        // Grid toggle
+        let gridVisible = true;
+        gridBtn.addEventListener('click', () => {
+            gridVisible = !gridVisible;
+            gridHelper.visible = gridVisible;
+            gridBtn.classList.toggle('active', gridVisible);
+            gridBtn.innerHTML = gridVisible ? '⬚' : '◻';
+        });
+
+        // --- Teclado ---
+        window.addEventListener('keydown', (e) => {
+            switch(e.code) {
+                case 'KeyW': characterState.moveFwd = true; e.preventDefault(); break;
+                case 'KeyS': characterState.moveBwd = true; e.preventDefault(); break;
+                case 'KeyA': characterState.moveLeft = true; e.preventDefault(); break;
+                case 'KeyD': characterState.moveRight = true; e.preventDefault(); break;
+                case 'KeyQ': characterState.rotateLeft = true; e.preventDefault(); break;
+                case 'KeyE': characterState.rotateRight = true; e.preventDefault(); break;
+                case 'ShiftLeft':
+                case 'ShiftRight':
+                    characterState.speed = 2.5;
+                    speedSlider.value = 2.5;
+                    speedValue.textContent = '2.5x';
+                    e.preventDefault();
+                    break;
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            switch(e.code) {
+                case 'KeyW': characterState.moveFwd = false; e.preventDefault(); break;
+                case 'KeyS': characterState.moveBwd = false; e.preventDefault(); break;
+                case 'KeyA': characterState.moveLeft = false; e.preventDefault(); break;
+                case 'KeyD': characterState.moveRight = false; e.preventDefault(); break;
+                case 'KeyQ': characterState.rotateLeft = false; e.preventDefault(); break;
+                case 'KeyE': characterState.rotateRight = false; e.preventDefault(); break;
+                case 'ShiftLeft':
+                case 'ShiftRight':
+                    characterState.speed = parseFloat(speedSlider.value);
+                    e.preventDefault();
+                    break;
+            }
+        });
+
+        // --- Joystick simples (toque/mouse) ---
+        const joystickArea = document.getElementById('joystick-area');
+        const joystick = document.getElementById('joystick');
+        let joystickActive = false;
+        const joystickCenter = { x: 0, y: 0 };
+
+        joystickArea.addEventListener('mousedown', (e) => {
+            joystickActive = true;
+            updateJoystick(e);
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (joystickActive) updateJoystick(e);
+        });
+
+        window.addEventListener('mouseup', () => {
+            joystickActive = false;
+            joystick.style.transform = 'translate(0px, 0px)';
+            characterState.moveFwd = false;
+            characterState.moveBwd = false;
+            characterState.moveLeft = false;
+            characterState.moveRight = false;
+        });
+
+        function updateJoystick(e) {
+            const rect = joystickArea.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            let dx = e.clientX - centerX;
+            let dy = e.clientY - centerY;
+            
+            // Limitar ao raio do joystick
+            const distance = Math.sqrt(dx*dx + dy*dy);
+            const maxDistance = 40;
+            
+            if (distance > maxDistance) {
+                dx = (dx / distance) * maxDistance;
+                dy = (dy / distance) * maxDistance;
+            }
+            
+            joystick.style.transform = `translate(${dx}px, ${dy}px)`;
+            
+            // Converter para direções
+            const threshold = 15;
+            characterState.moveFwd = dy < -threshold;
+            characterState.moveBwd = dy > threshold;
+            characterState.moveLeft = dx < -threshold;
+            characterState.moveRight = dx > threshold;
+        }
+
+        // --- Carregar o modelo ---
         const loader = new GLTFLoader();
         
-        // IMPORTANTE: Substitua 'novo.glb' pelo caminho correto do seu arquivo
         loader.load(
             'novo.glb',
             (gltf) => {
-                model = gltf.scene;
+                character = gltf.scene;
                 
-                // Centralizar o modelo (ajustar posição se necessário)
-                model.position.set(0, 0, 0);
-                
-                // Ajustar escala se necessário (descomente e ajuste se o modelo estiver muito grande/pequeno)
-                // model.scale.set(1, 1, 1);
-                
-                // Habilitar sombras no modelo
-                model.traverse((node) => {
+                character.position.set(0, 0, 0);
+                character.traverse((node) => {
                     if (node.isMesh) {
                         node.castShadow = true;
                         node.receiveShadow = true;
-                        
-                        // Otimizar materiais
-                        if (node.material) {
-                            if (Array.isArray(node.material)) {
-                                node.material.forEach(m => {
-                                    m.roughness = 0.4;
-                                    m.metalness = 0.1;
-                                    if (m.map) m.map.anisotropy = 16;
-                                });
-                            } else {
-                                node.material.roughness = 0.4;
-                                node.material.metalness = 0.1;
-                                if (node.material.map) node.material.map.anisotropy = 16;
-                            }
-                        }
                     }
                 });
                 
-                scene.add(model);
+                scene.add(character);
                 
                 // Configurar animações
                 if (gltf.animations && gltf.animations.length > 0) {
-                    mixer = new THREE.AnimationMixer(model);
+                    mixer = new THREE.AnimationMixer(character);
                     
-                    // Tocar todas as animações encontradas
                     gltf.animations.forEach((clip) => {
                         const action = mixer.clipAction(clip);
                         action.play();
-                        
-                        // Mostrar nome da animação no status
-                        if (clip.name) {
-                            statusEl.innerHTML = `🚶 Animação: ${clip.name}`;
-                        }
                     });
-                    
-                    console.log('Animações carregadas:', gltf.animations);
-                } else {
-                    statusEl.innerHTML = '⚠️ Nenhuma animação encontrada';
                 }
                 
-                // Esconder loading
                 loadingEl.classList.add('hidden');
-                
-                console.log('Modelo carregado com sucesso!');
+                console.log('Personagem carregado!');
             },
             (xhr) => {
-                // Progresso do carregamento
                 const percent = Math.floor((xhr.loaded / xhr.total) * 100);
-                loadingEl.innerHTML = `<span class="spinner"></span> Carregando modelo... ${percent}%`;
+                loadingEl.innerHTML = `<span class="spinner"></span> Carregando... ${percent}%`;
             },
             (error) => {
-                console.error('Erro ao carregar modelo:', error);
-                loadingEl.innerHTML = '❌ Erro ao carregar modelo. Verifique o console.';
-                statusEl.innerHTML = '❌ Erro no carregamento';
+                console.error('Erro:', error);
+                loadingEl.innerHTML = '❌ Erro ao carregar. Criando placeholder...';
                 
-                // Criar um cubo de placeholder para visualização
-                const geometry = new THREE.BoxGeometry(1, 2, 1);
-                const material = new THREE.MeshStandardMaterial({ color: 0xff3366, wireframe: true });
-                const cube = new THREE.Mesh(geometry, material);
-                cube.position.set(0, 1, 0);
-                cube.castShadow = true;
-                cube.receiveShadow = true;
-                scene.add(cube);
-                
-                // Adicionar texto de erro
-                const canvas = document.createElement('canvas');
-                canvas.width = 256;
-                canvas.height = 128;
-                const ctx = canvas.getContext('2d');
-                ctx.fillStyle = '#ff3366';
-                ctx.font = 'bold 20px Arial';
-                ctx.fillText('Erro ao carregar', 10, 50);
-                ctx.fillText('novo.glb', 10, 80);
-                
-                const texture = new THREE.CanvasTexture(canvas);
-                const textMat = new THREE.SpriteMaterial({ map: texture });
-                const textSprite = new THREE.Sprite(textMat);
-                textSprite.scale.set(2, 1, 1);
-                textSprite.position.set(0, 2.5, 0);
-                scene.add(textSprite);
+                // Placeholder
+                const geometry = new THREE.BoxGeometry(0.8, 1.8, 0.8);
+                const material = new THREE.MeshStandardMaterial({ color: 0xff3366 });
+                character = new THREE.Mesh(geometry, material);
+                character.position.set(0, 0.9, 0);
+                character.castShadow = true;
+                character.receiveShadow = true;
+                scene.add(character);
                 
                 loadingEl.classList.add('hidden');
             }
         );
 
-        // --- Controles de animação ---
-        playBtn.addEventListener('click', () => {
-            if (mixer) {
-                mixer.timeScale = 1;
-                isPlaying = true;
-                playBtn.classList.add('active');
-                pauseBtn.classList.remove('active');
-                statusEl.innerHTML = '▶ Animação: Playing';
+        // --- Atualização do movimento ---
+        function updateMovement(delta) {
+            if (!character) return;
+            
+            const moveSpeed = characterState.speed * delta * 2;
+            const rotateSpeed = 2 * delta;
+            
+            // Rotação
+            if (characterState.rotateLeft) {
+                characterState.rotation += rotateSpeed;
             }
-        });
-
-        pauseBtn.addEventListener('click', () => {
-            if (mixer) {
-                mixer.timeScale = 0;
-                isPlaying = false;
-                pauseBtn.classList.add('active');
-                playBtn.classList.remove('active');
-                statusEl.innerHTML = '⏸ Animação: Paused';
+            if (characterState.rotateRight) {
+                characterState.rotation -= rotateSpeed;
             }
-        });
-
-        resetBtn.addEventListener('click', () => {
-            if (mixer) {
-                mixer.setTime(0);
-                if (!isPlaying) {
-                    // Se estiver pausado, continua pausado mas no frame 0
-                    mixer.timeScale = 0;
-                }
-                statusEl.innerHTML = '⟲ Animação: Reset';
-                setTimeout(() => {
-                    statusEl.innerHTML = isPlaying ? '▶ Animação: Playing' : '⏸ Animação: Paused';
-                }, 1000);
+            
+            // Aplicar rotação ao personagem
+            character.rotation.y = characterState.rotation;
+            
+            // Movimento baseado na direção atual
+            let moveX = 0;
+            let moveZ = 0;
+            
+            if (characterState.moveFwd) {
+                moveZ -= moveSpeed;
             }
-        });
-
-        gridBtn.addEventListener('click', () => {
-            gridVisible = !gridVisible;
-            gridHelper.visible = gridVisible;
-            plane.visible = gridVisible;
-            gridBtn.classList.toggle('active', gridVisible);
-            gridBtn.innerHTML = gridVisible ? '⬚ Grid On' : '⬚ Grid Off';
-        });
-
-        // --- Estrelas de fundo (partículas) ---
-        const starsGeometry = new THREE.BufferGeometry();
-        const starsCount = 1000;
-        const starsPositions = new Float32Array(starsCount * 3);
-        
-        for (let i = 0; i < starsCount * 3; i += 3) {
-            starsPositions[i] = (Math.random() - 0.5) * 200;
-            starsPositions[i+1] = (Math.random() - 0.5) * 200;
-            starsPositions[i+2] = (Math.random() - 0.5) * 200;
+            if (characterState.moveBwd) {
+                moveZ += moveSpeed;
+            }
+            if (characterState.moveLeft) {
+                moveX -= moveSpeed;
+            }
+            if (characterState.moveRight) {
+                moveX += moveSpeed;
+            }
+            
+            // Ajustar movimento baseado na rotação do personagem
+            if (moveX !== 0 || moveZ !== 0) {
+                const forward = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), characterState.rotation);
+                const right = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), characterState.rotation);
+                
+                const movement = new THREE.Vector3()
+                    .addScaledVector(forward, moveZ)
+                    .addScaledVector(right, moveX);
+                
+                character.position.x += movement.x;
+                character.position.z += movement.z;
+                
+                // Atualizar estado
+                characterState.position.copy(character.position);
+            }
+            
+            // Atualizar alvo da câmera para seguir o personagem
+            controls.target.copy(character.position.clone().add(new THREE.Vector3(0, 1, 0)));
+            
+            // Atualizar status
+            statusEl.innerHTML = `🎮 Posição: X:${character.position.x.toFixed(2)}, Z:${character.position.z.toFixed(2)} | Ângulo: ${(characterState.rotation * 180 / Math.PI).toFixed(0)}°`;
         }
-        
-        starsGeometry.setAttribute('position', new THREE.BufferAttribute(starsPositions, 3));
-        
-        const starsMaterial = new THREE.PointsMaterial({ color: 0x888888, size: 0.2, transparent: true });
-        const stars = new THREE.Points(starsGeometry, starsMaterial);
-        scene.add(stars);
 
-        // --- Animação principal ---
+        // --- Animação ---
         function animate() {
             requestAnimationFrame(animate);
 
             const delta = clock.getDelta();
 
-            // Atualizar animações do modelo
             if (mixer) {
                 mixer.update(delta);
             }
 
-            // Rotacionar estrelas lentamente
-            stars.rotation.y += 0.0001;
+            updateMovement(delta);
 
-            // Atualizar controles
             controls.update();
-
-            // Renderizar cena
             renderer.render(scene, camera);
         }
 
         animate();
 
-        // --- Ajuste de tamanho da tela ---
-        window.addEventListener('resize', onWindowResize, false);
-        
-        function onWindowResize() {
+        // --- Resize ---
+        window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-
-        // --- Teclado shortcuts (opcional) ---
-        window.addEventListener('keydown', (e) => {
-            if (e.code === 'Space') {
-                e.preventDefault();
-                if (isPlaying) {
-                    pauseBtn.click();
-                } else {
-                    playBtn.click();
-                }
-            } else if (e.code === 'KeyR') {
-                resetBtn.click();
-            } else if (e.code === 'KeyG') {
-                gridBtn.click();
-            }
         });
-
-        console.log('Visualizador pronto!');
     </script>
 </body>
 </html>
