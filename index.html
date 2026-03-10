@@ -4,27 +4,53 @@
     <meta charset="UTF-8">
     <title>Meu Personagem 3D</title>
     <style>
-        body { margin: 0; background-color: #1a1a1a; }
-        /* Estilizando o container do modelo com CSS */
+        body { margin: 0; background-color: #1a1a1a; overflow: hidden; }
         model-viewer {
             width: 100%;
             height: 100vh;
             --poster-color: transparent;
         }
+        #info {
+            position: absolute; top: 10px; left: 10px; color: white;
+            font-family: sans-serif; background: rgba(0,0,0,0.5); padding: 10px;
+        }
     </style>
 </head>
 <body>
 
+    <div id="info">Use W, A, S, D para mover o Iron Man</div>
+
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 
     <model-viewer 
+        id="personagem"
         src="IronMan.glb" 
         alt="Modelo 3D do Iron Man" 
-        auto-rotate 
         camera-controls 
         shadow-intensity="1"
-        exposure="1">
-    </model-viewer>
+        exposure="1"
+        camera-target="0m 0m 0m"> </model-viewer>
+
+    <script>
+        const modelViewer = document.querySelector('#personagem');
+        // Posição inicial
+        let x = 0;
+        let z = 0;
+        const velocidade = 0.5; // Ajuste aqui se estiver muito rápido/lento
+
+        window.addEventListener('keydown', (event) => {
+            const tecla = event.key.toLowerCase();
+
+            if (tecla === 'w') z -= velocidade;
+            if (tecla === 's') z += velocidade;
+            if (tecla === 'a') x -= velocidade;
+            if (tecla === 'd') x += velocidade;
+
+            // Atualiza a posição do alvo da câmera e do modelo no espaço
+            // O model-viewer usa 'camera-target' para mover o ponto central
+            modelViewer.cameraTarget = `${x}m 0m ${z}m`;
+        });
+    </script>
 
 </body>
 </html>
