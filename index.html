@@ -106,8 +106,8 @@ scene.background = new THREE.Color(0x050810);
 scene.fog = new THREE.FogExp2(0x050810, 0.035);
 
 // ─── câmera ──────────────────────────────────────────────────────────────────
-var camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.01, 200);
-camera.position.set(0, 2, 5);
+var camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.001, 1000);
+camera.position.set(0, 2, 8);
 camera.lookAt(0, 1, 0);
 
 // ─── luzes ───────────────────────────────────────────────────────────────────
@@ -137,7 +137,7 @@ ring.position.y = 0.01;
 scene.add(ring);
 
 // ─── orbit camera manual ─────────────────────────────────────────────────────
-var orb = { on: false, sx: 0, sy: 0, th: 0.2, ph: 0.35, r: 5, tTh: 0.2, tPh: 0.35, tR: 5 };
+var orb = { on: false, sx: 0, sy: 0, th: 0.2, ph: 0.35, r: 8, tTh: 0.2, tPh: 0.35, tR: 8 };
 var camTgt = new THREE.Vector3(0, 1, 0);
 
 renderer.domElement.addEventListener('mousedown', function(e) { orb.on = true; orb.sx = e.clientX; orb.sy = e.clientY; });
@@ -149,7 +149,7 @@ window.addEventListener('mousemove', function(e) {
   orb.sx = e.clientX; orb.sy = e.clientY;
 });
 renderer.domElement.addEventListener('wheel', function(e) {
-  orb.tR = Math.max(1.5, Math.min(20, orb.tR + e.deltaY * 0.008));
+  orb.tR = Math.max(1.5, Math.min(50, orb.tR + e.deltaY * 0.02));
 }, { passive: true });
 
 // touch
@@ -223,10 +223,23 @@ gltfLoader.load(
     var sz  = box.getSize(new THREE.Vector3());
     log('Tamanho bruto: ' + sz.x.toFixed(2) + ' x ' + sz.y.toFixed(2) + ' x ' + sz.z.toFixed(2));
 
-    // normaliza altura para ~1.8 unidades
-    var escala = 1.8 / sz.y;
+    // Mixamo exporta em cm — detecta e corrige automaticamente
+    var alturaRef = sz.y;
+    var escala;
+    if (alturaRef > 50) {
+      // modelo em centimetros (tipico do Mixamo FBX->GLB)
+      escala = 1.8 / alturaRef;
+      log('Modelo em CM detectado. Escala: ' + escala.toFixed(5));
+    } else if (alturaRef > 5) {
+      // modelo em decimetros ou similar
+      escala = 1.8 / alturaRef;
+      log('Escala normal: ' + escala.toFixed(4));
+    } else {
+      // ja em metros, so ajusta fino
+      escala = 1.8 / alturaRef;
+      log('Modelo em metros. Escala: ' + escala.toFixed(4));
+    }
     model.scale.setScalar(escala);
-    log('Escala aplicada: ' + escala.toFixed(4));
 
     // reposiciona com pes no chao, centrado em X/Z
     var box2   = new THREE.Box3().setFromObject(model);
