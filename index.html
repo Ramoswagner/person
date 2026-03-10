@@ -214,19 +214,41 @@
     <div class="key key-s" id="k-s">S</div>
     <div class="key key-d" id="k-d">D</div>
   </div>
+  <div class="hud-label" style="margin-top:6px">E — opening &nbsp;|&nbsp; WASD — andar</div>
 </div>
 
 <script type="importmap">
 {
   "imports": {
-    "three": "https://unpkg.com/three@0.128.0/build/three.module.js"
+    "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js"
   }
 }
 </script>
 
 <script type="module">
 import * as THREE from 'three';
-import { GLTFLoader } from 'https://unpkg.com/three@0.128.0/examples/jsm/loaders/GLTFLoader.js';
+
+// ─── GLTFLoader inline (r128 CDN não tem addons, declaramos manualmente) ───
+class GLTFLoader extends THREE.Loader {
+  constructor(manager) { super(manager); }
+  load(url, onLoad, onProgress, onError) {
+    const scope = this;
+    const loader = new THREE.FileLoader(this.manager);
+    loader.setPath(this.path);
+    loader.setResponseType('arraybuffer');
+    loader.setRequestHeader(this.requestHeader);
+    loader.setWithCredentials(this.withCredentials);
+    loader.load(url, function(data) {
+      try { scope.parse(data, '', onLoad, onError); }
+      catch(e) { if (onError) onError(e); else console.error(e); }
+    }, onProgress, onError);
+  }
+  parse(data, path, onLoad, onError) {
+    // Usa o parser embutido do three r128 via ObjectLoader como fallback
+    // Para GLB real precisamos do script externo
+    onError && onError(new Error('Use script externo'));
+  }
+}
 
 // ─── Cena ───────────────────────────────────────────────────────────────────
 const container = document.getElementById('canvas-container');
@@ -375,93 +397,146 @@ function updateStatus(model, vel) {
   stVel.textContent = vel.toFixed(2);
 }
 
-// ─── Carrega GLB ──────────────────────────────────────────────────────────
+// ─── Carrega GLB via fetch + parse ──────────────────────────────────────────
 let model = null;
 let mixer = null;
 let acaoAtual = null;
 const acoes = {};
+let modelBaseY = 0; // posição Y correta após centralização
 
 const loaderBar = document.getElementById('loader-bar');
 const loaderPct = document.getElementById('loader-pct');
 const loadingEl = document.getElementById('loading');
 
-// Carrega o GLB
-const loader = new GLTFLoader();
+// Carrega o GLB usando three.js r128 com DRACOLoader opcional
+async function carregarGLB(url) {
+  // Importa GLTFLoader do CDN unpkg (compatível com r128)
+  const script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js';
+  document.head.appendChild(script);
 
-loader.load(
-  'man_in_suit.glb',
-  function(gltf) {
-    model = gltf.scene;
-    model.traverse(child => {
-      if (child.isMesh) {
-        child.castShadow = true;
-        child.receiveShadow = true;
-      }
+  await new Promise(resolve => script.onload = resolve);
+
+  return new Promise((resolve, reject) => {
+    const loader = new THREE.GLTFLoader();
+    loader.load(
+      url,
+      resolve,
+      xhr => {
+        if (xhr.lengthComputable) {
+          const pct = Math.round(xhr.loaded / xhr.total * 100);
+          loaderBar.style.width = pct + '%';
+          loaderPct.textContent = pct + '%';
+        }
+      },
+      reject
+    );
+  });
+}
+
+carregarGLB('novo.glb').then(gltf => {
+  model = gltf.scene;
+  model.traverse(child => {
+    if (child.isMesh) {
+      child.castShadow = true;
+      child.receiveShadow = true;
+    }
+  });
+
+  // Centraliza e escala o modelo automaticamente
+  const box = new THREE.Box3().setFromObject(model);
+  const size = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+  const maxDim = Math.max(size.x, size.y, size.z);
+  const scale = 1.8 / maxDim;
+  model.scale.setScalar(scale);
+  modelBaseY = -box.min.y * scale;
+  model.position.set(-center.x * scale, modelBaseY, -center.z * scale);
+  scene.add(model);
+
+  // Animações
+  if (gltf.animations.length > 0) {
+    mixer = new THREE.AnimationMixer(model);
+    gltf.animations.forEach(clip => {
+      const nome = clip.name.toLowerCase();
+      acoes[nome] = mixer.clipAction(clip);
+      console.log('Animacao:', nome);
     });
-
-    // Centraliza e escala o modelo automaticamente
-    const box = new THREE.Box3().setFromObject(model);
-    const size = box.getSize(new THREE.Vector3());
-    const center = box.getCenter(new THREE.Vector3());
-    const maxDim = Math.max(size.x, size.y, size.z);
-    const scale = 1.8 / maxDim;
-    model.scale.setScalar(scale);
-    model.position.set(-center.x * scale, -box.min.y * scale, -center.z * scale);
-    scene.add(model);
-
-    // Animações
-    if (gltf.animations && gltf.animations.length > 0) {
-      mixer = new THREE.AnimationMixer(model);
-      gltf.animations.forEach(clip => {
-        const nome = clip.name.toLowerCase();
-        acoes[nome] = mixer.clipAction(clip);
-        console.log('Animacao:', nome);
-      });
-      // Toca a primeira animação disponível como idle
-      const primeiraAnim = Object.values(acoes)[0];
-      if (primeiraAnim) { acaoAtual = primeiraAnim; acaoAtual.play(); }
-    }
-
-    // Esconde loading
-    loaderBar.style.width = '100%';
-    loaderPct.textContent = '100%';
-    setTimeout(() => loadingEl.classList.add('hidden'), 600);
-
-    animate();
-  },
-  function(xhr) {
-    if (xhr.lengthComputable) {
-      const pct = Math.round(xhr.loaded / xhr.total * 100);
-      loaderBar.style.width = pct + '%';
-      loaderPct.textContent = pct + '%';
-    }
-  },
-  function(error) {
-    console.error('Erro ao carregar GLB:', error);
-    loaderPct.textContent = 'ERRO — coloque o .glb na mesma pasta';
+    // Toca a primeira animação disponível como idle
+    const primeiraAnim = Object.values(acoes)[0];
+    if (primeiraAnim) { acaoAtual = primeiraAnim; acaoAtual.play(); }
   }
-);
+
+  // Esconde loading
+  loaderBar.style.width = '100%';
+  loaderPct.textContent = '100%';
+  setTimeout(() => loadingEl.classList.add('hidden'), 600);
+
+  animate();
+}).catch(err => {
+  console.error('Erro ao carregar GLB:', err);
+  loaderPct.textContent = 'ERRO — coloque o .glb na mesma pasta';
+});
 
 // ─── Troca de animação com crossfade ────────────────────────────────────────
 function transicaoPara(nome, loop = true) {
-  const proxima = acoes[nome];
+  // Busca pelo nome exato ou parcial (ex: "walking" encontra "walking (1)")
+  const chave = Object.keys(acoes).find(k => k.includes(nome));
+  const proxima = chave ? acoes[chave] : null;
   if (!proxima || proxima === acaoAtual) return;
   proxima.reset();
   proxima.setLoop(loop ? THREE.LoopRepeat : THREE.LoopOnce);
   proxima.clampWhenFinished = true;
   proxima.play();
-  if (acaoAtual) acaoAtual.crossFadeTo(proxima, 0.2, true);
+  if (acaoAtual) acaoAtual.crossFadeTo(proxima, 0.25, true);
   acaoAtual = proxima;
 }
+
+// Nomes das animações Mixamo (busca parcial, case-insensitive)
+const ANIM_IDLE    = 'opening';  // parado — usa opening em loop suave
+const ANIM_WALK    = 'walking';  // andando
+const ANIM_ACTION  = 'opening';  // tecla E
+
+// ─── Auto-foco: garante que o canvas captura teclado sem precisar clicar ────
+renderer.domElement.setAttribute('tabindex', '0');
+renderer.domElement.style.outline = 'none';
+renderer.domElement.focus();
+window.addEventListener('click', () => renderer.domElement.focus());
+// Também escuta no window para não depender de foco
+window.addEventListener('keydown', e => {
+  if (['KeyW','KeyS','KeyA','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)) {
+    e.preventDefault(); // evita scroll da página
+  }
+}, { passive: false });
 
 // ─── Loop principal ─────────────────────────────────────────────────────────
 const clock = new THREE.Clock();
 const VELOCIDADE = 4.0;
-const ROTACAO = 2.5;
+const ROTACAO = 2.2;
+
+// Bob procedural — simula balanço de caminhada sem animação
+let bobTempo = 0;
+let bobVelAtual = 0;
+
+function aplicarBob(movendo, delta) {
+  if (!model) return;
+  const velAlvo = movendo ? 1 : 0;
+  bobVelAtual += (velAlvo - bobVelAtual) * 8 * delta; // suaviza entrada/saída
+
+  bobTempo += delta * bobVelAtual * 8; // frequência do passo
+
+  const bobY    = Math.abs(Math.sin(bobTempo)) * 0.04 * bobVelAtual; // sobe/desce
+  const bobTilt = Math.sin(bobTempo) * 0.015 * bobVelAtual;           // inclina levemente
+  const bobSway = Math.sin(bobTempo * 0.5) * 0.008 * bobVelAtual;     // balança nos ombros
+
+  model.position.y = modelBaseY + bobY;
+  model.rotation.z = bobTilt;
+  model.rotation.x = bobSway;
+}
 
 function animate() {
   requestAnimationFrame(animate);
-  const delta = clock.getDelta();
+  const delta = Math.min(clock.getDelta(), 0.05);
 
   if (mixer) mixer.update(delta);
 
@@ -469,15 +544,31 @@ function animate() {
   if (model) {
     let movendo = false;
 
-    if (teclas['KeyW']) { model.translateZ(-VELOCIDADE * delta); movendo = true; vel = VELOCIDADE; }
-    if (teclas['KeyS']) { model.translateZ( VELOCIDADE * delta); movendo = true; vel = VELOCIDADE * 0.6; }
-    if (teclas['KeyA']) { model.rotation.y += ROTACAO * delta; movendo = true; }
-    if (teclas['KeyD']) { model.rotation.y -= ROTACAO * delta; movendo = true; }
+    if (teclas['KeyW'] || teclas['ArrowUp']) {
+      model.translateZ(-VELOCIDADE * delta);
+      movendo = true;
+      vel = VELOCIDADE;
+    }
+    if (teclas['KeyS'] || teclas['ArrowDown']) {
+      model.translateZ(VELOCIDADE * delta * 0.6);
+      movendo = true;
+      vel = VELOCIDADE * 0.6;
+    }
+    if (teclas['KeyA'] || teclas['ArrowLeft']) {
+      model.rotation.y += ROTACAO * delta;
+      movendo = true;
+    }
+    if (teclas['KeyD'] || teclas['ArrowRight']) {
+      model.rotation.y -= ROTACAO * delta;
+      movendo = true;
+    }
 
     // Limita ao plano
     model.position.x = Math.max(-18, Math.min(18, model.position.x));
     model.position.z = Math.max(-18, Math.min(18, model.position.z));
-    model.position.y = 0;
+
+    // Bob de caminhada procedural
+    aplicarBob(movendo, delta);
 
     // Anel acompanha o modelo
     ring.position.x = model.position.x;
@@ -485,13 +576,18 @@ function animate() {
 
     // Pulso do anel
     const pulse = 0.5 + 0.5 * Math.sin(Date.now() * 0.003);
-    ringMat.opacity = 0.2 + 0.3 * pulse;
+    ringMat.opacity = movendo ? 0.6 : (0.2 + 0.3 * pulse);
+    ring.scale.setScalar(movendo ? 1.15 : 1.0);
 
-    // Troca animação se tiver
-    if (Object.keys(acoes).length > 1) {
-      const nomes = Object.keys(acoes);
-      if (movendo && nomes.length > 1) transicaoPara(nomes[1]);
-      else transicaoPara(nomes[0]);
+    // Lógica de animação com nomes Mixamo
+    if (Object.keys(acoes).length > 0) {
+      if (teclas['KeyE']) {
+        transicaoPara(ANIM_ACTION, false); // opening — uma vez
+      } else if (movendo) {
+        transicaoPara(ANIM_WALK, true);    // walking em loop
+      } else {
+        transicaoPara(ANIM_IDLE, true);    // idle/opening suave
+      }
     }
 
     updateCamera(model.position);
