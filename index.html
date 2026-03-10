@@ -1,124 +1,84 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>Iron Man Interativo</title>
-    <style>
-        body { margin: 0; overflow: hidden; background: #111; font-family: sans-serif; }
-        #controles { position: absolute; bottom: 20px; left: 20px; color: white; background: rgba(0,0,0,0.7); padding: 15px; border-radius: 8px; }
-        kbd { background: #444; padding: 2px 5px; border-radius: 3px; border: 1px solid #888; }
-    </style>
-</head>
-<body>
+<script type="module">
+    import * as THREE from 'three';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-    <div id="controles">
-        <p><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> - Mover</p>
-        <p><kbd>Espaço</kbd> - Pular</p>
-        <p><kbd>T</kbd> - Acenar (Hello)</p>
-        <p><kbd>F</kbd> - Empurrar (Punch/Push)</p>
-    </div>
+    // ... (Configuração de Cena, Luz e Câmera igual ao anterior) ...
 
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-            }
+    let model, mixer;
+    let acoes = {}; // Guardará as animações: flying, opening, jumping
+    let acaoAtual;
+    const teclas = {};
+
+    const loader = new GLTFLoader();
+    loader.load('IronMan.glb', (gltf) => {
+        model = gltf.scene;
+        scene.add(model);
+
+        mixer = new THREE.AnimationMixer(model);
+
+        // Mapeia as animações pelo nome exato que você definiu
+        gltf.animations.forEach((clip) => {
+            const nome = clip.name.toLowerCase();
+            acoes[nome] = mixer.clipAction(clip);
+            console.log("Animação carregada:", nome);
+        });
+
+        // Define 'flying' como animação padrão (Idle/Andar)
+        if (acoes['flying']) {
+            acaoAtual = acoes['flying'];
+            acaoAtual.play();
         }
-    </script>
 
-    <script type="module">
-        import * as THREE from 'three';
-        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        animate();
+    });
 
-        // 1. Configuração Básica
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x222222);
+    // Detectar Teclas
+    window.addEventListener('keydown', (e) => teclas[e.code] = true);
+    window.addEventListener('keyup', (e) => teclas[e.code] = false);
+
+    // Função para trocar de animação suavemente (Crossfade)
+    function transicaoPara(novaAnimacao, loop = true) {
+        const proxima = acoes[novaAnimacao];
+        if (!proxima || proxima === acaoAtual) return;
+
+        proxima.reset();
+        proxima.setLoop(loop ? THREE.LoopRepeat : THREE.LoopOnce);
+        proxima.clampWhenFinished = true; // Para no último frame se não for loop
         
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 5, 10);
+        proxima.play();
+        acaoAtual.crossFadeTo(proxima, 0.2, true);
+        acaoAtual = proxima;
+    }
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true;
-        document.body.appendChild(renderer.domElement);
+    const clock = new THREE.Clock();
 
-        // 2. Luzes
-        scene.add(new THREE.AmbientLight(0xffffff, 0.8));
-        const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
-        dirLight.position.set(5, 10, 5);
-        dirLight.castShadow = true;
-        scene.add(dirLight);
+    function animate() {
+        requestAnimationFrame(animate);
+        const delta = clock.getDelta();
+        if (mixer) mixer.update(delta);
 
-        // 3. Chão (para o personagem não flutuar no nada)
-        const plane = new THREE.Mesh(
-            new THREE.PlaneGeometry(100, 100),
-            new THREE.MeshStandardMaterial({ color: 0x333333 })
-        );
-        plane.rotation.x = -Math.PI / 2;
-        plane.receiveShadow = true;
-        scene.add(plane);
+        if (model) {
+            // MOVIMENTAÇÃO (W, A, S, D)
+            let movendo = false;
 
-        // 4. Variáveis do Personagem
-        let model, mixer, animations = {};
-        const keys = {};
+            if (teclas['KeyW']) { model.translateZ(0.1); movendo = true; }
+            if (teclas['KeyS']) { model.translateZ(-0.1); movendo = true; }
+            if (teclas['KeyA']) { model.rotation.y += 0.05; movendo = true; }
+            if (teclas['KeyD']) { model.rotation.y -= 0.05; movendo = true; }
 
-        // 5. Carregar Iron Man
-        const loader = new GLTFLoader();
-        loader.load('IronMan.glb', (gltf) => {
-            model = gltf.scene;
-            model.traverse(n => { if (n.isMesh) n.castShadow = true; });
-            scene.add(model);
-
-            // Mixer para gerenciar animações
-            mixer = new THREE.AnimationMixer(model);
-            gltf.animations.forEach((clip) => {
-                animations[clip.name.toLowerCase()] = mixer.clipAction(clip);
-            });
-
-            animate();
-        });
-
-        // 6. Controles
-        window.addEventListener('keydown', (e) => keys[e.code] = true);
-        window.addEventListener('keyup', (e) => keys[e.code] = false);
-
-        const clock = new THREE.Clock();
-
-        function animate() {
-            requestAnimationFrame(animate);
-            const delta = clock.getDelta();
-            if (mixer) mixer.update(delta);
-
-            if (model) {
-                // Movimento básico e Rotação
-                if (keys['KeyW']) { model.translateZ(0.1); model.rotation.y = Math.PI; }
-                if (keys['KeyS']) { model.translateZ(0.1); model.rotation.y = 0; }
-                if (keys['KeyA']) { model.rotation.y += 0.05; }
-                if (keys['KeyD']) { model.rotation.y -= 0.05; }
-
-                // Gatilhos de Animação (Supondo que os nomes existam no seu GLB)
-                if (keys['Space']) playAnim('jump');
-                if (keys['KeyT']) playAnim('wave');
-                if (keys['KeyF']) playAnim('push');
-            }
-
-            renderer.render(scene, camera);
-        }
-
-        function playAnim(name) {
-            if (animations[name]) {
-                animations[name].reset().fadeIn(0.2).play();
-                // Para a animação após uma execução se não for loop
-                animations[name].setLoop(THREE.LoopOnce);
+            // LÓGICA DE TROCA DE ANIMAÇÃO
+            if (teclas['Space']) {
+                transicaoPara('jumping', false); // Pular (uma vez)
+            } else if (teclas['KeyE']) { // E para abrir porta
+                transicaoPara('opening', false);
+            } else if (movendo) {
+                transicaoPara('flying'); // Voar/Andar enquanto move
+            } else {
+                // Se quiser uma animação de parado (Idle), coloque aqui. 
+                // Se não, ele continuará em 'flying' (flutuando parado).
             }
         }
 
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-    </script>
-</body>
-</html>
+        renderer.render(scene, camera);
+    }
+</script>
