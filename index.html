@@ -1,465 +1,496 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GLB Walker - Controle Fluido</title>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>5 modelos PowerPoint • tendências 2026</title>
+  <!-- Font Awesome 6 (gratuito) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Google Fonts: Inter (moderna e limpa) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        #info {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 8px;
-            z-index: 10;
-            backdrop-filter: blur(5px);
-            border-left: 4px solid #ff6600;
-        }
+    body {
+      font-family: "Inter", system-ui, -apple-system, sans-serif;
+      background: #f2f5f9;
+      color: #1a1e2b;
+      line-height: 1.5;
+      padding: 2rem 1.5rem;
+    }
 
-        #hint {
-            position: absolute;
-            bottom: 30px;
-            left: 30px;
-            color: rgba(255,255,255,0.6);
-            font-size: 0.9rem;
-            background: rgba(0,0,0,0.4);
-            padding: 8px 15px;
-            border-radius: 20px;
-            backdrop-filter: blur(5px);
-            z-index: 15;
-        }
+    .container {
+      max-width: 1300px;
+      margin: 0 auto;
+    }
 
-        #status {
-            position: absolute;
-            bottom: 30px;
-            right: 30px;
-            color: white;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 10px 20px;
-            border-radius: 30px;
-            font-size: 0.9rem;
-            backdrop-filter: blur(5px);
-            z-index: 15;
-            border-right: 3px solid #ff6600;
-        }
+    /* cabeçalho */
+    .header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
 
-        #loading {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 1.2rem;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 20px 40px;
-            border-radius: 60px;
-            z-index: 100;
-            backdrop-filter: blur(10px);
-            border: 1px solid #ff6600;
-            transition: opacity 0.5s;
-        }
+    .header h1 {
+      font-size: 2.8rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(145deg, #1A2A4F, #2D3B6B, #4B3B6B);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
 
-        #loading.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
+    .header .sub {
+      font-size: 1.2rem;
+      font-weight: 300;
+      color: #4a4f63;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
 
-        .spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,102,0,0.3);
-            border-radius: 50%;
-            border-top-color: #ff6600;
-            animation: spin 1s ease-in-out infinite;
-            margin-right: 10px;
-        }
+    .header .sub span {
+      background: rgba(255,255,255,0.6);
+      backdrop-filter: blur(4px);
+      padding: 0.3rem 1rem;
+      border-radius: 40px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #1e293b;
+      border: 1px solid rgba(255,255,255,0.8);
+    }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 2rem 1.5rem;
+      margin-top: 2rem;
+    }
 
-        .key-box {
-            display: inline-block;
-            background: rgba(255,102,0,0.3);
-            border: 1px solid #ff6600;
-            border-radius: 5px;
-            padding: 2px 8px;
-            margin: 0 2px;
-            font-weight: bold;
-        }
-    </style>
+    /* cartão principal */
+    .card {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(2px);
+      border-radius: 2.2rem;
+      padding: 1.5rem 1.2rem 1.8rem 1.2rem;
+      box-shadow: 0 18px 35px -12px rgba(0, 10, 30, 0.15),
+                  inset 0 1px 2px rgba(255,255,255,0.6);
+      border: 1px solid rgba(255,255,255,0.45);
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card:hover {
+      transform: translateY(-10px) scale(1.01);
+      box-shadow: 0 30px 45px -15px rgba(20, 30, 80, 0.25);
+      border-color: rgba(255,255,255,0.9);
+    }
+
+    /* área de pré-visualização do slide (mockup) */
+    .preview {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border-radius: 1.5rem;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 10px 20px -8px rgba(0,0,0,0.2), inset 0 0 0 1px rgba(255,255,255,0.7);
+      transition: all 0.2s;
+    }
+
+    .preview > div {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    /* etiqueta "tendência 2026" */
+    .trend-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(10, 15, 30, 0.65);
+      backdrop-filter: blur(6px);
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.3rem 0.9rem;
+      border-radius: 30px;
+      letter-spacing: 0.3px;
+      border: 1px solid rgba(255,255,255,0.3);
+      z-index: 10;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .card h3 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin: 0.5rem 0 0.2rem;
+    }
+
+    .card .desc {
+      font-size: 0.9rem;
+      color: #3d4050;
+      margin-bottom: 1.5rem;
+      font-weight: 400;
+      line-height: 1.4;
+      opacity: 0.8;
+    }
+
+    .btn-group {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      margin-top: auto;
+    }
+
+    .btn {
+      background: white;
+      border: 1px solid #d0d7e5;
+      padding: 0.6rem 1rem;
+      border-radius: 3rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #1e1e2f;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: 0.15s;
+      flex: 1;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+      background: rgba(255,255,255,0.7);
+    }
+
+    .btn i {
+      font-size: 0.9rem;
+      color: #4b3b6b;
+    }
+
+    .btn:hover {
+      background: #1e1e2f;
+      border-color: #1e1e2f;
+      color: white;
+    }
+
+    .btn:hover i {
+      color: white;
+    }
+
+    .btn-download {
+      background: #1e1e2f;
+      border-color: #1e1e2f;
+      color: white;
+    }
+
+    .btn-download i {
+      color: #b6b0e0;
+    }
+
+    .btn-download:hover {
+      background: #2d2d4a;
+      border-color: #2d2d4a;
+    }
+
+    /* ---------- ESTILOS INDIVIDUAIS DOS 5 MODELOS (PREVIEW) ---------- */
+
+    /* Modelo 1 – Gradiente extremo + linhas tech */
+    .model1-preview {
+      background: linear-gradient(125deg, #F05B56, #FB8B4C, #E7498F, #A45EE5);
+      background-size: 200% 200%;
+      animation: gradientMove 8s ease infinite alternate;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .model1-preview::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: 
+        repeating-linear-gradient(45deg, rgba(255,255,255,0.25) 0px, rgba(255,255,255,0.25) 2px, transparent 2px, transparent 12px),
+        repeating-linear-gradient(135deg, rgba(255,255,240,0.3) 0px, rgba(255,255,240,0.3) 1px, transparent 1px, transparent 16px);
+      pointer-events: none;
+    }
+    @keyframes gradientMove {
+      0% { background-position: 0% 0%; }
+      100% { background-position: 100% 100%; }
+    }
+
+    /* Modelo 2 – Cyber Tech / circuitos */
+    .model2-preview {
+      background: #0b0f18;
+      position: relative;
+      overflow: hidden;
+    }
+    .circuit-line {
+      position: absolute;
+      background: #00ffaa30;
+    }
+    .circuit-line.horizontal {
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #0ff, #0ff, transparent);
+      top: 30%;
+      left: 0;
+      filter: blur(1px);
+      box-shadow: 0 0 8px #0ff;
+    }
+    .circuit-line.vertical {
+      height: 100%;
+      width: 2px;
+      background: linear-gradient(180deg, transparent, #ff55cc, #a44eff, transparent);
+      left: 60%;
+      top: 0;
+      filter: blur(1px);
+      box-shadow: 0 0 10px #f5f;
+    }
+    .circuit-dots {
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle at 20% 70%, #0ff 1.5px, transparent 1.5px),
+                        radial-gradient(circle at 75% 25%, #f0f 2px, transparent 2px),
+                        radial-gradient(circle at 45% 50%, #0ff 1px, transparent 1px),
+                        radial-gradient(circle at 85% 80%, #ffaa33 1.5px, transparent 1.5px);
+      background-size: 40px 40px;
+      opacity: 0.6;
+    }
+
+    /* Modelo 3 – Minimalismo absoluto */
+    .model3-preview {
+      background: #f1eee7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .minimal-circle {
+      width: 70px;
+      height: 70px;
+      background: radial-gradient(circle at 30% 30%, #EADBC6, #C8BDA8);
+      border-radius: 50%;
+      box-shadow: 0 15px 25px -8px rgba(90,70,50,0.2);
+      position: relative;
+      z-index: 2;
+    }
+    .minimal-line {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      width: 60px;
+      height: 4px;
+      background: #b9aa92;
+      border-radius: 10px;
+      opacity: 0.4;
+    }
+    .minimal-line.short {
+      width: 30px;
+      bottom: 35px;
+      left: 20px;
+      opacity: 0.2;
+    }
+
+    /* Modelo 4 – Geométrico / blocos de cor */
+    .model4-preview {
+      background: #131a2c;
+      position: relative;
+    }
+    .geo-shape {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      clip-path: polygon(0 0, 100% 0, 0 100%);
+      background: #fe5f75;
+      opacity: 0.9;
+    }
+    .geo-shape2 {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      clip-path: polygon(100% 100%, 0 100%, 100% 0);
+      background: #3ccfcf;
+      opacity: 0.8;
+    }
+    .geo-dot {
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      background: #f4d03f;
+      border-radius: 50%;
+      bottom: 18px;
+      right: 18px;
+      filter: drop-shadow(0 0 10px #f4d03f);
+    }
+
+    /* Modelo 5 – Glassmorphism + gradiente vivo */
+    .model5-preview {
+      background: linear-gradient(45deg, #f9d423, #f83691, #9040f5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .glass-panel {
+      width: 85%;
+      height: 70%;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(8px);
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,0.4);
+      box-shadow: 0 20px 30px -10px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .glass-panel i {
+      font-size: 2rem;
+      color: white;
+      text-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      opacity: 0.8;
+    }
+
+    /* rodapé */
+    .footer-note {
+      margin-top: 5rem;
+      text-align: center;
+      color: #7f8499;
+      font-size: 0.9rem;
+      border-top: 1px dashed rgba(0,0,0,0.1);
+      padding-top: 2rem;
+      font-weight: 300;
+    }
+
+    /* responsividade extra */
+    @media (max-width: 550px) {
+      body { padding: 1rem; }
+      .header h1 { font-size: 2.1rem; }
+      .grid { gap: 1.2rem; }
+    }
+  </style>
 </head>
 <body>
-    <div id="info">
-        <h2>🎮 Controle Fluido - Walking Animation</h2>
-        <p>Modelo: novo.glb | Movimento suave e responsivo</p>
+  <div class="container">
+    <div class="header">
+      <h1>5 modelos • power point 2026</h1>
+      <div class="sub">
+        <span>extremamente inovadores</span>
+        <i class="fa-solid fa-arrow-right-long" style="color:#5c5f77;"></i>
+        <span>gradiente + tech</span>
+        <span>minimalismo</span>
+        <span>glassmorphism</span>
+      </div>
+      <p style="margin-top: 1rem; color: #50546b; max-width: 600px; margin-left: auto; margin-right: auto;">
+        Toque visual e estruturas pensadas para apresentações que pedem futuro. 
+        Cada card representa um tema exclusivo para slides.
+      </p>
     </div>
 
-    <div id="hint">
-        <span class="key-box">W</span> <span class="key-box">A</span> <span class="key-box">S</span> <span class="key-box">D</span> Mover | 
-        <span class="key-box">Q</span> <span class="key-box">E</span> Rotacionar | 
-        <span class="key-box">Shift</span> Correr
+    <!-- grid com os 5 modelos -->
+    <div class="grid">
+      
+      <!-- 1. Gradiente extremo / tech gradient -->
+      <div class="card">
+        <div class="preview">
+          <div class="model1-preview">
+            <span class="trend-badge"><i class="fa-regular fa-star" style="margin-right: 4px;"></i>2026</span>
+          </div>
+        </div>
+        <h3>✦ Gradiente orgânico</h3>
+        <p class="desc">Cores que se movem, linhas diagonais e sobreposições. Energia visual para marcos criativos.</p>
+        <div class="btn-group">
+          <a href="#" class="btn"><i class="fa-regular fa-eye"></i> prévia</a>
+          <a href="#" class="btn btn-download"><i class="fa-regular fa-circle-down"></i> modelo</a>
+        </div>
+      </div>
+
+      <!-- 2. Cyber Tech / circuitos neon -->
+      <div class="card">
+        <div class="preview">
+          <div class="model2-preview">
+            <span class="trend-badge"><i class="fa-regular fa-microchip"></i> tech'26</span>
+            <div class="circuit-line horizontal"></div>
+            <div class="circuit-line vertical"></div>
+            <div class="circuit-dots"></div>
+          </div>
+        </div>
+        <h3>▣ Cyber matrix</h3>
+        <p class="desc">Traços de circuito, neon e profundidade escura. Para pitches de tecnologia e inovação.</p>
+        <div class="btn-group">
+          <a href="#" class="btn"><i class="fa-regular fa-eye"></i> prévia</a>
+          <a href="#" class="btn btn-download"><i class="fa-regular fa-circle-down"></i> modelo</a>
+        </div>
+      </div>
+
+      <!-- 3. Minimalismo puro (tendência 2026) -->
+      <div class="card">
+        <div class="preview">
+          <div class="model3-preview">
+            <span class="trend-badge">menos é mais</span>
+            <div class="minimal-circle"></div>
+            <div class="minimal-line"></div>
+            <div class="minimal-line short"></div>
+          </div>
+        </div>
+        <h3>○ Silent air</h3>
+        <p class="desc">Espaço vazio, textura suave, uma única forma. Foco absoluto no conteúdo.</p>
+        <div class="btn-group">
+          <a href="#" class="btn"><i class="fa-regular fa-eye"></i> prévia</a>
+          <a href="#" class="btn btn-download"><i class="fa-regular fa-circle-down"></i> modelo</a>
+        </div>
+      </div>
+
+      <!-- 4. Geométrico / blocos e cortes -->
+      <div class="card">
+        <div class="preview">
+          <div class="model4-preview">
+            <span class="trend-badge"><i class="fa-regular fa-shapes"></i> geométrico</span>
+            <div class="geo-shape"></div>
+            <div class="geo-shape2"></div>
+            <div class="geo-dot"></div>
+          </div>
+        </div>
+        <h3>⬥ Block divide</h3>
+        <p class="desc">Triângulos sobrepostos, cores fortes e ponto focal. Quebra de simetria moderna.</p>
+        <div class="btn-group">
+          <a href="#" class="btn"><i class="fa-regular fa-eye"></i> prévia</a>
+          <a href="#" class="btn btn-download"><i class="fa-regular fa-circle-down"></i> modelo</a>
+        </div>
+      </div>
+
+      <!-- 5. Glassmorphism + gradiente vivo -->
+      <div class="card">
+        <div class="preview">
+          <div class="model5-preview">
+            <span class="trend-badge">glass 2.0</span>
+            <div class="glass-panel">
+              <i class="fa-regular fa-gem"></i>
+            </div>
+          </div>
+        </div>
+        <h3>⏺ Frosted glass</h3>
+        <p class="desc">Camadas translúcidas, blur e gradiente vibrante ao fundo. Profundidade e frescor.</p>
+        <div class="btn-group">
+          <a href="#" class="btn"><i class="fa-regular fa-eye"></i> prévia</a>
+          <a href="#" class="btn btn-download"><i class="fa-regular fa-circle-down"></i> modelo</a>
+        </div>
+      </div>
     </div>
 
-    <div id="status">
-        🚶 Parado
+    <div class="footer-note">
+      <i class="fa-regular fa-copyright"></i> 2026 • templates conceito — clique em "modelo" para simular exportação<br>
+      <span style="opacity: 0.5;">design inspirado nas próximas tendências de apresentação</span>
     </div>
+  </div>
 
-    <div id="loading">
-        <span class="spinner"></span> Carregando modelo...
-    </div>
-
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
-            }
-        }
-    </script>
-
-    <script type="module">
-        import * as THREE from 'three';
-        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-
-        // --- Configuração inicial ---
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x1a1a2e);
-        scene.fog = new THREE.Fog(0x1a1a2e, 15, 40);
-
-        // Câmera
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(5, 3, 8);
-
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        renderer.setPixelRatio(window.devicePixelRatio);
-        document.body.appendChild(renderer.domElement);
-
-        // Controles da câmera (OrbitControls para liberdade de visão)
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
-        controls.maxPolarAngle = Math.PI / 2;
-        controls.minDistance = 3;
-        controls.maxDistance = 15;
-        controls.target.set(0, 1, 0);
-
-        // --- Iluminação ---
-        const ambientLight = new THREE.AmbientLight(0x404060);
-        scene.add(ambientLight);
-
-        const dirLight = new THREE.DirectionalLight(0xffffff, 1);
-        dirLight.position.set(5, 10, 7);
-        dirLight.castShadow = true;
-        dirLight.receiveShadow = true;
-        dirLight.shadow.mapSize.width = 1024;
-        dirLight.shadow.mapSize.height = 1024;
-        dirLight.shadow.camera.near = 1;
-        dirLight.shadow.camera.far = 20;
-        dirLight.shadow.camera.left = -10;
-        dirLight.shadow.camera.right = 10;
-        dirLight.shadow.camera.top = 10;
-        dirLight.shadow.camera.bottom = -10;
-        scene.add(dirLight);
-
-        // Luz de preenchimento
-        const fillLight = new THREE.PointLight(0x4466cc, 0.5);
-        fillLight.position.set(-5, 3, 5);
-        scene.add(fillLight);
-
-        // --- Cenário simples mas com referências ---
-        
-        // Chão com grade
-        const gridHelper = new THREE.GridHelper(20, 20, 0xff6600, 0x333344);
-        gridHelper.position.y = 0;
-        scene.add(gridHelper);
-
-        // Chão sólido semi-transparente
-        const groundGeometry = new THREE.CircleGeometry(15, 32);
-        const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x1a1a2e, transparent: true, opacity: 0.6 });
-        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-        ground.rotation.x = -Math.PI / 2;
-        ground.position.y = 0;
-        ground.receiveShadow = true;
-        scene.add(ground);
-
-        // Pequenos marcadores coloridos para referência espacial
-        const colors = [0xff3366, 0x33ccff, 0xffaa00, 0x66ff33];
-        for (let i = 0; i < 8; i++) {
-            const angle = (i / 8) * Math.PI * 2;
-            const radius = 5;
-            const x = Math.cos(angle) * radius;
-            const z = Math.sin(angle) * radius;
-            
-            const marker = new THREE.Mesh(
-                new THREE.ConeGeometry(0.3, 0.8, 8),
-                new THREE.MeshStandardMaterial({ color: colors[i % colors.length], emissive: 0x222222 })
-            );
-            marker.position.set(x, 0.4, z);
-            marker.castShadow = true;
-            marker.receiveShadow = true;
-            scene.add(marker);
-        }
-
-        // --- Variáveis do personagem ---
-        let character = null;
-        let mixer = null;
-        let clock = new THREE.Clock();
-        
-        // Estado do personagem com smoothing
-        const characterState = {
-            position: new THREE.Vector3(0, 0, 0),
-            targetPosition: new THREE.Vector3(0, 0, 0),
-            rotation: 0,
-            targetRotation: 0,
-            speed: 2.5,
-            isMoving: false,
-            
-            // Teclas pressionadas
-            keys: {
-                w: false, a: false, s: false, d: false,
-                q: false, e: false,
-                shift: false
-            },
-            
-            // Velocidades de movimento
-            moveSpeed: 3.0,
-            rotateSpeed: 2.5,
-            
-            // Fatores de suavização (quanto menor, mais suave)
-            smoothFactor: 0.15
-        };
-
-        // Elementos DOM
-        const loadingEl = document.getElementById('loading');
-        const statusEl = document.getElementById('status');
-
-        // --- Sistema de teclado otimizado ---
-        window.addEventListener('keydown', (e) => {
-            switch(e.code) {
-                case 'KeyW': characterState.keys.w = true; e.preventDefault(); break;
-                case 'KeyS': characterState.keys.s = true; e.preventDefault(); break;
-                case 'KeyA': characterState.keys.a = true; e.preventDefault(); break;
-                case 'KeyD': characterState.keys.d = true; e.preventDefault(); break;
-                case 'KeyQ': characterState.keys.q = true; e.preventDefault(); break;
-                case 'KeyE': characterState.keys.e = true; e.preventDefault(); break;
-                case 'ShiftLeft':
-                case 'ShiftRight':
-                    characterState.keys.shift = true;
-                    characterState.moveSpeed = 5.0; // Mais rápido com shift
-                    e.preventDefault();
-                    break;
-            }
-        });
-
-        window.addEventListener('keyup', (e) => {
-            switch(e.code) {
-                case 'KeyW': characterState.keys.w = false; e.preventDefault(); break;
-                case 'KeyS': characterState.keys.s = false; e.preventDefault(); break;
-                case 'KeyA': characterState.keys.a = false; e.preventDefault(); break;
-                case 'KeyD': characterState.keys.d = false; e.preventDefault(); break;
-                case 'KeyQ': characterState.keys.q = false; e.preventDefault(); break;
-                case 'KeyE': characterState.keys.e = false; e.preventDefault(); break;
-                case 'ShiftLeft':
-                case 'ShiftRight':
-                    characterState.keys.shift = false;
-                    characterState.moveSpeed = 3.0; // Volta à velocidade normal
-                    e.preventDefault();
-                    break;
-            }
-        });
-
-        // Prevenir rolagem da página
-        window.addEventListener('keydown', (e) => {
-            if (e.code.startsWith('Key') || e.code.startsWith('Shift') || e.code === 'Space') {
-                e.preventDefault();
-            }
-        }, { passive: false });
-
-        // --- Carregar o modelo GLB ---
-        const loader = new GLTFLoader();
-        
-        loader.load(
-            'novo.glb',
-            (gltf) => {
-                character = gltf.scene;
-                
-                character.position.set(0, 0, 0);
-                character.traverse((node) => {
-                    if (node.isMesh) {
-                        node.castShadow = true;
-                        node.receiveShadow = true;
-                        
-                        // Melhorar aparência dos materiais
-                        if (node.material) {
-                            if (Array.isArray(node.material)) {
-                                node.material.forEach(m => {
-                                    m.roughness = 0.4;
-                                    m.metalness = 0.1;
-                                });
-                            } else {
-                                node.material.roughness = 0.4;
-                                node.material.metalness = 0.1;
-                            }
-                        }
-                    }
-                });
-                
-                scene.add(character);
-                
-                // Configurar animações
-                if (gltf.animations && gltf.animations.length > 0) {
-                    mixer = new THREE.AnimationMixer(character);
-                    
-                    gltf.animations.forEach((clip) => {
-                        const action = mixer.clipAction(clip);
-                        action.play();
-                    });
-                    
-                    // Inicialmente pausar a animação
-                    if (mixer) {
-                        mixer.timeScale = 0;
-                    }
-                    
-                    console.log('Animações carregadas:', gltf.animations.length);
-                }
-                
-                loadingEl.classList.add('hidden');
-                console.log('Personagem carregado!');
-            },
-            (xhr) => {
-                const percent = Math.floor((xhr.loaded / xhr.total) * 100);
-                loadingEl.innerHTML = `<span class="spinner"></span> Carregando... ${percent}%`;
-            },
-            (error) => {
-                console.error('Erro:', error);
-                loadingEl.innerHTML = '❌ Erro ao carregar modelo';
-                
-                // Placeholder simples
-                const geometry = new THREE.BoxGeometry(0.8, 1.8, 0.8);
-                const material = new THREE.MeshStandardMaterial({ color: 0xff6600 });
-                character = new THREE.Mesh(geometry, material);
-                character.position.set(0, 0.9, 0);
-                character.castShadow = true;
-                character.receiveShadow = true;
-                scene.add(character);
-                
-                loadingEl.classList.add('hidden');
-            }
-        );
-
-        // --- Sistema de movimento fluido ---
-        function updateMovement(delta) {
-            if (!character) return;
-            
-            // Calcular direção do movimento baseado nas teclas
-            const moveX = (characterState.keys.d ? 1 : 0) - (characterState.keys.a ? 1 : 0);
-            const moveZ = (characterState.keys.s ? 1 : 0) - (characterState.keys.w ? 1 : 0);
-            
-            // Calcular rotação (Q/E)
-            let rotDelta = 0;
-            if (characterState.keys.q) rotDelta += 1;
-            if (characterState.keys.e) rotDelta -= 1;
-            
-            // Atualizar rotação alvo
-            if (rotDelta !== 0) {
-                characterState.targetRotation += rotDelta * characterState.rotateSpeed * delta;
-            }
-            
-            // Suavizar a rotação
-            characterState.rotation += (characterState.targetRotation - characterState.rotation) * characterState.smoothFactor * 5;
-            
-            // Verificar se está se movendo
-            const isMoving = moveX !== 0 || moveZ !== 0;
-            characterState.isMoving = isMoving;
-            
-            // Controlar animação (transição suave)
-            if (mixer) {
-                // Transição suave entre andar e parar
-                const targetTimeScale = isMoving ? 1.0 : 0.0;
-                mixer.timeScale += (targetTimeScale - mixer.timeScale) * 0.1;
-            }
-            
-            // Se estiver se movendo, calcular posição alvo
-            if (isMoving) {
-                // Vetores de direção baseados na rotação atual
-                const forward = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), characterState.rotation);
-                const right = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), characterState.rotation);
-                
-                // Calcular movimento
-                const movement = new THREE.Vector3()
-                    .addScaledVector(forward, -moveZ * characterState.moveSpeed * delta)
-                    .addScaledVector(right, moveX * characterState.moveSpeed * delta);
-                
-                // Atualizar posição alvo
-                characterState.targetPosition.x += movement.x;
-                characterState.targetPosition.z += movement.z;
-            }
-            
-            // Suavizar a posição do personagem (movimento fluido)
-            character.position.x += (characterState.targetPosition.x - character.position.x) * characterState.smoothFactor;
-            character.position.z += (characterState.targetPosition.z - character.position.z) * characterState.smoothFactor;
-            
-            // Aplicar rotação suave ao personagem
-            character.rotation.y = characterState.rotation;
-            
-            // Atualizar alvo da câmera para seguir o personagem
-            controls.target.lerp(character.position.clone().add(new THREE.Vector3(0, 1, 0)), 0.1);
-            
-            // Atualizar status
-            if (isMoving) {
-                statusEl.innerHTML = `🚶 Andando | Vel: ${characterState.moveSpeed.toFixed(1)} | Pos: ${character.position.x.toFixed(1)}, ${character.position.z.toFixed(1)}`;
-            } else {
-                statusEl.innerHTML = `🚶 Parado | Pos: ${character.position.x.toFixed(1)}, ${character.position.z.toFixed(1)}`;
-            }
-        }
-
-        // --- Animação principal ---
-        function animate() {
-            requestAnimationFrame(animate);
-
-            const delta = Math.min(clock.getDelta(), 0.1); // Limitar delta máximo para evitar saltos
-
-            // Atualizar animação do personagem
-            if (mixer) {
-                mixer.update(delta);
-            }
-
-            // Atualizar movimento
-            updateMovement(delta);
-            
-            // Atualizar controles da câmera
-            controls.update();
-
-            renderer.render(scene, camera);
-        }
-
-        animate();
-
-        // --- Resize ---
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-
-        // --- Esconder loading após 3 segundos (fallback) ---
-        setTimeout(() => {
-            loadingEl.classList.add('hidden');
-        }, 3000);
-    </script>
+  <!-- (os botões são apenas demonstrativos, nenhum arquivo é baixado) -->
 </body>
 </html>
