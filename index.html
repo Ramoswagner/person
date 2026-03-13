@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>5 modelos PowerPoint • tendências 2026</title>
-  <!-- Font Awesome 6 (gratuito) -->
+  <title>5 slides PowerPoint • tendências 2026</title>
+  <!-- Font Awesome 6 (ícones) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <!-- Google Fonts: Inter (moderna e limpa) -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..700&display=swap" rel="stylesheet">
+  <!-- Google Fonts: Inter + Space Grotesk (tech) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -16,481 +16,535 @@
     }
 
     body {
-      font-family: "Inter", system-ui, -apple-system, sans-serif;
-      background: #f2f5f9;
-      color: #1a1e2b;
-      line-height: 1.5;
-      padding: 2rem 1.5rem;
+      background: #0b0d12;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
     }
 
     .container {
-      max-width: 1300px;
-      margin: 0 auto;
+      max-width: 1200px;
+      width: 100%;
     }
 
     /* cabeçalho */
     .header {
       text-align: center;
-      margin-bottom: 4rem;
+      margin-bottom: 3rem;
+      color: #eef2fb;
     }
-
     .header h1 {
-      font-size: 2.8rem;
-      font-weight: 700;
+      font-size: 3rem;
+      font-weight: 600;
       letter-spacing: -0.02em;
-      background: linear-gradient(145deg, #1A2A4F, #2D3B6B, #4B3B6B);
+      background: linear-gradient(130deg, #c0a0ff, #6cc4ff, #ffb3c6);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
       margin-bottom: 0.5rem;
     }
-
     .header .sub {
-      font-size: 1.2rem;
-      font-weight: 300;
-      color: #4a4f63;
+      font-size: 1.1rem;
+      color: #a0aac0;
       display: flex;
-      align-items: center;
       justify-content: center;
-      gap: 0.75rem;
+      gap: 0.5rem;
       flex-wrap: wrap;
     }
 
-    .header .sub span {
-      background: rgba(255,255,255,0.6);
-      backdrop-filter: blur(4px);
-      padding: 0.3rem 1rem;
-      border-radius: 40px;
+    /* cada slide é uma "página" */
+    .slide-page {
+      margin-bottom: 4rem;
+      border-radius: 2.5rem;
+      overflow: hidden;
+      box-shadow: 0 30px 50px -20px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255,255,255,0.06) inset;
+      transition: transform 0.2s;
+      background-color: #11131f; /* fallback */
+    }
+    .slide-page:hover {
+      transform: scale(1.01);
+      box-shadow: 0 40px 70px -15px #000000dd;
+    }
+
+    /* área do slide com proporção 16:9 */
+    .slide {
+      aspect-ratio: 16 / 9;
+      width: 100%;
+      position: relative;
+      padding: 2rem 2.5rem;
+      display: flex;
+      flex-direction: column;
+      font-family: 'Inter', sans-serif;
+      overflow: hidden;
+    }
+
+    /* moldura superior com número do slide */
+    .slide-number {
+      position: absolute;
+      top: 1.2rem;
+      right: 1.8rem;
       font-size: 0.9rem;
       font-weight: 500;
-      color: #1e293b;
-      border: 1px solid rgba(255,255,255,0.8);
+      background: rgba(0,0,0,0.2);
+      backdrop-filter: blur(8px);
+      padding: 0.3rem 1rem;
+      border-radius: 40px;
+      color: rgba(255,255,255,0.9);
+      border: 1px solid rgba(255,255,255,0.15);
+      z-index: 20;
     }
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 2rem 1.5rem;
-      margin-top: 2rem;
+    /* conteúdo base do slide */
+    .slide-title {
+      font-size: 2.8rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+      line-height: 1.2;
+    }
+    .slide-sub {
+      font-size: 1.1rem;
+      opacity: 0.8;
+      max-width: 70%;
+      margin-bottom: 2rem;
+    }
+    .row {
+      display: flex;
+      gap: 2rem;
+      flex: 1;
+      align-items: flex-end;
+    }
+    .bullet-list {
+      list-style: none;
+      font-size: 1.1rem;
+      font-weight: 400;
+      space-y: 0.8rem;
+    }
+    .bullet-list li {
+      margin-bottom: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+    .bullet-list i {
+      width: 1.4rem;
+      color: inherit;
     }
 
-    /* cartão principal */
-    .card {
-      background: rgba(255, 255, 255, 0.75);
-      backdrop-filter: blur(2px);
-      border-radius: 2.2rem;
-      padding: 1.5rem 1.2rem 1.8rem 1.2rem;
-      box-shadow: 0 18px 35px -12px rgba(0, 10, 30, 0.15),
-                  inset 0 1px 2px rgba(255,255,255,0.6);
-      border: 1px solid rgba(255,255,255,0.45);
-      transition: all 0.3s ease;
+    .graphic-placeholder {
+      background: rgba(255,255,255,0.1);
+      border-radius: 2rem;
+      padding: 1.5rem;
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255,255,255,0.2);
+      display: flex;
+      gap: 1rem;
+      align-items: flex-end;
+      height: 140px;
+    }
+    .bar {
+      width: 40px;
+      background: white;
+      border-radius: 20px 20px 8px 8px;
+      opacity: 0.9;
+    }
+
+    /* ---- MODELO 1: Gradiente extremo + linhas diagonais ---- */
+    .gradient-slide {
+      background: linear-gradient(135deg, #f64f59, #c471ed, #12c2e9);
+      background-size: 200% 200%;
+      animation: gradientFlow 12s ease infinite alternate;
+      color: white;
+    }
+    @keyframes gradientFlow {
+      0% { background-position: 0% 0%; }
+      100% { background-position: 100% 100%; }
+    }
+    .gradient-slide .slide-title {
+      text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .gradient-overlay {
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(45deg, rgba(255,255,255,0.1) 0px, rgba(255,255,255,0.1) 10px, transparent 10px, transparent 30px);
+      pointer-events: none;
+    }
+
+    /* ---- MODELO 2: Tech / cyber matrix ---- */
+    .tech-slide {
+      background: #0c0f1c;
+      color: #b7ffd9;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .tech-grid {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(0,255,200,0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,80,255,0.08) 1px, transparent 1px);
+      background-size: 40px 40px;
+      z-index: 0;
+    }
+    .tech-glow {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle at 30% 40%, #00ffe1, transparent 70%);
+      opacity: 0.2;
+      filter: blur(60px);
+    }
+    .tech-slide .content {
+      z-index: 5;
+      position: relative;
+    }
+    .tech-slide .slide-title {
+      color: #fff;
+      text-shadow: 0 0 15px #00ffe1;
+    }
+    .tech-slide .bullet-list i {
+      color: #ff66cc;
+    }
+    .graphic-tech {
+      background: rgba(0,255,200,0.1);
+      border: 1px solid #00ffe180;
+      box-shadow: 0 0 20px #00ffe150;
+    }
+    .bar.tech {
+      background: #00ffe1;
+      box-shadow: 0 0 20px #00ffe1;
+    }
+
+    /* ---- MODELO 3: Minimalismo puro (monocromático suave) ---- */
+    .minimal-slide {
+      background: #f4f2ec;
+      color: #26231c;
+    }
+    .minimal-slide .slide-title {
+      font-weight: 500;
+      color: #3f3a31;
+      letter-spacing: -0.02em;
+    }
+    .minimal-slide .slide-sub {
+      color: #6b6257;
+    }
+    .minimal-list li i {
+      color: #a18f7a;
+    }
+    .minimal-shape {
+      position: absolute;
+      bottom: 2rem;
+      right: 2rem;
+      width: 200px;
+      height: 200px;
+      background: #ddd6cb;
+      border-radius: 60% 40% 50% 50%;
+      z-index: 0;
+      opacity: 0.4;
+    }
+    .minimal-graphic {
+      background: #d4cdc0;
+      border-radius: 2rem;
+      padding: 1rem;
+      display: flex;
+      gap: 0.5rem;
+      align-items: flex-end;
+      height: 120px;
+    }
+    .minimal-bar {
+      background: #7a6f60;
+      width: 30px;
+      border-radius: 12px 12px 4px 4px;
+    }
+
+    /* ---- MODELO 4: Geométrico / blocos de cor ---- */
+    .geo-slide {
+      background: #0b1424;
+      color: #f0edf5;
+    }
+    .geo-bg {
+      position: absolute;
+      inset: 0;
+      clip-path: polygon(0 0, 100% 0, 70% 100%, 0 100%);
+      background: #e54f6d;
+      opacity: 0.5;
+    }
+    .geo-bg2 {
+      position: absolute;
+      inset: 0;
+      clip-path: polygon(100% 0, 100% 100%, 30% 100%);
+      background: #32b8b0;
+      opacity: 0.5;
+    }
+    .geo-slide .content {
+      position: relative;
+      z-index: 5;
+    }
+    .geo-slide .slide-title {
+      color: #fff;
+      text-shadow: 2px 2px 0 #e54f6d;
+    }
+    .geo-shape-small {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 100px;
+      height: 100px;
+      background: #f4d03f;
+      clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+      opacity: 0.7;
+    }
+
+    /* ---- MODELO 5: Glassmorphism + gradiente vivo ---- */
+    .glass-slide {
+      background: linear-gradient(145deg, #8f5ff0, #df6f9c, #6fc3df);
+      position: relative;
+    }
+    .glass-bg-blur {
+      position: absolute;
+      inset: 0;
+      backdrop-filter: blur(8px);
+      background: rgba(255,255,255,0.05);
+      z-index: 0;
+    }
+    .glass-card {
+      background: rgba(255,255,255,0.2);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 2.5rem;
+      padding: 2rem;
+      box-shadow: 0 30px 40px -20px rgba(0,0,0,0.5);
+      color: white;
+      z-index: 5;
+      position: relative;
+      height: 80%;
       display: flex;
       flex-direction: column;
     }
-
-    .card:hover {
-      transform: translateY(-10px) scale(1.01);
-      box-shadow: 0 30px 45px -15px rgba(20, 30, 80, 0.25);
-      border-color: rgba(255,255,255,0.9);
+    .glass-card .slide-title {
+      font-weight: 500;
     }
-
-    /* área de pré-visualização do slide (mockup) */
-    .preview {
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      border-radius: 1.5rem;
-      margin-bottom: 1.5rem;
-      overflow: hidden;
-      position: relative;
-      box-shadow: 0 10px 20px -8px rgba(0,0,0,0.2), inset 0 0 0 1px rgba(255,255,255,0.7);
-      transition: all 0.2s;
+    .glass-graphic {
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+      margin-top: 1rem;
     }
-
-    .preview > div {
-      width: 100%;
-      height: 100%;
-      position: relative;
-    }
-
-    /* etiqueta "tendência 2026" */
-    .trend-badge {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      background: rgba(10, 15, 30, 0.65);
-      backdrop-filter: blur(6px);
-      color: white;
-      font-size: 0.7rem;
-      font-weight: 600;
-      padding: 0.3rem 0.9rem;
-      border-radius: 30px;
-      letter-spacing: 0.3px;
-      border: 1px solid rgba(255,255,255,0.3);
-      z-index: 10;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    .card h3 {
-      font-size: 1.5rem;
-      font-weight: 600;
-      letter-spacing: -0.02em;
-      margin: 0.5rem 0 0.2rem;
-    }
-
-    .card .desc {
-      font-size: 0.9rem;
-      color: #3d4050;
-      margin-bottom: 1.5rem;
-      font-weight: 400;
-      line-height: 1.4;
+    .glass-icon {
+      font-size: 3rem;
       opacity: 0.8;
     }
 
-    .btn-group {
+    /* botões de ação (fictícios) */
+    .slide-footer {
       display: flex;
-      align-items: center;
-      gap: 0.8rem;
-      margin-top: auto;
+      justify-content: flex-end;
+      gap: 1rem;
+      margin-top: 1rem;
+      z-index: 20;
+      position: relative;
     }
-
-    .btn {
-      background: white;
-      border: 1px solid #d0d7e5;
-      padding: 0.6rem 1rem;
+    .btn-slide {
+      background: rgba(0,0,0,0.3);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.25);
+      color: white;
+      padding: 0.5rem 1.2rem;
       border-radius: 3rem;
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       font-weight: 500;
-      color: #1e1e2f;
       text-decoration: none;
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      transition: 0.15s;
-      flex: 1;
-      justify-content: center;
-      backdrop-filter: blur(4px);
-      background: rgba(255,255,255,0.7);
+      transition: 0.2s;
     }
-
-    .btn i {
-      font-size: 0.9rem;
-      color: #4b3b6b;
-    }
-
-    .btn:hover {
-      background: #1e1e2f;
-      border-color: #1e1e2f;
-      color: white;
-    }
-
-    .btn:hover i {
-      color: white;
-    }
-
-    .btn-download {
-      background: #1e1e2f;
-      border-color: #1e1e2f;
-      color: white;
-    }
-
-    .btn-download i {
-      color: #b6b0e0;
-    }
-
-    .btn-download:hover {
-      background: #2d2d4a;
-      border-color: #2d2d4a;
-    }
-
-    /* ---------- ESTILOS INDIVIDUAIS DOS 5 MODELOS (PREVIEW) ---------- */
-
-    /* Modelo 1 – Gradiente extremo + linhas tech */
-    .model1-preview {
-      background: linear-gradient(125deg, #F05B56, #FB8B4C, #E7498F, #A45EE5);
-      background-size: 200% 200%;
-      animation: gradientMove 8s ease infinite alternate;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .model1-preview::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background-image: 
-        repeating-linear-gradient(45deg, rgba(255,255,255,0.25) 0px, rgba(255,255,255,0.25) 2px, transparent 2px, transparent 12px),
-        repeating-linear-gradient(135deg, rgba(255,255,240,0.3) 0px, rgba(255,255,240,0.3) 1px, transparent 1px, transparent 16px);
-      pointer-events: none;
-    }
-    @keyframes gradientMove {
-      0% { background-position: 0% 0%; }
-      100% { background-position: 100% 100%; }
-    }
-
-    /* Modelo 2 – Cyber Tech / circuitos */
-    .model2-preview {
-      background: #0b0f18;
-      position: relative;
-      overflow: hidden;
-    }
-    .circuit-line {
-      position: absolute;
-      background: #00ffaa30;
-    }
-    .circuit-line.horizontal {
-      width: 100%;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, #0ff, #0ff, transparent);
-      top: 30%;
-      left: 0;
-      filter: blur(1px);
-      box-shadow: 0 0 8px #0ff;
-    }
-    .circuit-line.vertical {
-      height: 100%;
-      width: 2px;
-      background: linear-gradient(180deg, transparent, #ff55cc, #a44eff, transparent);
-      left: 60%;
-      top: 0;
-      filter: blur(1px);
-      box-shadow: 0 0 10px #f5f;
-    }
-    .circuit-dots {
-      position: absolute;
-      inset: 0;
-      background-image: radial-gradient(circle at 20% 70%, #0ff 1.5px, transparent 1.5px),
-                        radial-gradient(circle at 75% 25%, #f0f 2px, transparent 2px),
-                        radial-gradient(circle at 45% 50%, #0ff 1px, transparent 1px),
-                        radial-gradient(circle at 85% 80%, #ffaa33 1.5px, transparent 1.5px);
-      background-size: 40px 40px;
-      opacity: 0.6;
-    }
-
-    /* Modelo 3 – Minimalismo absoluto */
-    .model3-preview {
-      background: #f1eee7;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-    }
-    .minimal-circle {
-      width: 70px;
-      height: 70px;
-      background: radial-gradient(circle at 30% 30%, #EADBC6, #C8BDA8);
-      border-radius: 50%;
-      box-shadow: 0 15px 25px -8px rgba(90,70,50,0.2);
-      position: relative;
-      z-index: 2;
-    }
-    .minimal-line {
-      position: absolute;
-      bottom: 20px;
-      left: 20px;
-      width: 60px;
-      height: 4px;
-      background: #b9aa92;
-      border-radius: 10px;
-      opacity: 0.4;
-    }
-    .minimal-line.short {
-      width: 30px;
-      bottom: 35px;
-      left: 20px;
-      opacity: 0.2;
-    }
-
-    /* Modelo 4 – Geométrico / blocos de cor */
-    .model4-preview {
-      background: #131a2c;
-      position: relative;
-    }
-    .geo-shape {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      clip-path: polygon(0 0, 100% 0, 0 100%);
-      background: #fe5f75;
-      opacity: 0.9;
-    }
-    .geo-shape2 {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      clip-path: polygon(100% 100%, 0 100%, 100% 0);
-      background: #3ccfcf;
-      opacity: 0.8;
-    }
-    .geo-dot {
-      position: absolute;
-      width: 32px;
-      height: 32px;
-      background: #f4d03f;
-      border-radius: 50%;
-      bottom: 18px;
-      right: 18px;
-      filter: drop-shadow(0 0 10px #f4d03f);
-    }
-
-    /* Modelo 5 – Glassmorphism + gradiente vivo */
-    .model5-preview {
-      background: linear-gradient(45deg, #f9d423, #f83691, #9040f5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .glass-panel {
-      width: 85%;
-      height: 70%;
-      background: rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(8px);
-      border-radius: 24px;
-      border: 1px solid rgba(255,255,255,0.4);
-      box-shadow: 0 20px 30px -10px rgba(0,0,0,0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .glass-panel i {
-      font-size: 2rem;
-      color: white;
-      text-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      opacity: 0.8;
+    .btn-slide:hover {
+      background: white;
+      color: black;
+      border-color: white;
     }
 
     /* rodapé */
     .footer-note {
-      margin-top: 5rem;
+      color: #646c84;
       text-align: center;
-      color: #7f8499;
-      font-size: 0.9rem;
-      border-top: 1px dashed rgba(0,0,0,0.1);
-      padding-top: 2rem;
-      font-weight: 300;
+      margin-top: 2rem;
+      padding: 2rem;
+      border-top: 1px solid #202433;
     }
 
-    /* responsividade extra */
-    @media (max-width: 550px) {
-      body { padding: 1rem; }
-      .header h1 { font-size: 2.1rem; }
-      .grid { gap: 1.2rem; }
+    /* ajustes responsivos */
+    @media (max-width: 800px) {
+      .slide { padding: 1.5rem; }
+      .slide-title { font-size: 2rem; }
     }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <h1>5 modelos • power point 2026</h1>
+      <h1>5 slides • prontos para 2026</h1>
       <div class="sub">
-        <span>extremamente inovadores</span>
-        <i class="fa-solid fa-arrow-right-long" style="color:#5c5f77;"></i>
-        <span>gradiente + tech</span>
-        <span>minimalismo</span>
-        <span>glassmorphism</span>
+        <span>✦ gradiente extremo</span>
+        <span>✦ tech matrix</span>
+        <span>✦ minimalismo</span>
+        <span>✦ blocos geométricos</span>
+        <span>✦ glass 2.0</span>
       </div>
-      <p style="margin-top: 1rem; color: #50546b; max-width: 600px; margin-left: auto; margin-right: auto;">
-        Toque visual e estruturas pensadas para apresentações que pedem futuro. 
-        Cada card representa um tema exclusivo para slides.
-      </p>
     </div>
 
-    <!-- grid com os 5 modelos -->
-    <div class="grid">
-      
-      <!-- 1. Gradiente extremo / tech gradient -->
-      <div class="card">
-        <div class="preview">
-          <div class="model1-preview">
-            <span class="trend-badge"><i class="fa-regular fa-star" style="margin-right: 4px;"></i>2026</span>
-          </div>
-        </div>
-        <h3>✦ Gradiente orgânico</h3>
-        <p class="desc">Cores que se movem, linhas diagonais e sobreposições. Energia visual para marcos criativos.</p>
-        <div class="btn-group">
-          <a href="#" class="btn"><i class="fa-regular fa-eye"></i> prévia</a>
-          <a href="#" class="btn btn-download"><i class="fa-regular fa-circle-down"></i> modelo</a>
-        </div>
-      </div>
-
-      <!-- 2. Cyber Tech / circuitos neon -->
-      <div class="card">
-        <div class="preview">
-          <div class="model2-preview">
-            <span class="trend-badge"><i class="fa-regular fa-microchip"></i> tech'26</span>
-            <div class="circuit-line horizontal"></div>
-            <div class="circuit-line vertical"></div>
-            <div class="circuit-dots"></div>
-          </div>
-        </div>
-        <h3>▣ Cyber matrix</h3>
-        <p class="desc">Traços de circuito, neon e profundidade escura. Para pitches de tecnologia e inovação.</p>
-        <div class="btn-group">
-          <a href="#" class="btn"><i class="fa-regular fa-eye"></i> prévia</a>
-          <a href="#" class="btn btn-download"><i class="fa-regular fa-circle-down"></i> modelo</a>
-        </div>
-      </div>
-
-      <!-- 3. Minimalismo puro (tendência 2026) -->
-      <div class="card">
-        <div class="preview">
-          <div class="model3-preview">
-            <span class="trend-badge">menos é mais</span>
-            <div class="minimal-circle"></div>
-            <div class="minimal-line"></div>
-            <div class="minimal-line short"></div>
-          </div>
-        </div>
-        <h3>○ Silent air</h3>
-        <p class="desc">Espaço vazio, textura suave, uma única forma. Foco absoluto no conteúdo.</p>
-        <div class="btn-group">
-          <a href="#" class="btn"><i class="fa-regular fa-eye"></i> prévia</a>
-          <a href="#" class="btn btn-download"><i class="fa-regular fa-circle-down"></i> modelo</a>
-        </div>
-      </div>
-
-      <!-- 4. Geométrico / blocos e cortes -->
-      <div class="card">
-        <div class="preview">
-          <div class="model4-preview">
-            <span class="trend-badge"><i class="fa-regular fa-shapes"></i> geométrico</span>
-            <div class="geo-shape"></div>
-            <div class="geo-shape2"></div>
-            <div class="geo-dot"></div>
-          </div>
-        </div>
-        <h3>⬥ Block divide</h3>
-        <p class="desc">Triângulos sobrepostos, cores fortes e ponto focal. Quebra de simetria moderna.</p>
-        <div class="btn-group">
-          <a href="#" class="btn"><i class="fa-regular fa-eye"></i> prévia</a>
-          <a href="#" class="btn btn-download"><i class="fa-regular fa-circle-down"></i> modelo</a>
-        </div>
-      </div>
-
-      <!-- 5. Glassmorphism + gradiente vivo -->
-      <div class="card">
-        <div class="preview">
-          <div class="model5-preview">
-            <span class="trend-badge">glass 2.0</span>
-            <div class="glass-panel">
-              <i class="fa-regular fa-gem"></i>
+    <!-- SLIDE 1 – Gradiente extremo -->
+    <div class="slide-page">
+      <div class="slide gradient-slide">
+        <div class="gradient-overlay"></div>
+        <span class="slide-number">01/05 — gradiente orgânico</span>
+        <div style="position: relative; z-index: 5; height: 100%; display: flex; flex-direction: column;">
+          <div class="slide-title">energia em<br>movimento</div>
+          <div class="slide-sub">cores que evoluem • 2026</div>
+          <div class="row" style="justify-content: space-between; align-items: flex-end;">
+            <ul class="bullet-list">
+              <li><i class="fa-regular fa-circle-check"></i> narrativa visual fluida</li>
+              <li><i class="fa-regular fa-compass"></i> transições orgânicas</li>
+              <li><i class="fa-regular fa-sun"></i> paleta viva e extrema</li>
+            </ul>
+            <div class="graphic-placeholder" style="width: 250px;">
+              <div style="height: 80px; width: 40px; background: #fff5; border-radius: 20px 20px 8px 8px;"></div>
+              <div style="height: 120px; width: 40px; background: #fffb; border-radius: 20px 20px 8px 8px;"></div>
+              <div style="height: 50px; width: 40px; background: #fffa; border-radius: 20px 20px 8px 8px;"></div>
             </div>
           </div>
+          <div class="slide-footer">
+            <a href="#" class="btn-slide"><i class="fa-regular fa-eye"></i> visualizar</a>
+            <a href="#" class="btn-slide"><i class="fa-regular fa-circle-down"></i> exportar pptx</a>
+          </div>
         </div>
-        <h3>⏺ Frosted glass</h3>
-        <p class="desc">Camadas translúcidas, blur e gradiente vibrante ao fundo. Profundidade e frescor.</p>
-        <div class="btn-group">
-          <a href="#" class="btn"><i class="fa-regular fa-eye"></i> prévia</a>
-          <a href="#" class="btn btn-download"><i class="fa-regular fa-circle-down"></i> modelo</a>
+      </div>
+    </div>
+
+    <!-- SLIDE 2 – Tech / cyber matrix -->
+    <div class="slide-page">
+      <div class="slide tech-slide">
+        <div class="tech-grid"></div>
+        <div class="tech-glow" style="top: 10%; left: 5%;"></div>
+        <div class="tech-glow" style="bottom: 0; right: 0; background: radial-gradient(circle, #ff55aa, transparent);"></div>
+        <span class="slide-number">02/05 — cyber matrix</span>
+        <div class="content" style="position: relative; z-index: 10; height: 100%; display: flex; flex-direction: column;">
+          <div class="slide-title">protocolo<br>nexus</div>
+          <div class="slide-sub">infraestrutura digital • dados em tempo real</div>
+          <div class="row" style="justify-content: space-between;">
+            <ul class="bullet-list">
+              <li><i class="fa-regular fa-microchip"></i> arquitetura de rede</li>
+              <li><i class="fa-regular fa-chart-line"></i> analytics imersivo</li>
+              <li><i class="fa-regular fa-cube"></i> edge computing</li>
+            </ul>
+            <div class="graphic-placeholder graphic-tech" style="width: 260px; background: #0b0f1a; border: 1px solid #00ffe1;">
+              <div class="bar tech" style="height: 60px;"></div>
+              <div class="bar tech" style="height: 110px;"></div>
+              <div class="bar tech" style="height: 30px;"></div>
+              <div class="bar tech" style="height: 80px;"></div>
+            </div>
+          </div>
+          <div class="slide-footer">
+            <a href="#" class="btn-slide"><i class="fa-regular fa-eye"></i> visualizar</a>
+            <a href="#" class="btn-slide"><i class="fa-regular fa-circle-down"></i> exportar pptx</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3 – Minimalismo puro -->
+    <div class="slide-page">
+      <div class="slide minimal-slide">
+        <div class="minimal-shape"></div>
+        <span class="slide-number" style="background: rgba(0,0,0,0.05); color: #3f3a31; border-color: #ccc;">03/05 — silent air</span>
+        <div style="position: relative; z-index: 10; height: 100%; display: flex; flex-direction: column;">
+          <div class="slide-title">menos é<br>mais</div>
+          <div class="slide-sub">essência e espaço • 2026</div>
+          <div class="row" style="justify-content: space-between;">
+            <ul class="bullet-list minimal-list">
+              <li><i class="fa-regular fa-circle"></i> conteúdo em foco</li>
+              <li><i class="fa-regular fa-square"></i> tipografia como forma</li>
+              <li><i class="fa-regular fa-leaf"></i> pausa visual</li>
+            </ul>
+            <div class="minimal-graphic" style="width: 240px;">
+              <div class="minimal-bar" style="height: 40px;"></div>
+              <div class="minimal-bar" style="height: 70px;"></div>
+              <div class="minimal-bar" style="height: 95px;"></div>
+              <div class="minimal-bar" style="height: 30px;"></div>
+            </div>
+          </div>
+          <div class="slide-footer">
+            <a href="#" class="btn-slide" style="background: #bbb2a4; color:#26231c;"><i class="fa-regular fa-eye"></i> visualizar</a>
+            <a href="#" class="btn-slide" style="background: #bbb2a4; color:#26231c;"><i class="fa-regular fa-circle-down"></i> exportar pptx</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4 – Geométrico / blocos -->
+    <div class="slide-page">
+      <div class="slide geo-slide">
+        <div class="geo-bg"></div>
+        <div class="geo-bg2"></div>
+        <div class="geo-shape-small"></div>
+        <span class="slide-number">04/05 — block divide</span>
+        <div class="content" style="position: relative; z-index: 10; height: 100%; display: flex; flex-direction: column;">
+          <div class="slide-title">estrutura<br>fragmentada</div>
+          <div class="slide-sub">sobreposição e cor • coleção 2026</div>
+          <div class="row" style="justify-content: space-between;">
+            <ul class="bullet-list">
+              <li><i class="fa-regular fa-shapes"></i> blocos assimétricos</li>
+              <li><i class="fa-regular fa-circle-half-stroke"></i> contraste dinâmico</li>
+              <li><i class="fa-regular fa-crop"></i> grids não lineares</li>
+            </ul>
+            <div style="display: flex; gap: 10px; align-items: flex-end;">
+              <div style="width: 45px; height: 90px; background: #e54f6d; clip-path: polygon(0 0, 100% 20%, 100% 100%, 0 80%);"></div>
+              <div style="width: 45px; height: 130px; background: #32b8b0; clip-path: polygon(0 20%, 100% 0, 100% 80%, 0 100%);"></div>
+              <div style="width: 45px; height: 50px; background: #f4d03f; clip-path: polygon(20% 0%, 100% 20%, 80% 100%, 0% 80%);"></div>
+            </div>
+          </div>
+          <div class="slide-footer">
+            <a href="#" class="btn-slide"><i class="fa-regular fa-eye"></i> visualizar</a>
+            <a href="#" class="btn-slide"><i class="fa-regular fa-circle-down"></i> exportar pptx</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5 – Glassmorphism + gradiente vivo -->
+    <div class="slide-page">
+      <div class="slide glass-slide">
+        <div class="glass-bg-blur"></div>
+        <span class="slide-number">05/05 — frost glass</span>
+        <div style="position: relative; z-index: 20; height: 100%; width: 100%; display: flex; flex-direction: column;">
+          <div class="glass-card">
+            <div class="slide-title">camadas<br>translúcidas</div>
+            <div class="slide-sub">glass 2.0 + gradiente vivo</div>
+            <div style="flex:1;"></div>
+            <div class="glass-graphic">
+              <i class="fa-regular fa-gem glass-icon"></i>
+              <i class="fa-regular fa-moon glass-icon"></i>
+              <i class="fa-regular fa-snowflake glass-icon"></i>
+            </div>
+            <ul class="bullet-list" style="margin-top: 1.5rem;">
+              <li><i class="fa-regular fa-droplet"></i> profundidade etérea</li>
+              <li><i class="fa-regular fa-sparkles"></i> blur e brilho suave</li>
+            </ul>
+            <div class="slide-footer" style="margin-top: 1rem;">
+              <a href="#" class="btn-slide"><i class="fa-regular fa-eye"></i> visualizar</a>
+              <a href="#" class="btn-slide"><i class="fa-regular fa-circle-down"></i> exportar pptx</a>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
     <div class="footer-note">
-      <i class="fa-regular fa-copyright"></i> 2026 • templates conceito — clique em "modelo" para simular exportação<br>
-      <span style="opacity: 0.5;">design inspirado nas próximas tendências de apresentação</span>
+      <i class="fa-regular fa-copyright"></i> 2026 • templates conceito — cada slide é uma página pronta para inspirar suas apresentações.
     </div>
   </div>
-
-  <!-- (os botões são apenas demonstrativos, nenhum arquivo é baixado) -->
+  <!-- botões são apenas ilustrativos, sem download real -->
 </body>
 </html>
