@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>5 slides PowerPoint • tendências 2026</title>
-  <!-- Font Awesome 6 (ícones) -->
+  <title>+10 slides • água & inovação • tendências 2026</title>
+  <!-- Font Awesome 6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <!-- Google Fonts: Inter + Space Grotesk (tech) -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Google Fonts: Inter + Outfit (fresco) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -16,7 +16,7 @@
     }
 
     body {
-      background: #0b0d12;
+      background: #0a0c15;
       font-family: 'Inter', sans-serif;
       display: flex;
       flex-direction: column;
@@ -25,324 +25,144 @@
     }
 
     .container {
-      max-width: 1200px;
+      max-width: 1300px;
       width: 100%;
     }
 
-    /* cabeçalho */
     .header {
       text-align: center;
       margin-bottom: 3rem;
       color: #eef2fb;
     }
     .header h1 {
-      font-size: 3rem;
+      font-size: 3.5rem;
       font-weight: 600;
       letter-spacing: -0.02em;
-      background: linear-gradient(130deg, #c0a0ff, #6cc4ff, #ffb3c6);
+      background: linear-gradient(145deg, #6cd4ff, #b7b1ff, #8fdcb0);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
       margin-bottom: 0.5rem;
     }
     .header .sub {
-      font-size: 1.1rem;
-      color: #a0aac0;
+      font-size: 1.2rem;
+      color: #9aa7c9;
       display: flex;
       justify-content: center;
-      gap: 0.5rem;
+      gap: 1rem;
       flex-wrap: wrap;
     }
+    .header .sub span {
+      background: rgba(255,255,255,0.03);
+      padding: 0.3rem 1.2rem;
+      border-radius: 40px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
 
-    /* cada slide é uma "página" */
     .slide-page {
       margin-bottom: 4rem;
       border-radius: 2.5rem;
       overflow: hidden;
-      box-shadow: 0 30px 50px -20px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255,255,255,0.06) inset;
-      transition: transform 0.2s;
-      background-color: #11131f; /* fallback */
+      box-shadow: 0 30px 50px -20px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255,255,255,0.08) inset;
+      transition: transform 0.25s ease, box-shadow 0.3s;
+      background-color: #111522;
     }
     .slide-page:hover {
-      transform: scale(1.01);
-      box-shadow: 0 40px 70px -15px #000000dd;
+      transform: scale(1.015);
+      box-shadow: 0 40px 70px -10px #000000ee, 0 0 0 2px rgba(255,255,255,0.15) inset;
     }
 
-    /* área do slide com proporção 16:9 */
     .slide {
       aspect-ratio: 16 / 9;
       width: 100%;
       position: relative;
-      padding: 2rem 2.5rem;
+      padding: 2rem 2.8rem;
       display: flex;
       flex-direction: column;
-      font-family: 'Inter', sans-serif;
       overflow: hidden;
     }
 
-    /* moldura superior com número do slide */
     .slide-number {
       position: absolute;
       top: 1.2rem;
       right: 1.8rem;
       font-size: 0.9rem;
       font-weight: 500;
-      background: rgba(0,0,0,0.2);
+      background: rgba(0,0,0,0.3);
       backdrop-filter: blur(8px);
-      padding: 0.3rem 1rem;
+      padding: 0.4rem 1.2rem;
       border-radius: 40px;
       color: rgba(255,255,255,0.9);
-      border: 1px solid rgba(255,255,255,0.15);
-      z-index: 20;
+      border: 1px solid rgba(255,255,255,0.2);
+      z-index: 30;
+      font-family: 'Outfit', sans-serif;
     }
 
-    /* conteúdo base do slide */
     .slide-title {
-      font-size: 2.8rem;
+      font-size: 3rem;
       font-weight: 700;
       letter-spacing: -0.02em;
+      line-height: 1.1;
       margin-bottom: 0.5rem;
-      line-height: 1.2;
+      max-width: 70%;
+      z-index: 10;
     }
     .slide-sub {
       font-size: 1.1rem;
       opacity: 0.8;
-      max-width: 70%;
+      max-width: 60%;
       margin-bottom: 2rem;
+      z-index: 10;
     }
     .row {
       display: flex;
       gap: 2rem;
       flex: 1;
       align-items: flex-end;
+      justify-content: space-between;
+      z-index: 10;
     }
     .bullet-list {
       list-style: none;
       font-size: 1.1rem;
       font-weight: 400;
-      space-y: 0.8rem;
+      z-index: 10;
     }
     .bullet-list li {
-      margin-bottom: 0.8rem;
+      margin-bottom: 1rem;
       display: flex;
       align-items: center;
-      gap: 0.7rem;
+      gap: 0.8rem;
     }
     .bullet-list i {
-      width: 1.4rem;
+      width: 1.6rem;
       color: inherit;
     }
 
-    .graphic-placeholder {
+    .graphic-block {
       background: rgba(255,255,255,0.1);
-      border-radius: 2rem;
-      padding: 1.5rem;
       backdrop-filter: blur(4px);
-      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 2rem;
+      padding: 1.2rem 1.8rem;
+      border: 1px solid rgba(255,255,255,0.15);
       display: flex;
       gap: 1rem;
       align-items: flex-end;
       height: 140px;
     }
     .bar {
-      width: 40px;
+      width: 38px;
       background: white;
       border-radius: 20px 20px 8px 8px;
       opacity: 0.9;
     }
 
-    /* ---- MODELO 1: Gradiente extremo + linhas diagonais ---- */
-    .gradient-slide {
-      background: linear-gradient(135deg, #f64f59, #c471ed, #12c2e9);
-      background-size: 200% 200%;
-      animation: gradientFlow 12s ease infinite alternate;
-      color: white;
-    }
-    @keyframes gradientFlow {
-      0% { background-position: 0% 0%; }
-      100% { background-position: 100% 100%; }
-    }
-    .gradient-slide .slide-title {
-      text-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    }
-    .gradient-overlay {
-      position: absolute;
-      inset: 0;
-      background: repeating-linear-gradient(45deg, rgba(255,255,255,0.1) 0px, rgba(255,255,255,0.1) 10px, transparent 10px, transparent 30px);
-      pointer-events: none;
-    }
-
-    /* ---- MODELO 2: Tech / cyber matrix ---- */
-    .tech-slide {
-      background: #0c0f1c;
-      color: #b7ffd9;
-      font-family: 'Space Grotesk', sans-serif;
-    }
-    .tech-grid {
-      position: absolute;
-      inset: 0;
-      background-image: 
-        linear-gradient(rgba(0,255,200,0.08) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,80,255,0.08) 1px, transparent 1px);
-      background-size: 40px 40px;
-      z-index: 0;
-    }
-    .tech-glow {
-      position: absolute;
-      width: 300px;
-      height: 300px;
-      background: radial-gradient(circle at 30% 40%, #00ffe1, transparent 70%);
-      opacity: 0.2;
-      filter: blur(60px);
-    }
-    .tech-slide .content {
-      z-index: 5;
-      position: relative;
-    }
-    .tech-slide .slide-title {
-      color: #fff;
-      text-shadow: 0 0 15px #00ffe1;
-    }
-    .tech-slide .bullet-list i {
-      color: #ff66cc;
-    }
-    .graphic-tech {
-      background: rgba(0,255,200,0.1);
-      border: 1px solid #00ffe180;
-      box-shadow: 0 0 20px #00ffe150;
-    }
-    .bar.tech {
-      background: #00ffe1;
-      box-shadow: 0 0 20px #00ffe1;
-    }
-
-    /* ---- MODELO 3: Minimalismo puro (monocromático suave) ---- */
-    .minimal-slide {
-      background: #f4f2ec;
-      color: #26231c;
-    }
-    .minimal-slide .slide-title {
-      font-weight: 500;
-      color: #3f3a31;
-      letter-spacing: -0.02em;
-    }
-    .minimal-slide .slide-sub {
-      color: #6b6257;
-    }
-    .minimal-list li i {
-      color: #a18f7a;
-    }
-    .minimal-shape {
-      position: absolute;
-      bottom: 2rem;
-      right: 2rem;
-      width: 200px;
-      height: 200px;
-      background: #ddd6cb;
-      border-radius: 60% 40% 50% 50%;
-      z-index: 0;
-      opacity: 0.4;
-    }
-    .minimal-graphic {
-      background: #d4cdc0;
-      border-radius: 2rem;
-      padding: 1rem;
-      display: flex;
-      gap: 0.5rem;
-      align-items: flex-end;
-      height: 120px;
-    }
-    .minimal-bar {
-      background: #7a6f60;
-      width: 30px;
-      border-radius: 12px 12px 4px 4px;
-    }
-
-    /* ---- MODELO 4: Geométrico / blocos de cor ---- */
-    .geo-slide {
-      background: #0b1424;
-      color: #f0edf5;
-    }
-    .geo-bg {
-      position: absolute;
-      inset: 0;
-      clip-path: polygon(0 0, 100% 0, 70% 100%, 0 100%);
-      background: #e54f6d;
-      opacity: 0.5;
-    }
-    .geo-bg2 {
-      position: absolute;
-      inset: 0;
-      clip-path: polygon(100% 0, 100% 100%, 30% 100%);
-      background: #32b8b0;
-      opacity: 0.5;
-    }
-    .geo-slide .content {
-      position: relative;
-      z-index: 5;
-    }
-    .geo-slide .slide-title {
-      color: #fff;
-      text-shadow: 2px 2px 0 #e54f6d;
-    }
-    .geo-shape-small {
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
-      width: 100px;
-      height: 100px;
-      background: #f4d03f;
-      clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-      opacity: 0.7;
-    }
-
-    /* ---- MODELO 5: Glassmorphism + gradiente vivo ---- */
-    .glass-slide {
-      background: linear-gradient(145deg, #8f5ff0, #df6f9c, #6fc3df);
-      position: relative;
-    }
-    .glass-bg-blur {
-      position: absolute;
-      inset: 0;
-      backdrop-filter: blur(8px);
-      background: rgba(255,255,255,0.05);
-      z-index: 0;
-    }
-    .glass-card {
-      background: rgba(255,255,255,0.2);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(255,255,255,0.3);
-      border-radius: 2.5rem;
-      padding: 2rem;
-      box-shadow: 0 30px 40px -20px rgba(0,0,0,0.5);
-      color: white;
-      z-index: 5;
-      position: relative;
-      height: 80%;
-      display: flex;
-      flex-direction: column;
-    }
-    .glass-card .slide-title {
-      font-weight: 500;
-    }
-    .glass-graphic {
-      display: flex;
-      gap: 2rem;
-      align-items: center;
-      margin-top: 1rem;
-    }
-    .glass-icon {
-      font-size: 3rem;
-      opacity: 0.8;
-    }
-
-    /* botões de ação (fictícios) */
     .slide-footer {
       display: flex;
       justify-content: flex-end;
       gap: 1rem;
       margin-top: 1rem;
-      z-index: 20;
+      z-index: 30;
       position: relative;
     }
     .btn-slide {
@@ -350,201 +170,490 @@
       backdrop-filter: blur(8px);
       border: 1px solid rgba(255,255,255,0.25);
       color: white;
-      padding: 0.5rem 1.2rem;
+      padding: 0.6rem 1.5rem;
       border-radius: 3rem;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       font-weight: 500;
       text-decoration: none;
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.6rem;
       transition: 0.2s;
     }
     .btn-slide:hover {
       background: white;
-      color: black;
+      color: #0a0c15;
       border-color: white;
+    }
+
+    /* ------- ESTILOS ESPECÍFICOS PARA CADA SLIDE (ÁGUA & INOVAÇÃO) ------- */
+
+    /* 1. Oceano profundo (deep) */
+    .deep-ocean {
+      background: radial-gradient(ellipse at 20% 40%, #023b4b, #00111c);
+      color: #caf0f8;
+    }
+    .deep-ocean::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(45deg, rgba(0,255,255,0.02) 0px, rgba(0,255,255,0.02) 20px, transparent 20px, transparent 40px);
+      pointer-events: none;
+    }
+    .bubbles {
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle at 10% 70%, rgba(255,255,255,0.15) 2px, transparent 2px),
+                        radial-gradient(circle at 90% 30%, rgba(200,255,255,0.2) 4px, transparent 4px),
+                        radial-gradient(circle at 40% 85%, rgba(255,255,255,0.1) 6px, transparent 6px),
+                        radial-gradient(circle at 70% 55%, rgba(200,240,255,0.12) 3px, transparent 3px);
+      background-size: 120px 120px;
+      animation: bubbleMove 18s infinite alternate;
+    }
+    @keyframes bubbleMove {
+      0% { background-position: 0 0; }
+      100% { background-position: 60px 60px; }
+    }
+
+    /* 2. Água cristalina (claro, translúcido) */
+    .crystal-water {
+      background: linear-gradient(145deg, #d4f4ff, #a9e5ff, #e0f2fe);
+      color: #024e6b;
+    }
+    .crystal-water .slide-title, .crystal-water .slide-sub { color: #015c7c; }
+    .crystal-water .bullet-list i { color: #0284a5; }
+    .water-shimmer {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.5) 50%, transparent 70%);
+      mix-blend-mode: overlay;
+      animation: shimmer 6s infinite;
+    }
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      20% { transform: translateX(100%); }
+      100% { transform: translateX(200%); }
+    }
+
+    /* 3. Aqua tech (água + circuitos) */
+    .aqua-tech {
+      background: #0d1b2a;
+      color: #9efff0;
+    }
+    .aqua-grid {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(0,255,200,0.15) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,200,0.12) 1px, transparent 1px);
+      background-size: 30px 30px;
+    }
+    .aqua-neon {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, #00ffe1, #0066ff);
+      opacity: 0.3;
+      filter: blur(70px);
+      border-radius: 50%;
+      top: -50px;
+      right: -50px;
+    }
+    .aqua-wave {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 80px;
+      background: repeating-linear-gradient( transparent 0px, transparent 25px, rgba(0,255,200,0.2) 25px, rgba(0,255,200,0.2) 30px);
+    }
+
+    /* 4. Minimalist drop (água minimalista) */
+    .minimal-drop {
+      background: #f7f9fc;
+      color: #1d3557;
+    }
+    .drop-shape {
+      position: absolute;
+      bottom: 2rem;
+      right: 2rem;
+      width: 200px;
+      height: 200px;
+      background: #c1d3fe;
+      border-radius: 42% 58% 70% 30% / 44% 30% 70% 56%;
+      opacity: 0.5;
+      filter: blur(2px);
+    }
+    .minimal-drop .bullet-list i { color: #457b9d; }
+
+    /* 5. Ondas geométricas */
+    .geo-waves {
+      background: #0e2738;
+      color: #f0f7fa;
+    }
+    .geo-wave-bg {
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(45deg, #1e4b62 0px, #1e4b62 2px, transparent 2px, transparent 20px);
+      opacity: 0.2;
+    }
+    .wave-poly {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 40%;
+      background: linear-gradient(transparent, #278ea5);
+      clip-path: polygon(0 60%, 20% 30%, 40% 70%, 60% 20%, 80% 50%, 100% 10%, 100% 100%, 0 100%);
+      opacity: 0.5;
+    }
+
+    /* 6. Frosted water (glass + água) */
+    .frosted-water {
+      background: linear-gradient(125deg, #92c9ff, #c0b7ff, #a6e2fa);
+    }
+    .frost-card {
+      background: rgba(255,255,255,0.2);
+      backdrop-filter: blur(16px);
+      border-radius: 3rem;
+      padding: 2rem;
+      border: 1px solid rgba(255,255,255,0.3);
+      height: 80%;
+      display: flex;
+      flex-direction: column;
+      color: #022b40;
+    }
+    .frost-card .slide-title, .frost-card .slide-sub { color: #022b40; }
+
+    /* 7. Fluid art (aquarela digital) */
+    .fluid-art {
+      background: #fff5e6;
+      color: #3a2618;
+    }
+    .fluid-blob {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 30% 40%, #ffb3aa, transparent 40%),
+                  radial-gradient(circle at 80% 70%, #aad0ff, transparent 50%),
+                  radial-gradient(circle at 20% 80%, #b0e0c0, transparent 50%);
+      filter: blur(30px);
+      opacity: 0.5;
+    }
+
+    /* 8. Night tide (água noturna) */
+    .night-tide {
+      background: linear-gradient(145deg, #021526, #123456, #1a3a5e);
+      color: #e0f2ff;
+    }
+    .stars {
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(2px 2px at 10px 20px, #fff, rgba(0,0,0,0)),
+                        radial-gradient(2px 2px at 90px 150px, #fff, rgba(0,0,0,0)),
+                        radial-gradient(3px 3px at 200px 80px, #fffb, rgba(0,0,0,0)),
+                        radial-gradient(1px 1px at 300px 200px, #fff, rgba(0,0,0,0));
+      background-size: 400px 400px;
+    }
+
+    /* 9. Prism water (gradiente extremo + água) */
+    .prism-water {
+      background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #ffe66d, #c084fc);
+      background-size: 200% 200%;
+      animation: prismFlow 12s infinite alternate;
+      color: white;
+    }
+    @keyframes prismFlow {
+      0% { background-position: 0% 0%; }
+      100% { background-position: 100% 100%; }
+    }
+    .prism-water .slide-title { text-shadow: 2px 2px 10px rgba(0,0,0,0.3); }
+
+    /* 10. Liquid flow (orgânico) */
+    .liquid-flow {
+      background: #d0efff;
+      color: #004d66;
+    }
+    .flow-line {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 150px;
+      background: repeating-linear-gradient( transparent 0px, transparent 25px, #00a6c0 25px, #00a6c0 30px);
+      mask-image: linear-gradient(to top, black, transparent);
+      opacity: 0.4;
     }
 
     /* rodapé */
     .footer-note {
-      color: #646c84;
+      color: #6b7a9c;
       text-align: center;
       margin-top: 2rem;
       padding: 2rem;
       border-top: 1px solid #202433;
-    }
-
-    /* ajustes responsivos */
-    @media (max-width: 800px) {
-      .slide { padding: 1.5rem; }
-      .slide-title { font-size: 2rem; }
     }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <h1>5 slides • prontos para 2026</h1>
+      <h1>águas criativas • 10 slides premium</h1>
       <div class="sub">
-        <span>✦ gradiente extremo</span>
-        <span>✦ tech matrix</span>
-        <span>✦ minimalismo</span>
-        <span>✦ blocos geométricos</span>
-        <span>✦ glass 2.0</span>
+        <span>oceano profundo</span>
+        <span>cristalino</span>
+        <span>aqua tech</span>
+        <span>minimal drop</span>
+        <span>ondas geométricas</span>
+        <span>frosted</span>
+        <span>fluid art</span>
+        <span>night tide</span>
+        <span>prisma</span>
+        <span>liquid flow</span>
       </div>
     </div>
 
-    <!-- SLIDE 1 – Gradiente extremo -->
+    <!-- SLIDE 1 – Oceano profundo -->
     <div class="slide-page">
-      <div class="slide gradient-slide">
-        <div class="gradient-overlay"></div>
-        <span class="slide-number">01/05 — gradiente orgânico</span>
-        <div style="position: relative; z-index: 5; height: 100%; display: flex; flex-direction: column;">
-          <div class="slide-title">energia em<br>movimento</div>
-          <div class="slide-sub">cores que evoluem • 2026</div>
-          <div class="row" style="justify-content: space-between; align-items: flex-end;">
-            <ul class="bullet-list">
-              <li><i class="fa-regular fa-circle-check"></i> narrativa visual fluida</li>
-              <li><i class="fa-regular fa-compass"></i> transições orgânicas</li>
-              <li><i class="fa-regular fa-sun"></i> paleta viva e extrema</li>
-            </ul>
-            <div class="graphic-placeholder" style="width: 250px;">
-              <div style="height: 80px; width: 40px; background: #fff5; border-radius: 20px 20px 8px 8px;"></div>
-              <div style="height: 120px; width: 40px; background: #fffb; border-radius: 20px 20px 8px 8px;"></div>
-              <div style="height: 50px; width: 40px; background: #fffa; border-radius: 20px 20px 8px 8px;"></div>
-            </div>
+      <div class="slide deep-ocean">
+        <div class="bubbles"></div>
+        <span class="slide-number">01/10 — deep ocean</span>
+        <div class="slide-title">abismo<br>azul</div>
+        <div class="slide-sub">profundidade e mistério • 2026</div>
+        <div class="row">
+          <ul class="bullet-list">
+            <li><i class="fa-regular fa-water"></i> textura abissal</li>
+            <li><i class="fa-regular fa-fish"></i> vida marinha digital</li>
+            <li><i class="fa-regular fa-gem"></i> reflexos líquidos</li>
+          </ul>
+          <div class="graphic-block" style="background: #023b4b80;">
+            <div style="height: 50px; width: 38px; background: #60e0e0;"></div>
+            <div style="height: 110px; width: 38px; background: #90f0f0;"></div>
+            <div style="height: 70px; width: 38px; background: #b0ffff;"></div>
           </div>
-          <div class="slide-footer">
-            <a href="#" class="btn-slide"><i class="fa-regular fa-eye"></i> visualizar</a>
-            <a href="#" class="btn-slide"><i class="fa-regular fa-circle-down"></i> exportar pptx</a>
+        </div>
+        <div class="slide-footer">
+          <a href="#" class="btn-slide"><i class="fa-regular fa-eye"></i> visualizar</a>
+          <a href="#" class="btn-slide"><i class="fa-regular fa-circle-down"></i> exportar pptx</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2 – Água cristalina (claro) -->
+    <div class="slide-page">
+      <div class="slide crystal-water">
+        <div class="water-shimmer"></div>
+        <span class="slide-number">02/10 — cristalino</span>
+        <div class="slide-title">transparência<br>pura</div>
+        <div class="slide-sub">luz e água • fresh 2026</div>
+        <div class="row">
+          <ul class="bullet-list">
+            <li><i class="fa-regular fa-droplet"></i> brilho aquático</li>
+            <li><i class="fa-regular fa-sun"></i> reflexos suaves</li>
+            <li><i class="fa-regular fa-leaf"></i> frescor visual</li>
+          </ul>
+          <div class="graphic-block" style="background: #ffffff50; border-color: #fff;">
+            <div style="height: 70px; background: #0284a5;"></div>
+            <div style="height: 120px; background: #026c8a;"></div>
+            <div style="height: 40px; background: #0284a5;"></div>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <a href="#" class="btn-slide"><i class="fa-regular fa-eye"></i> visualizar</a>
+          <a href="#" class="btn-slide"><i class="fa-regular fa-circle-down"></i> exportar pptx</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3 – Aqua tech -->
+    <div class="slide-page">
+      <div class="slide aqua-tech">
+        <div class="aqua-grid"></div>
+        <div class="aqua-neon"></div>
+        <div class="aqua-wave"></div>
+        <span class="slide-number">03/10 — aqua tech</span>
+        <div class="slide-title">cyber<br>ocean</div>
+        <div class="slide-sub">tecnologia líquida • dados fluidos</div>
+        <div class="row">
+          <ul class="bullet-list">
+            <li><i class="fa-regular fa-microchip"></i> circuitos aquáticos</li>
+            <li><i class="fa-regular fa-chart-scatter"></i> visualização dinâmica</li>
+            <li><i class="fa-regular fa-wifi"></i> conectividade azul</li>
+          </ul>
+          <div class="graphic-block" style="background: #0d1b2a; border: 1px solid #0ff;">
+            <div style="height: 80px; background: #0ff; box-shadow: 0 0 20px #0ff;"></div>
+            <div style="height: 130px; background: #f0f; box-shadow: 0 0 20px #f0f;"></div>
+            <div style="height: 40px; background: #0ff;"></div>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <a href="#" class="btn-slide"><i class="fa-regular fa-eye"></i> visualizar</a>
+          <a href="#" class="btn-slide"><i class="fa-regular fa-circle-down"></i> exportar pptx</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4 – Minimalist drop (água minimalista) -->
+    <div class="slide-page">
+      <div class="slide minimal-drop">
+        <div class="drop-shape"></div>
+        <span class="slide-number">04/10 — minimal drop</span>
+        <div class="slide-title">gota<br>essencial</div>
+        <div class="slide-sub">a forma da água • silêncio</div>
+        <div class="row">
+          <ul class="bullet-list">
+            <li><i class="fa-regular fa-circle"></i> uma única gota</li>
+            <li><i class="fa-regular fa-wave-square"></i> linha d'água</li>
+            <li><i class="fa-regular fa-eye"></i> foco absoluto</li>
+          </ul>
+          <div style="width: 100px; height: 100px; border-radius: 50%; background: #a3cef1; opacity: 0.6;"></div>
+        </div>
+        <div class="slide-footer">
+          <a href="#" class="btn-slide" style="background: #d4e2f0; color: #1d3557;"><i class="fa-regular fa-eye"></i> visualizar</a>
+          <a href="#" class="btn-slide" style="background: #d4e2f0; color: #1d3557;"><i class="fa-regular fa-circle-down"></i> exportar pptx</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5 – Ondas geométricas -->
+    <div class="slide-page">
+      <div class="slide geo-waves">
+        <div class="geo-wave-bg"></div>
+        <div class="wave-poly"></div>
+        <span class="slide-number">05/10 — geometric waves</span>
+        <div class="slide-title">ondas<br>estruturadas</div>
+        <div class="slide-sub">padrões e movimento</div>
+        <div class="row">
+          <ul class="bullet-list">
+            <li><i class="fa-regular fa-triangle"></i> triângulos líquidos</li>
+            <li><i class="fa-regular fa-chart-line"></i> linhas de quebra</li>
+            <li><i class="fa-regular fa-cubes"></i> profundidade angular</li>
+          </ul>
+          <div style="display: flex; gap: 10px;">
+            <div style="width: 40px; height: 90px; background: #00b8b8; clip-path: polygon(0 0, 100% 20%, 100% 100%, 0 80%);"></div>
+            <div style="width: 40px; height: 130px; background: #00e0e0; clip-path: polygon(0 20%, 100% 0, 100% 80%, 0 100%);"></div>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <a href="#" class="btn-slide"><i class="fa-regular fa-eye"></i> visualizar</a>
+          <a href="#" class="btn-slide"><i class="fa-regular fa-circle-down"></i> exportar pptx</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6 – Frosted water (glass + água) -->
+    <div class="slide-page">
+      <div class="slide frosted-water">
+        <span class="slide-number">06/10 — frosted water</span>
+        <div class="frost-card">
+          <div class="slide-title">gelo<br>líquido</div>
+          <div class="slide-sub">camadas translúcidas</div>
+          <ul class="bullet-list" style="margin-top: 1rem;">
+            <li><i class="fa-regular fa-snowflake"></i> vidro aquático</li>
+            <li><i class="fa-regular fa-droplet"></i> fusão gelo/água</li>
+          </ul>
+          <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+            <i class="fa-regular fa-gem" style="font-size: 3rem;"></i>
+            <i class="fa-regular fa-star" style="font-size: 3rem;"></i>
+          </div>
+          <div class="slide-footer" style="margin-top: 1rem;">
+            <a href="#" class="btn-slide" style="background: rgba(0,0,0,0.2);"><i class="fa-regular fa-eye"></i> visualizar</a>
+            <a href="#" class="btn-slide" style="background: rgba(0,0,0,0.2);"><i class="fa-regular fa-circle-down"></i> exportar pptx</a>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- SLIDE 2 – Tech / cyber matrix -->
+    <!-- SLIDE 7 – Fluid art (aquarela digital) -->
     <div class="slide-page">
-      <div class="slide tech-slide">
-        <div class="tech-grid"></div>
-        <div class="tech-glow" style="top: 10%; left: 5%;"></div>
-        <div class="tech-glow" style="bottom: 0; right: 0; background: radial-gradient(circle, #ff55aa, transparent);"></div>
-        <span class="slide-number">02/05 — cyber matrix</span>
-        <div class="content" style="position: relative; z-index: 10; height: 100%; display: flex; flex-direction: column;">
-          <div class="slide-title">protocolo<br>nexus</div>
-          <div class="slide-sub">infraestrutura digital • dados em tempo real</div>
-          <div class="row" style="justify-content: space-between;">
-            <ul class="bullet-list">
-              <li><i class="fa-regular fa-microchip"></i> arquitetura de rede</li>
-              <li><i class="fa-regular fa-chart-line"></i> analytics imersivo</li>
-              <li><i class="fa-regular fa-cube"></i> edge computing</li>
-            </ul>
-            <div class="graphic-placeholder graphic-tech" style="width: 260px; background: #0b0f1a; border: 1px solid #00ffe1;">
-              <div class="bar tech" style="height: 60px;"></div>
-              <div class="bar tech" style="height: 110px;"></div>
-              <div class="bar tech" style="height: 30px;"></div>
-              <div class="bar tech" style="height: 80px;"></div>
-            </div>
-          </div>
-          <div class="slide-footer">
-            <a href="#" class="btn-slide"><i class="fa-regular fa-eye"></i> visualizar</a>
-            <a href="#" class="btn-slide"><i class="fa-regular fa-circle-down"></i> exportar pptx</a>
-          </div>
+      <div class="slide fluid-art">
+        <div class="fluid-blob"></div>
+        <span class="slide-number">07/10 — fluid art</span>
+        <div class="slide-title">aquarela<br>digital</div>
+        <div class="slide-sub">manchas e fluidez</div>
+        <div class="row">
+          <ul class="bullet-list">
+            <li><i class="fa-regular fa-paintbrush"></i> pinceladas líquidas</li>
+            <li><i class="fa-regular fa-droplet"></i> tinta na água</li>
+            <li><i class="fa-regular fa-palette"></i> cores orgânicas</li>
+          </ul>
+          <div style="width: 120px; height: 120px; border-radius: 60% 40% 70% 30%; background: #ff9f7c;"></div>
+        </div>
+        <div class="slide-footer">
+          <a href="#" class="btn-slide" style="background: #ccb6a0; color: #3a2618;"><i class="fa-regular fa-eye"></i> visualizar</a>
+          <a href="#" class="btn-slide" style="background: #ccb6a0; color: #3a2618;"><i class="fa-regular fa-circle-down"></i> exportar pptx</a>
         </div>
       </div>
     </div>
 
-    <!-- SLIDE 3 – Minimalismo puro -->
+    <!-- SLIDE 8 – Night tide (água noturna) -->
     <div class="slide-page">
-      <div class="slide minimal-slide">
-        <div class="minimal-shape"></div>
-        <span class="slide-number" style="background: rgba(0,0,0,0.05); color: #3f3a31; border-color: #ccc;">03/05 — silent air</span>
-        <div style="position: relative; z-index: 10; height: 100%; display: flex; flex-direction: column;">
-          <div class="slide-title">menos é<br>mais</div>
-          <div class="slide-sub">essência e espaço • 2026</div>
-          <div class="row" style="justify-content: space-between;">
-            <ul class="bullet-list minimal-list">
-              <li><i class="fa-regular fa-circle"></i> conteúdo em foco</li>
-              <li><i class="fa-regular fa-square"></i> tipografia como forma</li>
-              <li><i class="fa-regular fa-leaf"></i> pausa visual</li>
-            </ul>
-            <div class="minimal-graphic" style="width: 240px;">
-              <div class="minimal-bar" style="height: 40px;"></div>
-              <div class="minimal-bar" style="height: 70px;"></div>
-              <div class="minimal-bar" style="height: 95px;"></div>
-              <div class="minimal-bar" style="height: 30px;"></div>
-            </div>
-          </div>
-          <div class="slide-footer">
-            <a href="#" class="btn-slide" style="background: #bbb2a4; color:#26231c;"><i class="fa-regular fa-eye"></i> visualizar</a>
-            <a href="#" class="btn-slide" style="background: #bbb2a4; color:#26231c;"><i class="fa-regular fa-circle-down"></i> exportar pptx</a>
-          </div>
+      <div class="slide night-tide">
+        <div class="stars"></div>
+        <span class="slide-number">08/10 — night tide</span>
+        <div class="slide-title">maré<br>noturna</div>
+        <div class="slide-sub">estrelas refletidas</div>
+        <div class="row">
+          <ul class="bullet-list">
+            <li><i class="fa-regular fa-moon"></i> luar na água</li>
+            <li><i class="fa-regular fa-star"></i> brilho noturno</li>
+            <li><i class="fa-regular fa-wave"></i> ondas escuras</li>
+          </ul>
+          <div style="width: 80px; height: 80px; border-radius: 50%; background: #ffecaa30; box-shadow: 0 0 40px #ffecaa;"></div>
+        </div>
+        <div class="slide-footer">
+          <a href="#" class="btn-slide"><i class="fa-regular fa-eye"></i> visualizar</a>
+          <a href="#" class="btn-slide"><i class="fa-regular fa-circle-down"></i> exportar pptx</a>
         </div>
       </div>
     </div>
 
-    <!-- SLIDE 4 – Geométrico / blocos -->
+    <!-- SLIDE 9 – Prism water (gradiente extremo + água) -->
     <div class="slide-page">
-      <div class="slide geo-slide">
-        <div class="geo-bg"></div>
-        <div class="geo-bg2"></div>
-        <div class="geo-shape-small"></div>
-        <span class="slide-number">04/05 — block divide</span>
-        <div class="content" style="position: relative; z-index: 10; height: 100%; display: flex; flex-direction: column;">
-          <div class="slide-title">estrutura<br>fragmentada</div>
-          <div class="slide-sub">sobreposição e cor • coleção 2026</div>
-          <div class="row" style="justify-content: space-between;">
-            <ul class="bullet-list">
-              <li><i class="fa-regular fa-shapes"></i> blocos assimétricos</li>
-              <li><i class="fa-regular fa-circle-half-stroke"></i> contraste dinâmico</li>
-              <li><i class="fa-regular fa-crop"></i> grids não lineares</li>
-            </ul>
-            <div style="display: flex; gap: 10px; align-items: flex-end;">
-              <div style="width: 45px; height: 90px; background: #e54f6d; clip-path: polygon(0 0, 100% 20%, 100% 100%, 0 80%);"></div>
-              <div style="width: 45px; height: 130px; background: #32b8b0; clip-path: polygon(0 20%, 100% 0, 100% 80%, 0 100%);"></div>
-              <div style="width: 45px; height: 50px; background: #f4d03f; clip-path: polygon(20% 0%, 100% 20%, 80% 100%, 0% 80%);"></div>
-            </div>
-          </div>
-          <div class="slide-footer">
-            <a href="#" class="btn-slide"><i class="fa-regular fa-eye"></i> visualizar</a>
-            <a href="#" class="btn-slide"><i class="fa-regular fa-circle-down"></i> exportar pptx</a>
-          </div>
+      <div class="slide prism-water">
+        <span class="slide-number">09/10 — prism water</span>
+        <div class="slide-title">prisma<br>líquido</div>
+        <div class="slide-sub">espectro aquático</div>
+        <div class="row">
+          <ul class="bullet-list">
+            <li><i class="fa-regular fa-sun"></i> refração da luz</li>
+            <li><i class="fa-regular fa-diamond"></i> cores extremas</li>
+            <li><i class="fa-regular fa-water"></i> fluidez cromática</li>
+          </ul>
+          <div style="width: 150px; height: 100px; background: rgba(255,255,255,0.2); backdrop-filter: blur(6px); border-radius: 30px;"></div>
+        </div>
+        <div class="slide-footer">
+          <a href="#" class="btn-slide"><i class="fa-regular fa-eye"></i> visualizar</a>
+          <a href="#" class="btn-slide"><i class="fa-regular fa-circle-down"></i> exportar pptx</a>
         </div>
       </div>
     </div>
 
-    <!-- SLIDE 5 – Glassmorphism + gradiente vivo -->
+    <!-- SLIDE 10 – Liquid flow (orgânico) -->
     <div class="slide-page">
-      <div class="slide glass-slide">
-        <div class="glass-bg-blur"></div>
-        <span class="slide-number">05/05 — frost glass</span>
-        <div style="position: relative; z-index: 20; height: 100%; width: 100%; display: flex; flex-direction: column;">
-          <div class="glass-card">
-            <div class="slide-title">camadas<br>translúcidas</div>
-            <div class="slide-sub">glass 2.0 + gradiente vivo</div>
-            <div style="flex:1;"></div>
-            <div class="glass-graphic">
-              <i class="fa-regular fa-gem glass-icon"></i>
-              <i class="fa-regular fa-moon glass-icon"></i>
-              <i class="fa-regular fa-snowflake glass-icon"></i>
-            </div>
-            <ul class="bullet-list" style="margin-top: 1.5rem;">
-              <li><i class="fa-regular fa-droplet"></i> profundidade etérea</li>
-              <li><i class="fa-regular fa-sparkles"></i> blur e brilho suave</li>
-            </ul>
-            <div class="slide-footer" style="margin-top: 1rem;">
-              <a href="#" class="btn-slide"><i class="fa-regular fa-eye"></i> visualizar</a>
-              <a href="#" class="btn-slide"><i class="fa-regular fa-circle-down"></i> exportar pptx</a>
-            </div>
-          </div>
+      <div class="slide liquid-flow">
+        <div class="flow-line"></div>
+        <span class="slide-number">10/10 — liquid flow</span>
+        <div class="slide-title">fluxo<br>orgânico</div>
+        <div class="slide-sub">movimento perpétuo</div>
+        <div class="row">
+          <ul class="bullet-list">
+            <li><i class="fa-regular fa-wind"></i> correnteza</li>
+            <li><i class="fa-regular fa-leaf"></i> formas vivas</li>
+            <li><i class="fa-regular fa-circle-nodes"></i> conexões fluidas</li>
+          </ul>
+          <div style="width: 150px; height: 100px; background: repeating-linear-gradient(45deg, #008b9f 0px, #008b9f 4px, transparent 4px, transparent 12px);"></div>
+        </div>
+        <div class="slide-footer">
+          <a href="#" class="btn-slide" style="background: #c2e9fb; color: #004d66;"><i class="fa-regular fa-eye"></i> visualizar</a>
+          <a href="#" class="btn-slide" style="background: #c2e9fb; color: #004d66;"><i class="fa-regular fa-circle-down"></i> exportar pptx</a>
         </div>
       </div>
     </div>
 
     <div class="footer-note">
-      <i class="fa-regular fa-copyright"></i> 2026 • templates conceito — cada slide é uma página pronta para inspirar suas apresentações.
+      <i class="fa-regular fa-copyright"></i> 2026 • 10 slides inspirados na água — inovação e fluidez para apresentações premiadas.
     </div>
   </div>
-  <!-- botões são apenas ilustrativos, sem download real -->
+  <!-- botões ilustrativos, sem download real -->
 </body>
 </html>
