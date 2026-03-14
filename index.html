@@ -2868,20 +2868,22 @@ function switchTab(id, event) {
 }
 
 
+
 // ═══════════════════════════════════════════════════════════════════
-// EXPORTAR PDF — window.print() nativo (fontes carregadas, sem CORS)
+// EXPORTAR PDF — window.print() nativo — relatório profissional A4
 // ═══════════════════════════════════════════════════════════════════
 function exportPDF() {
   const s   = calcScore();
   const z   = zone(s);
   const zl  = zoneLabel(s);
-  const now = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
-  const nowShort = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  const ts  = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  const now      = new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+  const nowShort = new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const ts       = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  const reportId = 'DICE-' + s + '-' + nowShort.replace(/\//g,'');
 
   const projectName = document.getElementById('projectName')?.value?.trim() || 'Projeto sem nome';
 
-  const JUSTIFICATIONS = {
+  const J = {
     D:  document.getElementById('justD')?.value?.trim()  || '',
     I:  document.getElementById('justI')?.value?.trim()  || '',
     C1: document.getElementById('justC1')?.value?.trim() || '',
@@ -2889,374 +2891,357 @@ function exportPDF() {
     E:  document.getElementById('justE')?.value?.trim()  || ''
   };
 
+  const ZC  = { win:'#03A63C', worry:'#D97706', woe:'#DC2626' };
+  const ZBG = { win:'#f0fdf4', worry:'#fffbeb', woe:'#fef2f2' };
+  const ZBD = { win:'#bbf7d0', worry:'#fde68a', woe:'#fecaca' };
+  const ZLB = { win:'WIN — Zona de Sucesso', worry:'WORRY — Zona de Atenção', woe:'WOE — Zona de Perigo' };
+  const RC  = { 1:'#03A63C', 2:'#D97706', 3:'#EA580C', 4:'#DC2626' };
+  const RL  = { 1:'BAIXO RISCO', 2:'MODERADO', 3:'ELEVADO', 4:'CRÍTICO' };
+
+  const zc = ZC[z], zbg = ZBG[z], zbd = ZBD[z];
+
   const factors = [
-    { key:'D',  name:'Duração',              longName:'D — Duração entre marcos',              val:state.D,  comp:state.D,       weight:1 },
-    { key:'I',  name:'Integridade da Equipe', longName:'I — Integridade da Equipe',              val:state.I,  comp:2*state.I,     weight:2 },
-    { key:'C1', name:'Alta Gestão',           longName:'C1 — Compromisso da Alta Gestão',        val:state.C1, comp:2*state.C1,    weight:2 },
-    { key:'C2', name:'Impactados',            longName:'C2 — Compromisso dos Impactados',        val:state.C2, comp:state.C2,      weight:1 },
-    { key:'E',  name:'Esforço',               longName:'E — Esforço Adicional Exigido',          val:state.E,  comp:state.E,       weight:1 }
+    {key:'D',  long:'D — Duração entre marcos de revisão', val:state.D,  comp:state.D,    max:4, weight:1},
+    {key:'I',  long:'I — Integridade e capacidade da equipe', val:state.I,  comp:2*state.I,  max:8, weight:2},
+    {key:'C1', long:'C1 — Compromisso da alta gestão',     val:state.C1, comp:2*state.C1, max:8, weight:2},
+    {key:'C2', long:'C2 — Compromisso dos colaboradores impactados', val:state.C2, comp:state.C2,  max:4, weight:1},
+    {key:'E',  long:'E — Esforço adicional exigido',       val:state.E,  comp:state.E,    max:4, weight:1}
   ];
 
-  const FULL_LABELS = {
-    D:  ['Menos de 2 meses', 'Entre 2 e 4 meses', 'Entre 4 e 8 meses', 'Mais de 8 meses'],
-    I:  ['Excelente — Líder altamente capaz, equipe com habilidades adequadas e dedicação ≥ 50%',
-         'Boa — Equipe competente com algumas lacunas de habilidade ou disponibilidade',
-         'Regular — Lacunas relevantes de competência ou dedicação ao projeto',
-         'Fraca — Equipe inadequada em múltiplas dimensões críticas'],
-    C1: ['Muito forte — Liderança comunica ativamente e com alta frequência o compromisso',
-         'Favorável — Suporte presente e visível, mas poderia ser mais frequente',
-         'Neutro — Postura ambígua que envia sinal dúbio à organização',
-         'Relutante — Resistência ou ausência visível do apoio da alta gestão'],
-    C2: ['Engajados — Colaboradores impactados estão entusiasmados e apoiam ativamente',
-         'Dispostos — Aceitam a mudança embora sem entusiasmo marcado',
-         'Relutantes — Resistência presente; intervenção de engajamento necessária',
-         'Alta resistência — Oposição ativa que requer plano estruturado de gestão da mudança'],
-    E:  ['Menos de 10% de esforço adicional — carga gerenciável e sustentável',
-         'Entre 10% e 20% de esforço extra — monitore sinais de sobrecarga',
-         'Entre 20% e 40% de esforço adicional — alto risco; remova responsabilidades não-essenciais',
-         'Mais de 40% de esforço adicional — insustentável; alto risco de abandono e burnout']
+  const DETAIL = {
+    D: ['Menos de 2 meses entre revisões formais de marco — intervalo ideal segundo o BCG. Permite detecção precoce de riscos.',
+        'Entre 2 e 4 meses entre revisões — adequado para projetos de complexidade moderada.',
+        'Entre 4 e 8 meses — intervalo elevado. Problemas podem acumular sem percepção da liderança.',
+        'Mais de 8 meses sem revisão formal — risco exponencial. O BCG recomenda subdivir marcos imediatamente.'],
+    I: ['Equipe excelente: líder altamente capaz e respeitado, membros com habilidades adequadas e dedicação ≥ 50% ao projeto.',
+        'Equipe boa: competente, mas com algumas lacunas de habilidade ou disponibilidade que merecem atenção.',
+        'Equipe regular: lacunas relevantes de competência ou dedicação. Reforce a composição antes do lançamento.',
+        'Equipe fraca: inadequada em múltiplas dimensões críticas. Reconfiguração urgente é necessária.'],
+    C1:['Comprometimento muito forte: liderança comunica ativamente, com alta frequência e de forma consistente.',
+        'Comprometimento favorável: suporte presente e visível, mas poderia ser mais frequente ou enfático.',
+        'Postura neutra: sinal ambíguo para a organização. Funcionários tendem a interpretar como falta de prioridade.',
+        'Relutância ou ausência visível da alta gestão — fator mais determinante de fracasso identificado pelo BCG.'],
+    C2:['Colaboradores entusiasmados e engajados — apoiam ativamente a iniciativa de mudança.',
+        'Colaboradores dispostos — aceitam a mudança, embora sem entusiasmo marcado.',
+        'Resistência presente — intervenção de engajamento necessária; mapeie e neutralize preocupações específicas.',
+        'Alta resistência ativa — requer plano estruturado de gestão da mudança antes de prosseguir.'],
+    E: ['Menos de 10% de esforço adicional — carga gerenciável. O BCG recomenda nunca ultrapassar este limite.',
+        'Entre 10% e 20% de esforço extra — gerenciável, mas monitore sinais de sobrecarga.',
+        'Entre 20% e 40% adicional — alto risco; remova responsabilidades não-essenciais dos envolvidos-chave.',
+        'Mais de 40% adicional — insustentável. Alto risco de burnout, queda de qualidade e abandono.']
   };
 
-  const RISK_LABELS = { 1:'BAIXO RISCO', 2:'MODERADO', 3:'ELEVADO', 4:'CRÍTICO' };
-  const RISK_COLORS = { 1:'#03A63C', 2:'#F2B705', 3:'#E87C2A', 4:'#F25C5C' };
-  const ZONE_COLORS = { win:'#03A63C', worry:'#F2B705', woe:'#F25C5C' };
-  const ZONE_BG     = { win:'#f0fdf4', worry:'#fffbeb', woe:'#fff1f2' };
-
-  const interps = {
-    win: 'Com base na análise estatística de 225 iniciativas de mudança conduzida pelo Boston Consulting Group (BCG), este projeto apresenta alta probabilidade de atingir seus objetivos. Os fatores combinados indicam que a estrutura de governança, a qualidade da equipe e o nível de comprometimento organizacional estão bem posicionados para suportar a transformação.',
-    worry: 'O projeto encontra-se em zona de atenção, com resultado imprevisível. Existe risco real de desvio dos objetivos caso intervenções não sejam realizadas. O BCG recomenda identificar os fatores com pontuação mais elevada e agir de forma imediata e direcionada antes que o projeto avance para estágios mais críticos de implementação.',
-    woe: 'O projeto encontra-se em zona de alto risco, com probabilidade significativa de fracasso ou resultado medíocre. A análise dos 225 casos do estudo original indica que projetos nesta faixa raramente atingem seus objetivos sem reestruturação profunda. É recomendável revisar as premissas fundamentais antes de prosseguir com investimentos adicionais.'
+  const INTERP = {
+    win: `Com base na análise estatística de 225 iniciativas de mudança conduzida pelo Boston Consulting Group, este projeto apresenta <strong>alta probabilidade de atingir seus objetivos</strong>. Os fatores combinados indicam que a estrutura de governança, a qualidade da equipe e o nível de comprometimento organizacional estão bem posicionados para suportar a transformação.`,
+    worry: `O projeto encontra-se em zona de atenção, com <strong>resultado imprevisível</strong>. Existe risco real de desvio dos objetivos caso intervenções não sejam realizadas. O BCG recomenda identificar os fatores com pontuação mais elevada e agir de forma imediata e direcionada antes que o projeto avance para estágios mais críticos.`,
+    woe: `O projeto encontra-se em zona de <strong>alto risco</strong>, com probabilidade significativa de fracasso ou resultado medíocre. A análise dos 225 casos do estudo original indica que projetos nesta faixa raramente atingem seus objetivos sem reestruturação profunda. Recomenda-se revisar as premissas fundamentais antes de prosseguir com investimentos adicionais.`
   };
 
-  const recsFull = {
-    win: [
-      { num:'01', title:'Mantenha a cadência de revisões', text:'A frequência atual de revisões está contribuindo para o bom desempenho do projeto. Continue formalizando checkpoints e garantindo que os marcos de aprendizado sejam documentados e utilizados para ajustes preventivos.' },
-      { num:'02', title:'Documente e replique as boas práticas', text:'Projetos na Zona WIN são oportunidades únicas de aprendizado organizacional. Registre os fatores que contribuíram para o sucesso — composição da equipe, nível de engajamento, estrutura de governança — para uso em futuras iniciativas.' },
-      { num:'03', title:'Monitore proativamente os fatores DICE', text:'O score atual não é permanente. Recalcule o DICE nas principais revisões de marco e atue preventivamente caso qualquer fator apresente deterioração. Especial atenção ao fator Esforço em fases de aceleração.' },
-      { num:'04', title:'Fortaleça a comunicação com os impactados', text:'Mesmo com C2 favorável, a comunicação contínua é essencial para sustentar o engajamento ao longo do projeto. Evite que o entusiasmo inicial se perca nas fases de implementação detalhada.' }
+  const RECS = {
+    win:[
+      {n:'01', t:'Mantenha a cadência de revisões formais',
+       d:'A frequência de revisões está contribuindo diretamente para o desempenho atual. Formalize checkpoints como marcos de aprendizado — não apenas de status — e garanta que cada revisão produza ações preventivas documentadas.'},
+      {n:'02', t:'Documente e institucionalize as boas práticas',
+       d:'Projetos na Zona WIN são oportunidades raras de aprendizado organizacional. Registre os fatores que contribuíram para a boa avaliação — composição da equipe, perfil da liderança, estrutura de governança — para uso em portfólios futuros.'},
+      {n:'03', t:'Recalcule o DICE em cada marco principal',
+       d:'O score atual não é permanente. Monitore proativamente os fatores a cada revisão e atue antes de qualquer deterioração. Atenção especial ao fator Esforço (E) em fases de aceleração, quando a sobrecarga tende a surgir silenciosamente.'},
+      {n:'04', t:'Sustente o engajamento dos colaboradores impactados',
+       d:'Mesmo com C2 favorável, a comunicação consistente é essencial para preservar o engajamento nas fases de implementação detalhada. Evite que o entusiasmo inicial se dissolva no silêncio operacional.'}
     ],
-    worry: [
-      { num:'01', title:'Priorize os fatores de maior pontuação', text:'Identifique os dois fatores DICE com as notas mais altas e concentre energia de intervenção neles. O BCG demonstrou que esforços pulverizados em todos os fatores simultaneamente são menos eficazes do que ações cirúrgicas nos pontos críticos.' },
-      { num:'02', title:'Reduza o intervalo entre marcos de revisão', text:'Se a pontuação D está elevada, redefina o cronograma para criar checkpoints mais frequentes. Projetos na zona WORRY que aumentam a frequência de revisão têm probabilidade consideravelmente maior de migrar para a zona WIN.' },
-      { num:'03', title:'Mobilize a alta gestão para sinalização visível', text:'O compromisso da liderança (C1) tem peso dobrado no cálculo. Uma série de ações visíveis — reuniões all-hands, comunicados diretos, presença em marcos importantes — pode impactar significativamente o score total em curto prazo.' },
-      { num:'04', title:'Mapeie e aja sobre a resistência dos impactados', text:'Realize conversas 1:1 com líderes informais de opinião nas áreas mais afetadas. O BCG documentou casos em que uma série de diálogos diretos transformou resistentes em defensores ativos da mudança.' }
+    worry:[
+      {n:'01', t:'Priorize cirurgicamente os fatores de maior pontuação',
+       d:'Identifique os dois fatores DICE com notas mais altas e concentre toda a energia de intervenção neles. O BCG demonstrou que esforços pulverizados em todos os fatores simultaneamente são menos eficazes do que ações cirúrgicas nos pontos críticos.'},
+      {n:'02', t:'Aumente a frequência dos marcos de revisão',
+       d:'Se D está elevado, redefina o cronograma criando checkpoints intermediários. Projetos na zona WORRY que aumentam a frequência de revisão têm probabilidade consideravelmente maior de migrar para a zona WIN dentro de 4 a 6 semanas.'},
+      {n:'03', t:'Mobilize a alta gestão para sinalização inequívoca',
+       d:'C1 tem peso dobrado no cálculo. Uma série de ações visíveis — all-hands, comunicados diretos, presença em marcos importantes — pode impactar significativamente o score total em curto prazo. Quando a liderança achar que está "exagerando", estará no nível certo.'},
+      {n:'04', t:'Mapeie e neutralize focos de resistência',
+       d:'Realize conversas 1:1 com líderes informais de opinião nas áreas mais afetadas. O BCG documentou casos em que uma série de diálogos diretos e honestos sobre impacto e objetivos transformou resistentes em defensores ativos da mudança.'}
     ],
-    woe: [
-      { num:'01', title:'Considere uma pausa estratégica de avaliação', text:'Antes de prosseguir com investimentos adicionais, avalie se o momento organizacional é adequado para esta iniciativa. O BCG aponta que projetos forçados em condições adversas tendem a desperdiçar recursos e deteriorar a credibilidade para iniciativas futuras.' },
-      { num:'02', title:'Recomponha a equipe do projeto', text:'O fator Integridade (I) tem peso dobrado no cálculo e é o preditor mais forte identificado no estudo. Uma reconfiguração da equipe — especialmente da liderança do projeto — pode ter o maior impacto unitário sobre o score total.' },
-      { num:'03', title:'Reestruture o programa em fases menores', text:'Divida o projeto em iniciativas menores com escopo bem definido, marcos frequentes e equipes dedicadas. Projetos menores têm score naturalmente mais favorável e permitem demonstrar vitórias rápidas que reconstroem o engajamento organizacional.' },
-      { num:'04', title:'Estabeleça um programa formal de gestão de resistência', text:'Com C2 elevado, a resistência dos impactados é um risco estrutural. Estruture um programa dedicado de comunicação, envolvimento de stakeholders e gestão de impacto, com responsável designado e métricas de acompanhamento.' }
+    woe:[
+      {n:'01', t:'Avalie uma pausa estratégica antes de prosseguir',
+       d:'Antes de prosseguir com investimentos adicionais, avalie se o momento organizacional é propício. O BCG aponta que projetos forçados em condições adversas tendem a desperdiçar recursos e deteriorar a credibilidade institucional para iniciativas futuras.'},
+      {n:'02', t:'Recomponha a liderança e a equipe do projeto',
+       d:'O fator I tem peso dobrado no cálculo e é o preditor unitário mais forte identificado no estudo. Uma reconfiguração da equipe — especialmente da liderança do projeto — pode ter o maior impacto sobre o score total com o menor prazo de implementação.'},
+      {n:'03', t:'Reestruture o programa em fases menores e sequenciais',
+       d:'Divida o projeto em iniciativas menores com escopo bem definido, marcos frequentes e equipes dedicadas. Fases menores permitem demonstrar vitórias rápidas que reconstroem o engajamento organizacional e criam momentum para a transformação mais ampla.'},
+      {n:'04', t:'Implante um programa formal de gestão da resistência',
+       d:'Com C2 elevado, a resistência dos impactados é um risco estrutural que demanda tratamento específico. Estruture um programa dedicado com responsável designado, métricas de acompanhamento e canal direto de comunicação bidirecional com as áreas afetadas.'}
     ]
   };
 
-  // ── Build factor analysis rows ──────────────────────────────────────────
+  // ── Bars for cover ──────────────────────────────────────────────────────
+  const coverBars = factors.map(f => {
+    const pct = Math.round(f.comp / f.max * 100);
+    const col = RC[f.val];
+    return `<tr>
+      <td style="font-size:8px;font-weight:700;letter-spacing:.08em;color:#A0B3CC;padding-right:3mm;white-space:nowrap;text-align:right;width:12mm">${f.key}</td>
+      <td style="width:60mm;padding-right:3mm">
+        <div style="height:4px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:${col};border-radius:2px"></div>
+        </div>
+      </td>
+      <td style="font-size:9px;font-weight:700;color:${col};white-space:nowrap">${f.comp}/${f.max}</td>
+    </tr>`;
+  }).join('');
+
+  // ── Factor rows (page 2) ────────────────────────────────────────────────
   const factorRows = factors.map(f => {
-    const riskColor = RISK_COLORS[f.val];
-    const just = JUSTIFICATIONS[f.key];
-    const maxComp = f.weight === 2 ? 8 : 4;
-    const barPct = Math.round(f.comp / maxComp * 100);
+    const col  = RC[f.val];
+    const pct  = Math.round(f.comp / f.max * 100);
+    const just = J[f.key];
     return `
-    <div class="rf-row">
-      <div class="rf-header">
-        <div class="rf-tag" style="background:${riskColor}18;border-color:${riskColor}40;color:${riskColor}">${f.key}</div>
-        <div class="rf-name">${f.longName}</div>
-        <div class="rf-risk" style="color:${riskColor};border-color:${riskColor}40;background:${riskColor}10">${RISK_LABELS[f.val]}</div>
-        <div class="rf-score" style="color:${riskColor}">${f.comp}<span class="rf-max">/${maxComp}</span></div>
+    <div style="margin-bottom:5mm;padding:4mm 5mm;background:#fafafa;border-radius:8px;border:1px solid #f1f5f9;page-break-inside:avoid">
+      <div style="display:flex;align-items:center;gap:3mm;margin-bottom:2mm">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:10mm;height:6.5mm;border-radius:5px;font-size:8px;font-weight:700;background:${col}15;border:1px solid ${col}40;color:${col};flex-shrink:0">${f.key}</span>
+        <span style="flex:1;font-size:10px;font-weight:600;color:#111827">${f.long}</span>
+        <span style="font-size:7px;font-weight:700;letter-spacing:.08em;padding:1mm 3mm;border-radius:20px;border:1px solid ${col}40;background:${col}12;color:${col};flex-shrink:0">${RL[f.val]}</span>
+        <span style="font-family:'Cormorant Garamond',serif;font-size:18pt;font-weight:700;line-height:1;color:${col};flex-shrink:0;min-width:12mm;text-align:right">${f.comp}<span style="font-size:10pt;color:#9ca3af">/${f.max}</span></span>
       </div>
-      <div class="rf-label">${FULL_LABELS[f.key][f.val-1]}</div>
-      <div class="rf-bar-wrap"><div class="rf-bar" style="width:${barPct}%;background:${riskColor}"></div></div>
-      ${just ? `<div class="rf-just"><span class="rf-just-label">Justificativa do gestor:</span> ${just}</div>` : ''}
+      <div style="height:3px;background:#e9ecef;border-radius:2px;margin-bottom:2mm;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:${col};border-radius:2px"></div>
+      </div>
+      <div style="font-size:9px;color:#4b5563;line-height:1.6;margin-bottom:${just ? '2mm' : '0'}">${DETAIL[f.key][f.val-1]}</div>
+      ${just ? `<div style="background:#fff;border:1px solid #e9ecef;border-left:3px solid #C4A35A;border-radius:0 6px 6px 0;padding:2mm 3mm;font-size:9px;color:#374151;line-height:1.6"><span style="font-size:7.5px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#C4A35A;margin-right:2mm">Justificativa do gestor:</span>${just}</div>` : ''}
     </div>`;
   }).join('');
 
-  // ── Build recommendations ────────────────────────────────────────────────
-  const recsRows = recsFull[z].map(r => `
-    <div class="rr-item">
-      <div class="rr-num" style="color:${ZONE_COLORS[z]};border-color:${ZONE_COLORS[z]}40;background:${ZONE_COLORS[z]}0f">${r.num}</div>
-      <div class="rr-body">
-        <div class="rr-title">${r.title}</div>
-        <div class="rr-text">${r.text}</div>
+  // ── Recommendation rows (page 3) ────────────────────────────────────────
+  const recRows = RECS[z].map(r => `
+    <div style="display:flex;gap:4mm;margin-bottom:4mm;padding:4mm 5mm;background:#fafafa;border-radius:8px;border:1px solid #f1f5f9;page-break-inside:avoid">
+      <div style="display:flex;align-items:center;justify-content:center;width:11mm;height:11mm;border-radius:50%;font-family:'Cormorant Garamond',serif;font-size:14pt;font-weight:700;border:1.5px solid ${zc}40;background:${zc}10;color:${zc};flex-shrink:0;line-height:1">${r.n}</div>
+      <div style="flex:1">
+        <div style="font-size:10.5px;font-weight:700;color:#111827;margin-bottom:1.5mm">${r.t}</div>
+        <div style="font-size:9.5px;color:#4b5563;line-height:1.7">${r.d}</div>
       </div>
     </div>`).join('');
 
-  // ── Factor bar for cover ─────────────────────────────────────────────────
-  const coverBars = factors.map(f => {
-    const maxC = f.weight === 2 ? 8 : 4;
-    const pct  = Math.round(f.comp / maxC * 100);
-    const col  = RISK_COLORS[f.val];
-    return `<div class="cb-item">
-      <div class="cb-key">${f.key}</div>
-      <div class="cb-track"><div class="cb-fill" style="width:${pct}%;background:${col}"></div></div>
-      <div class="cb-val" style="color:${col}">${f.comp}</div>
-    </div>`;
-  }).join('');
-
-  // ── Assemble full print document ─────────────────────────────────────────
+  // ── Assemble full document ───────────────────────────────────────────────
   const html = `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>DICE Report — ${projectName}</title>
+<title>DICE — ${projectName}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* ── Reset & Base ── */
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{background:#fff;color:#1a1a2e;font-family:'Inter',sans-serif;font-size:13px;line-height:1.6;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+html,body{font-family:'Inter',sans-serif;font-size:13px;line-height:1.6;background:#fff;color:#1a1a2e;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+
+/* A4 natural pages — no fixed heights */
 @page{size:A4 portrait;margin:0}
+@page:first{margin:0}
 
-/* ── Cover page ── */
+/* Cover — exactly one A4 page */
 .cover{
-  width:210mm;height:297mm;background:#0B1E33;
-  display:flex;flex-direction:column;justify-content:space-between;
-  page-break-after:always;position:relative;overflow:hidden;
+  width:210mm;height:297mm;
+  background:#0B1E33;
+  position:relative;overflow:hidden;
+  display:flex;flex-direction:column;
+  page-break-after:always;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;
 }
-.cover-bg{position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(ellipse 70% 55% at 90% 5%,rgba(21,52,80,0.9) 0%,transparent 60%),
-             radial-gradient(ellipse 40% 30% at 5% 90%,rgba(196,163,90,0.07) 0%,transparent 60%);}
-.cover-top{padding:16mm 14mm 0;position:relative;z-index:1;}
-.cover-eyebrow{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:#62748C;margin-bottom:4mm}
-.cover-title{font-family:'Cormorant Garamond',serif;font-size:52pt;font-weight:300;line-height:1;letter-spacing:-.02em;color:#F0F4FA;margin-bottom:2mm}
-.cover-sub{font-family:'Cormorant Garamond',serif;font-size:16pt;font-weight:300;font-style:italic;color:#A0B3CC;line-height:1.3}
-.cover-project{margin-top:10mm;background:rgba(196,163,90,0.12);border:1px solid rgba(196,163,90,0.3);border-radius:8px;padding:4mm 6mm}
-.cover-project-label{font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:#62748C;margin-bottom:1mm}
-.cover-project-name{font-family:'Cormorant Garamond',serif;font-size:18pt;font-weight:600;color:#D8B87A;letter-spacing:.02em}
-.cover-mid{padding:0 14mm;position:relative;z-index:1;flex:1;display:flex;flex-direction:column;justify-content:center}
-.cover-score-row{display:flex;align-items:flex-end;gap:8mm;margin-bottom:8mm}
-.cover-score-num{font-family:'Cormorant Garamond',serif;font-size:96pt;font-weight:700;line-height:1;color:#F0F4FA}
-.cover-score-info{padding-bottom:4mm}
-.cover-score-label{font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:#62748C;margin-bottom:2mm}
-.cover-zone-pill{display:inline-block;padding:2mm 5mm;border-radius:30px;font-size:11pt;font-weight:700;border:1.5px solid;color:${ZONE_COLORS[z]};border-color:${ZONE_COLORS[z]};background:${ZONE_COLORS[z]}18}
-.cover-bars{display:flex;flex-direction:column;gap:2.5mm;max-width:120mm}
-.cb-item{display:flex;align-items:center;gap:3mm}
-.cb-key{font-size:9px;font-weight:700;letter-spacing:.1em;color:#A0B3CC;width:8mm;flex-shrink:0;text-align:right}
-.cb-track{flex:1;height:5px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden}
-.cb-fill{height:100%;border-radius:3px;transition:width .3s}
-.cb-val{font-size:10px;font-weight:600;width:6mm;text-align:right;flex-shrink:0}
-.cover-bottom{padding:0 14mm 10mm;position:relative;z-index:1}
-.cover-divider{height:1px;background:rgba(196,163,90,0.2);margin-bottom:6mm}
-.cover-meta{display:flex;justify-content:space-between;align-items:flex-end}
-.cover-meta-left{font-size:8px;color:#62748C;line-height:1.8;letter-spacing:.06em}
-.cover-meta-right{font-family:'Cormorant Garamond',serif;font-size:24pt;font-weight:700;color:rgba(196,163,90,0.15);letter-spacing:.1em}
+.cover-bg{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse 70% 55% at 90% 5%,rgba(21,52,80,.9) 0%,transparent 60%),
+             radial-gradient(ellipse 40% 30% at 5% 90%,rgba(196,163,90,.06) 0%,transparent 65%);
+}
 
-/* ── Content pages ── */
-.page{width:210mm;min-height:297mm;padding:14mm 14mm 12mm;page-break-after:always;position:relative}
+/* Content pages — padding only, no fixed height */
+.page{
+  width:210mm;
+  padding:13mm 13mm 22mm;
+  position:relative;
+  page-break-after:always;
+}
 .page:last-child{page-break-after:auto}
 
-/* Header bar */
-.page-header{display:flex;justify-content:space-between;align-items:center;padding-bottom:5mm;margin-bottom:8mm;border-bottom:1px solid #e9ecef}
-.ph-left{display:flex;flex-direction:column;gap:.5mm}
-.ph-title{font-family:'Cormorant Garamond',serif;font-size:15pt;font-weight:600;color:#0B1E33;letter-spacing:.02em}
-.ph-sub{font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:#9ca3af}
-.ph-badge{padding:1.5mm 4mm;border-radius:20px;font-size:8px;font-weight:700;letter-spacing:.1em;background:${ZONE_COLORS[z]}18;color:${ZONE_COLORS[z]};border:1px solid ${ZONE_COLORS[z]}40}
+/* Page footer — in-flow, pushed to bottom via page padding */
+.pfooter{
+  position:absolute;bottom:7mm;left:13mm;right:13mm;
+  display:flex;justify-content:space-between;align-items:center;
+  border-top:1px solid #e9ecef;padding-top:2.5mm;
+}
+.pfooter-l{font-size:7px;color:#9ca3af;letter-spacing:.05em}
+.pfooter-r{font-family:'Cormorant Garamond',serif;font-size:9pt;font-weight:700;color:#C4A35A;letter-spacing:.12em}
 
-/* Section title */
-.section-title{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.18em;color:#9ca3af;margin-bottom:4mm;display:flex;align-items:center;gap:3mm}
-.section-title::after{content:'';flex:1;height:1px;background:#e9ecef}
+/* Page header */
+.pheader{display:flex;justify-content:space-between;align-items:center;padding-bottom:4mm;margin-bottom:6mm;border-bottom:1.5px solid #e9ecef}
+.ph-title{font-family:'Cormorant Garamond',serif;font-size:15pt;font-weight:600;color:#0B1E33;letter-spacing:.02em}
+.ph-sub{font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:#9ca3af;margin-top:.5mm}
+.ph-badge{padding:1.5mm 4mm;border-radius:20px;font-size:8px;font-weight:700;letter-spacing:.1em;background:${zc}15;color:${zc};border:1px solid ${zc}40}
+
+/* Section label */
+.sec{font-size:7.5px;font-weight:700;text-transform:uppercase;letter-spacing:.2em;color:#9ca3af;margin-bottom:3.5mm;display:flex;align-items:center;gap:3mm}
+.sec::after{content:'';flex:1;height:1px;background:#e9ecef}
 
 /* Score block */
-.score-block{background:${ZONE_BG[z]};border-left:4px solid ${ZONE_COLORS[z]};border-radius:0 10px 10px 0;padding:5mm 6mm;margin-bottom:6mm;display:flex;justify-content:space-between;align-items:flex-start;gap:6mm}
-.score-num{font-family:'Cormorant Garamond',serif;font-size:64pt;font-weight:700;line-height:1;color:#1a1a2e}
-.score-num span{font-size:18pt;color:#9ca3af;margin-left:1mm}
-.score-details{flex:1}
-.score-zone{display:inline-block;padding:1mm 4mm;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:.08em;color:${ZONE_COLORS[z]};border:1.5px solid ${ZONE_COLORS[z]};background:${ZONE_COLORS[z]}18;margin-bottom:2mm}
-.score-interp{font-size:10px;color:#374151;line-height:1.7;max-width:110mm}
+.score-block{background:${zbg};border:1px solid ${zbd};border-left:4px solid ${zc};border-radius:0 10px 10px 0;padding:5mm 6mm;margin-bottom:5mm;display:flex;align-items:flex-start;gap:6mm}
+.snum{font-family:'Cormorant Garamond',serif;font-size:60pt;font-weight:700;line-height:1;color:#111827;flex-shrink:0}
+.snum-max{font-size:18pt;color:#9ca3af;margin-left:1mm}
+.sdetails{flex:1;padding-top:1mm}
+.spill{display:inline-block;padding:1mm 4mm;border-radius:20px;font-size:8.5px;font-weight:700;letter-spacing:.1em;color:${zc};border:1.5px solid ${zc};background:${zc}18;margin-bottom:2mm}
+.sinterp{font-size:9.5px;color:#374151;line-height:1.7}
 
-/* KPIs row */
-.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm;margin-bottom:6mm}
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm;margin-bottom:5mm}
 .kpi{background:#f9fafb;border:1px solid #e9ecef;border-radius:8px;padding:3mm 4mm;text-align:center}
-.kpi-val{font-family:'Cormorant Garamond',serif;font-size:20pt;font-weight:600;color:#1a1a2e;line-height:1}
-.kpi-lbl{font-size:7.5px;text-transform:uppercase;letter-spacing:.1em;color:#9ca3af;margin-top:1mm}
+.kpi-v{font-family:'Cormorant Garamond',serif;font-size:18pt;font-weight:600;color:#111827;line-height:1}
+.kpi-l{font-size:7px;text-transform:uppercase;letter-spacing:.1em;color:#9ca3af;margin-top:1mm}
 
-/* Factor analysis rows */
-.rf-row{margin-bottom:4mm;padding:4mm;background:#fafafa;border-radius:8px;border:1px solid #f1f5f9}
-.rf-header{display:flex;align-items:center;gap:3mm;margin-bottom:2mm}
-.rf-tag{display:inline-flex;align-items:center;justify-content:center;width:9mm;height:6mm;border-radius:5px;font-size:8.5px;font-weight:700;border:1px solid;flex-shrink:0}
-.rf-name{flex:1;font-size:10.5px;font-weight:600;color:#1a1a2e}
-.rf-risk{font-size:7.5px;font-weight:700;letter-spacing:.08em;padding:1mm 3mm;border-radius:20px;border:1px solid;flex-shrink:0}
-.rf-score{font-family:'Cormorant Garamond',serif;font-size:20pt;font-weight:700;line-height:1;min-width:14mm;text-align:right;flex-shrink:0}
-.rf-max{font-size:10pt;color:#9ca3af}
-.rf-label{font-size:9.5px;color:#4b5563;margin-bottom:2mm;padding-left:12mm}
-.rf-bar-wrap{height:4px;background:#e9ecef;border-radius:2px;margin-bottom:2mm;overflow:hidden}
-.rf-bar{height:100%;border-radius:2px;transition:width .3s}
-.rf-just{background:#fff;border:1px solid #e9ecef;border-left:3px solid #C4A35A;border-radius:0 6px 6px 0;padding:2.5mm 3mm;margin-top:1.5mm}
-.rf-just-label{font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:#C4A35A;margin-right:2mm}
-.rf-just{font-size:9.5px;color:#374151;line-height:1.6}
+/* Formula */
+.fbox{background:#f9fafb;border:1px solid #e9ecef;border-radius:10px;padding:4mm 6mm;margin-bottom:5mm;text-align:center}
+.fexp{font-family:'Cormorant Garamond',serif;font-size:14pt;color:#111827;margin-bottom:1.5mm}
+.fcite{font-size:8px;color:#9ca3af;font-style:italic}
 
-/* Recommendations */
-.rr-item{display:flex;gap:4mm;margin-bottom:4mm;padding:4mm;background:#fafafa;border-radius:8px;border:1px solid #f1f5f9}
-.rr-num{display:flex;align-items:center;justify-content:center;width:10mm;height:10mm;border-radius:50%;font-size:8.5px;font-weight:700;border:1.5px solid;flex-shrink:0;font-family:'Cormorant Garamond',serif;font-size:12pt}
-.rr-body{flex:1}
-.rr-title{font-size:10.5px;font-weight:700;color:#1a1a2e;margin-bottom:1mm}
-.rr-text{font-size:9.5px;color:#4b5563;line-height:1.7}
-
-/* Formula box */
-.formula-box{background:#f8f9fa;border:1px solid #e9ecef;border-radius:10px;padding:5mm 6mm;margin-bottom:6mm;text-align:center}
-.formula-exp{font-family:'Cormorant Garamond',serif;font-size:16pt;color:#1a1a2e;margin-bottom:2mm}
-.formula-exp strong{color:${ZONE_COLORS[z]}}
-.formula-cite{font-size:8.5px;color:#9ca3af;font-style:italic}
-
-/* Footer */
-.page-footer{position:absolute;bottom:8mm;left:14mm;right:14mm;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #e9ecef;padding-top:3mm}
-.pf-left{font-size:7.5px;color:#9ca3af;letter-spacing:.06em}
-.pf-right{font-family:'Cormorant Garamond',serif;font-size:9pt;font-weight:700;color:#C4A35A;letter-spacing:.1em}
-
-/* Reference box */
-.ref-box{background:#f8f9fa;border-left:3px solid #C4A35A;border-radius:0 8px 8px 0;padding:4mm 5mm;margin-top:4mm}
-.ref-text{font-size:9px;color:#4b5563;line-height:1.7}
-.ref-link{color:#C4A35A;font-size:8.5px}
+/* Reference */
+.refbox{background:#fffbf5;border:1px solid #fde68a;border-left:3px solid #C4A35A;border-radius:0 8px 8px 0;padding:4mm 5mm;margin-top:5mm}
 
 @media print{
-  body{background:white}
-  .cover,.page{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .cover,.page{page-break-inside:avoid}
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
 }
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════ CAPA ═══════════════════════════ -->
+<!-- ═══ CAPA ═══ -->
 <div class="cover">
   <div class="cover-bg"></div>
-  <div class="cover-top">
-    <div class="cover-eyebrow">DICE Framework · Análise de Mudança Organizacional</div>
-    <div class="cover-title">DICE</div>
-    <div class="cover-sub">The Hard Side of Change Management</div>
-    <div class="cover-project">
-      <div class="cover-project-label">Projeto avaliado</div>
-      <div class="cover-project-name">${projectName}</div>
+  <!-- Top -->
+  <div style="padding:15mm 14mm 0;position:relative;z-index:1;flex-shrink:0">
+    <div style="font-size:8.5px;letter-spacing:.25em;text-transform:uppercase;color:#62748C;margin-bottom:5mm">DICE Framework · Análise de Mudança Organizacional</div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:56pt;font-weight:300;line-height:.95;letter-spacing:-.02em;color:#F0F4FA;margin-bottom:1.5mm">DICE</div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:15pt;font-weight:300;font-style:italic;color:#A0B3CC">The Hard Side of Change Management</div>
+    <div style="margin-top:8mm;background:rgba(196,163,90,.1);border:1px solid rgba(196,163,90,.3);border-radius:8px;padding:4mm 5mm">
+      <div style="font-size:7.5px;letter-spacing:.18em;text-transform:uppercase;color:#62748C;margin-bottom:1.5mm">Projeto avaliado</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:17pt;font-weight:600;color:#D8B87A;letter-spacing:.02em">${projectName}</div>
     </div>
   </div>
-  <div class="cover-mid">
-    <div class="cover-score-row">
-      <div class="cover-score-num">${s}</div>
-      <div class="cover-score-info">
-        <div class="cover-score-label">DICE Score</div>
-        <div class="cover-zone-pill">${zl}</div>
+  <!-- Mid: score + bars -->
+  <div style="padding:0 14mm;position:relative;z-index:1;flex:1;display:flex;flex-direction:column;justify-content:center">
+    <div style="display:flex;align-items:flex-end;gap:8mm;margin-bottom:7mm">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:88pt;font-weight:700;line-height:1;color:#F0F4FA">${s}</div>
+      <div style="padding-bottom:4mm">
+        <div style="font-size:7.5px;letter-spacing:.2em;text-transform:uppercase;color:#62748C;margin-bottom:2mm">DICE Score</div>
+        <div style="display:inline-block;padding:2mm 5mm;border-radius:30px;font-size:11pt;font-weight:700;border:1.5px solid ${zc};color:${zc};background:${zc}18">${ZLB[z]}</div>
       </div>
     </div>
-    <div class="cover-bars">${coverBars}</div>
+    <table style="border-collapse:collapse;max-width:110mm">${coverBars}</table>
   </div>
-  <div class="cover-bottom">
-    <div class="cover-divider"></div>
-    <div class="cover-meta">
-      <div class="cover-meta-left">
+  <!-- Bottom -->
+  <div style="padding:0 14mm 10mm;position:relative;z-index:1;flex-shrink:0">
+    <div style="height:1px;background:rgba(196,163,90,.2);margin-bottom:5mm"></div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end">
+      <div style="font-size:8px;color:#62748C;line-height:1.9;letter-spacing:.05em">
         Wagner Ramos · PMO &amp; BI<br>
         Gerado em ${now} · ${ts}<br>
-        Ref: Sirkin, Keenan &amp; Jackson, HBR 2005
+        Sirkin, Keenan &amp; Jackson · HBR 2005 · ID: ${reportId}
       </div>
-      <div class="cover-meta-right">WR</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:28pt;font-weight:700;color:rgba(196,163,90,.12);letter-spacing:.12em">WR</div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════ PÁG 2 — RESUMO + FATORES ═══════════════════════════ -->
+<!-- ═══ PÁG 2 — RESUMO EXECUTIVO + ANÁLISE POR FATOR ═══ -->
 <div class="page">
-  <div class="page-header">
-    <div class="ph-left">
+  <div class="pheader">
+    <div>
       <div class="ph-title">${projectName}</div>
-      <div class="ph-sub">Análise DICE · ${now}</div>
+      <div class="ph-sub">Relatório de Análise DICE · ${now}</div>
     </div>
-    <div class="ph-badge">${zl} · Score ${s}/28</div>
+    <div class="ph-badge">${ZLB[z]} · ${s}/28</div>
   </div>
 
-  <div class="section-title">Resumo Executivo</div>
+  <div class="sec">Resumo Executivo</div>
 
   <div class="score-block">
-    <div class="score-num">${s}<span>/28</span></div>
-    <div class="score-details">
-      <div class="score-zone">${zl}</div>
-      <div class="score-interp">${interps[z]}</div>
+    <div class="snum">${s}<span class="snum-max">/28</span></div>
+    <div class="sdetails">
+      <div class="spill">${ZLB[z]}</div>
+      <div class="sinterp">${INTERP[z]}</div>
     </div>
   </div>
 
-  <div class="kpi-row">
+  <div class="kpis">
     <div class="kpi">
-      <div class="kpi-val" style="color:${ZONE_COLORS[z]}">${z === 'win' ? '>85%' : z === 'worry' ? '50–70%' : '<30%'}</div>
-      <div class="kpi-lbl">Prob. de sucesso</div>
+      <div class="kpi-v" style="color:${zc}">${z==='win'?'>85%':z==='worry'?'50–70%':'<30%'}</div>
+      <div class="kpi-l">Prob. de sucesso</div>
     </div>
     <div class="kpi">
-      <div class="kpi-val">${s}</div>
-      <div class="kpi-lbl">Score DICE</div>
+      <div class="kpi-v">${s}</div>
+      <div class="kpi-l">DICE Score</div>
     </div>
     <div class="kpi">
-      <div class="kpi-val">${state.D + 2*state.I + 2*state.C1 + state.C2 + state.E}</div>
-      <div class="kpi-lbl">Total ponderado</div>
+      <div class="kpi-v">${z==='win'?'Baixo':z==='worry'?'Moderado':'Elevado'}</div>
+      <div class="kpi-l">Nível de risco</div>
     </div>
     <div class="kpi">
-      <div class="kpi-val">225</div>
-      <div class="kpi-lbl">Casos na base BCG</div>
+      <div class="kpi-v">225</div>
+      <div class="kpi-l">Base BCG (casos)</div>
     </div>
   </div>
 
-  <div class="formula-box">
-    <div class="formula-exp">DICE = D(${state.D}) + 2·I(${2*state.I}) + 2·C1(${2*state.C1}) + C2(${state.C2}) + E(${state.E}) = <strong>${s}</strong></div>
-    <div class="formula-cite">Sirkin, H. L., Keenan, P., & Jackson, A. (2005) · I e C1 com peso duplo por regressão logística multivariada (R² = 0.84)</div>
+  <div class="fbox">
+    <div class="fexp">DICE = D(${state.D}) + 2·I(${2*state.I}) + 2·C1(${2*state.C1}) + C2(${state.C2}) + E(${state.E}) = <strong style="color:${zc}">${s}</strong></div>
+    <div class="fcite">I e C1 com peso duplo validado por regressão logística multivariada · Sirkin et al. (2005)</div>
   </div>
 
-  <div class="section-title">Análise por Fator — com justificativa do gestor</div>
+  <div class="sec">Análise por Fator — com justificativa do gestor</div>
   ${factorRows}
 
-  <div class="page-footer">
-    <div class="pf-left">DICE Framework · ${projectName} · ${nowShort} · ID: DICE-${s}-${nowShort.replace(/\//g,'')}</div>
-    <div class="pf-right">WR</div>
+  <div class="pfooter">
+    <div class="pfooter-l">DICE Framework · ${projectName} · ${nowShort} · ID: ${reportId}</div>
+    <div class="pfooter-r">WR</div>
   </div>
 </div>
 
-<!-- ═══════════════════════════ PÁG 3 — RECOMENDAÇÕES + REFERÊNCIA ═══════════════════════════ -->
+<!-- ═══ PÁG 3 — RECOMENDAÇÕES + REFERÊNCIA ═══ -->
 <div class="page">
-  <div class="page-header">
-    <div class="ph-left">
+  <div class="pheader">
+    <div>
       <div class="ph-title">Plano de Ação Recomendado</div>
-      <div class="ph-sub">${projectName} · Baseado na zona ${zl}</div>
+      <div class="ph-sub">${projectName} · Baseado na Zona ${zl}</div>
     </div>
-    <div class="ph-badge">${zl} · Score ${s}/28</div>
+    <div class="ph-badge">${ZLB[z]} · ${s}/28</div>
   </div>
 
-  <div class="section-title">Recomendações Baseadas em Evidências — Zona ${zl}</div>
-  ${recsRows}
+  <div class="sec">Recomendações baseadas em evidências — Zona ${zl}</div>
+  ${recRows}
 
-  <div style="margin-top:6mm">
-    <div class="section-title">Referência Acadêmica</div>
-    <div class="ref-box">
-      <div class="ref-text">
-        <strong>Sirkin, H. L., Keenan, P., &amp; Jackson, A. (2005).</strong> "The Hard Side of Change Management."
-        <em>Harvard Business Review, 83(10), 108–118.</em><br><br>
-        O estudo analisou 225 iniciativas de mudança em múltiplos setores e países, identificando os quatro fatores DICE como preditores estatisticamente significativos do sucesso de programas de transformação organizacional. A fórmula DICE foi validada por regressão logística multivariada e confirmada em mais de 1.000 programas conduzidos pelo BCG desde 1994.
-        <br><br>
-        <span class="ref-link">Artigo completo: hbr.org/2005/10/the-hard-side-of-change-management</span> &nbsp;·&nbsp;
-        <span class="ref-link">PDF (MIT): web.mit.edu/curhan/www/docs/Articles/15341_Readings/Organizational_Cognition_&_Learning/Sirkin_Hard_Side_of_Change_Management.pdf</span>
-      </div>
+  <div class="sec" style="margin-top:5mm">Referência Acadêmica</div>
+  <div class="refbox">
+    <div style="font-size:9.5px;color:#374151;line-height:1.75">
+      <strong>Sirkin, H. L., Keenan, P., &amp; Jackson, A. (2005).</strong> "The Hard Side of Change Management."
+      <em>Harvard Business Review, 83(10), 108–118.</em><br><br>
+      O estudo analisou 225 iniciativas de mudança em múltiplos setores e países, identificando os quatro fatores DICE como preditores estatisticamente significativos do sucesso de programas de transformação organizacional. A fórmula foi validada por regressão logística multivariada e confirmada em mais de 1.000 programas conduzidos pelo BCG desde 1994.<br><br>
+      <span style="color:#C4A35A;font-size:8.5px">hbr.org/2005/10/the-hard-side-of-change-management</span>
     </div>
   </div>
 
-  <div class="page-footer">
-    <div class="pf-left">DICE Framework · ${projectName} · ${nowShort} · Wagner Ramos — PMO &amp; BI</div>
-    <div class="pf-right">WR</div>
+  <div class="pfooter">
+    <div class="pfooter-l">DICE Framework · ${projectName} · ${nowShort} · Wagner Ramos — PMO &amp; BI</div>
+    <div class="pfooter-r">WR</div>
   </div>
 </div>
 
+<script>
+// Auto-trigger print after fonts load — no double window
+window.addEventListener('load', function() {
+  setTimeout(function() { window.print(); }, 1200);
+});
+</sc"+"ript>
 </body></html>`;
 
-  // ── Open in new window and trigger print ──────────────────────────────────
-  const win = window.open('', '_blank', 'width=900,height=700');
-  if (!win) {
-    showToast('Permita pop-ups para exportar o PDF.');
-    return;
-  }
+  const win = window.open('', '_blank');
+  if (!win) { showToast('Permita pop-ups neste site para exportar.'); return; }
+  win.document.open();
   win.document.write(html);
   win.document.close();
-
-  // Wait for fonts to load, then print
-  win.onload = () => {
-    setTimeout(() => {
-      win.focus();
-      win.print();
-    }, 800);
-  };
-
-  showToast('Abrindo relatório para impressão/PDF...');
+  showToast('Abrindo relatório — aguarde o diálogo de impressão...');
 }
+
 
 
 // ── Wagner Signature Cursor ──
