@@ -2883,12 +2883,14 @@ function exportPDF() {
 
   const projectName = document.getElementById('projectName')?.value?.trim() || 'Projeto sem nome';
 
+  // Truncate justifications to 280 chars max to prevent PDF layout overflow
+  const truncate = (s, n=280) => s.length > n ? s.slice(0,n).trimEnd() + '…' : s;
   const J = {
-    D:  document.getElementById('justD')?.value?.trim()  || '',
-    I:  document.getElementById('justI')?.value?.trim()  || '',
-    C1: document.getElementById('justC1')?.value?.trim() || '',
-    C2: document.getElementById('justC2')?.value?.trim() || '',
-    E:  document.getElementById('justE')?.value?.trim()  || ''
+    D:  truncate(document.getElementById('justD')?.value?.trim()  || ''),
+    I:  truncate(document.getElementById('justI')?.value?.trim()  || ''),
+    C1: truncate(document.getElementById('justC1')?.value?.trim() || ''),
+    C2: truncate(document.getElementById('justC2')?.value?.trim() || ''),
+    E:  truncate(document.getElementById('justE')?.value?.trim()  || '')
   };
 
   const ZC  = { win:'#03A63C', worry:'#D97706', woe:'#DC2626' };
@@ -3001,8 +3003,8 @@ function exportPDF() {
       <div style="height:2.5px;background:#e9ecef;border-radius:2px;margin-bottom:1.5mm;overflow:hidden">
         <div style="height:100%;width:${pct}%;background:${col};border-radius:2px"></div>
       </div>
-      <div style="font-size:8.5px;color:#4b5563;line-height:1.55;margin-bottom:${just ? '1.5mm' : '0'}">${DETAIL[f.key][f.val-1]}</div>
-      ${just ? `<div style="background:#fff;border:1px solid #e9ecef;border-left:3px solid #C4A35A;border-radius:0 5px 5px 0;padding:1.5mm 2.5mm;font-size:8.5px;color:#374151;line-height:1.55"><span style="font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#C4A35A;margin-right:1.5mm">Justificativa do gestor:</span>${just}</div>` : ''}
+      <div style="font-size:8.5px;color:#4b5563;line-height:1.55;margin-bottom:${just ? '1.5mm' : '0'};word-break:break-word;overflow-wrap:break-word">${DETAIL[f.key][f.val-1]}</div>
+      ${just ? `<div style="background:#fff;border:1px solid #e9ecef;border-left:3px solid #C4A35A;border-radius:0 5px 5px 0;padding:1.5mm 2.5mm;font-size:8.5px;color:#374151;line-height:1.55;word-break:break-word;overflow-wrap:break-word;overflow:hidden;max-height:20mm"><span style="font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#C4A35A;margin-right:1.5mm">Justificativa do gestor:</span>${just}</div>` : ''}
     </div>`;
   }).join('');
 
@@ -3027,7 +3029,7 @@ function exportPDF() {
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{font-family:'Inter',sans-serif;font-size:13px;line-height:1.6;background:#fff;color:#1a1a2e;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+html,body{font-family:'Inter',sans-serif;font-size:13px;line-height:1.6;background:#fff;color:#1a1a2e;-webkit-print-color-adjust:exact;print-color-adjust:exact;word-break:break-word;overflow-wrap:break-word}
 
 /* A4 natural pages — no fixed heights */
 @page{size:A4 portrait;margin:0}
@@ -3123,7 +3125,7 @@ html,body{font-family:'Inter',sans-serif;font-size:13px;line-height:1.6;backgrou
   </div>
 
   <!-- MID BLOCK: score + bars -->
-  <div style="position:absolute;top:95mm;left:14mm;right:14mm;z-index:1">
+  <div style="position:absolute;top:90mm;left:14mm;right:14mm;z-index:1">
     <div style="display:flex;align-items:flex-end;gap:7mm;margin-bottom:6mm">
       <div style="font-family:'Cormorant Garamond',serif;font-size:80pt;font-weight:700;line-height:1;color:#F0F4FA">${s}</div>
       <div style="padding-bottom:3mm">
