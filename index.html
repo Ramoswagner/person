@@ -1973,19 +1973,19 @@
             <div class="factor-row">
               <div class="factor-label"><span class="factor-tag">D</span>Duração entre marcos<span class="factor-desc">intervalo / prazo</span></div>
               <div class="factor-options" data-factor="D">
-                <button class="opt-btn selected" data-val="1" onclick="select(this)">
+                <button class="opt-btn selected" data-val="1" onclick="selectFactor(this)">
                   <span class="opt-num">1</span><span class="opt-label">&lt; 2 meses</span>
                   <div class="tip"><strong>Ótimo (1pt)</strong> — Revisões em menos de 2 meses. O BCG recomenda revisões pelo menos bimestrais; abaixo disso permite detecção precoce de riscos.</div>
                 </button>
-                <button class="opt-btn" data-val="2" onclick="select(this)">
+                <button class="opt-btn" data-val="2" onclick="selectFactor(this)">
                   <span class="opt-num">2</span><span class="opt-label">2–4 meses</span>
                   <div class="tip"><strong>Razoável (2pts)</strong> — Intervalo entre revisões de 2 a 4 meses. Adequado para projetos de complexidade moderada.</div>
                 </button>
-                <button class="opt-btn" data-val="3" onclick="select(this)">
+                <button class="opt-btn" data-val="3" onclick="selectFactor(this)">
                   <span class="opt-num">3</span><span class="opt-label">4–8 meses</span>
                   <div class="tip"><strong>Risco elevado (3pts)</strong> — Intervalo de 4 a 8 meses. Problemas podem acumular sem que a liderança perceba. Subdivida os marcos.</div>
                 </button>
-                <button class="opt-btn" data-val="4" onclick="select(this)">
+                <button class="opt-btn" data-val="4" onclick="selectFactor(this)">
                   <span class="opt-num">4</span><span class="opt-label">&gt; 8 meses</span>
                   <div class="tip"><strong>Crítico (4pts)</strong> — Mais de 8 meses sem revisão formal. O BCG identificou que o risco aumenta exponencialmente neste intervalo.</div>
                 </button>
@@ -1998,19 +1998,19 @@
             <div class="factor-row">
               <div class="factor-label"><span class="factor-tag">I</span>Integridade da equipe<span class="factor-desc">× 2 no cálculo</span></div>
               <div class="factor-options" data-factor="I">
-                <button class="opt-btn selected" data-val="1" onclick="select(this)">
+                <button class="opt-btn selected" data-val="1" onclick="selectFactor(this)">
                   <span class="opt-num">1</span><span class="opt-label">Muito boa</span>
                   <div class="tip"><strong>Excelente (1pt)</strong> — Líder altamente capaz, respeitado pelos pares. Membros com habilidades adequadas e dedicação ≥ 50% ao projeto.</div>
                 </button>
-                <button class="opt-btn" data-val="2" onclick="select(this)">
+                <button class="opt-btn" data-val="2" onclick="selectFactor(this)">
                   <span class="opt-num">2</span><span class="opt-label">Boa</span>
                   <div class="tip"><strong>Boa (2pts)</strong> — Equipe competente mas com algumas lacunas. Verifique se a dedicação está sendo comprometida por outras demandas.</div>
                 </button>
-                <button class="opt-btn" data-val="3" onclick="select(this)">
+                <button class="opt-btn" data-val="3" onclick="selectFactor(this)">
                   <span class="opt-num">3</span><span class="opt-label">Média</span>
                   <div class="tip"><strong>Fraca (3pts)</strong> — Lacunas relevantes de habilidade ou dedicação. Reforce a equipe antes do lançamento ou replaneje o escopo.</div>
                 </button>
-                <button class="opt-btn" data-val="4" onclick="select(this)">
+                <button class="opt-btn" data-val="4" onclick="selectFactor(this)">
                   <span class="opt-num">4</span><span class="opt-label">Fraca</span>
                   <div class="tip"><strong>Crítico (4pts)</strong> — Equipe inadequada em múltiplas dimensões. O BCG aponta que a qualidade da equipe é o principal preditor de sucesso.</div>
                 </button>
@@ -2023,19 +2023,19 @@
             <div class="factor-row">
               <div class="factor-label"><span class="factor-tag">C1</span>Compromisso da alta gestão<span class="factor-desc">× 2 no cálculo</span></div>
               <div class="factor-options" data-factor="C1">
-                <button class="opt-btn selected" data-val="1" onclick="select(this)">
+                <button class="opt-btn selected" data-val="1" onclick="selectFactor(this)">
                   <span class="opt-num">1</span><span class="opt-label">Muito forte</span>
                   <div class="tip"><strong>Excelente (1pt)</strong> — Liderança comunica ativamente a necessidade da mudança. Regra: quando você achar que está falando 3× mais do que precisa, está no nível certo.</div>
                 </button>
-                <button class="opt-btn" data-val="2" onclick="select(this)">
+                <button class="opt-btn" data-val="2" onclick="selectFactor(this)">
                   <span class="opt-num">2</span><span class="opt-label">Favorável</span>
                   <div class="tip"><strong>Favorável (2pts)</strong> — Suporte presente e visível, mas poderia ser mais frequente ou explícito.</div>
                 </button>
-                <button class="opt-btn" data-val="3" onclick="select(this)">
+                <button class="opt-btn" data-val="3" onclick="selectFactor(this)">
                   <span class="opt-num">3</span><span class="opt-label">Neutro</span>
                   <div class="tip"><strong>Neutro (3pts)</strong> — Postura ambígua da liderança. Funcionários percebem a falta de suporte e tendem a resistir à mudança.</div>
                 </button>
-                <button class="opt-btn" data-val="4" onclick="select(this)">
+                <button class="opt-btn" data-val="4" onclick="selectFactor(this)">
                   <span class="opt-num">4</span><span class="opt-label">Relutante</span>
                   <div class="tip"><strong>Crítico (4pts)</strong> — Resistência ou ausência visível do topo. O BCG considera este o fator mais determinante do fracasso.</div>
                 </button>
@@ -2048,19 +2048,19 @@
             <div class="factor-row">
               <div class="factor-label"><span class="factor-tag">C2</span>Compromisso dos impactados</div>
               <div class="factor-options" data-factor="C2">
-                <button class="opt-btn selected" data-val="1" onclick="select(this)">
+                <button class="opt-btn selected" data-val="1" onclick="selectFactor(this)">
                   <span class="opt-num">1</span><span class="opt-label">Ansiosos</span>
                   <div class="tip"><strong>Engajados (1pt)</strong> — Colaboradores impactados estão entusiasmados e apoiam ativamente a iniciativa.</div>
                 </button>
-                <button class="opt-btn" data-val="2" onclick="select(this)">
+                <button class="opt-btn" data-val="2" onclick="selectFactor(this)">
                   <span class="opt-num">2</span><span class="opt-label">Dispostos</span>
                   <div class="tip"><strong>Dispostos (2pts)</strong> — Colaboradores aceitam a mudança, embora sem entusiasmo. Comunicação consistente é fundamental.</div>
                 </button>
-                <button class="opt-btn" data-val="3" onclick="select(this)">
+                <button class="opt-btn" data-val="3" onclick="selectFactor(this)">
                   <span class="opt-num">3</span><span class="opt-label">Relutantes</span>
                   <div class="tip"><strong>Relutantes (3pts)</strong> — Resistência presente. O BCG recomenda conversas 1:1 para mapear e neutralizar as preocupações.</div>
                 </button>
-                <button class="opt-btn" data-val="4" onclick="select(this)">
+                <button class="opt-btn" data-val="4" onclick="selectFactor(this)">
                   <span class="opt-num">4</span><span class="opt-label">Fort. relut.</span>
                   <div class="tip"><strong>Alta resistência (4pts)</strong> — Oposição ativa. Requer plano de gestão da mudança estruturado antes de prosseguir.</div>
                 </button>
@@ -2073,19 +2073,19 @@
             <div class="factor-row">
               <div class="factor-label"><span class="factor-tag">E</span>Esforço adicional exigido</div>
               <div class="factor-options" data-factor="E">
-                <button class="opt-btn selected" data-val="1" onclick="select(this)">
+                <button class="opt-btn selected" data-val="1" onclick="selectFactor(this)">
                   <span class="opt-num">1</span><span class="opt-label">&lt; 10%</span>
                   <div class="tip"><strong>Seguro (1pt)</strong> — Menos de 10% de esforço adicional. O BCG recomenda não ultrapassar este limite para evitar resistência.</div>
                 </button>
-                <button class="opt-btn" data-val="2" onclick="select(this)">
+                <button class="opt-btn" data-val="2" onclick="selectFactor(this)">
                   <span class="opt-num">2</span><span class="opt-label">10–20%</span>
                   <div class="tip"><strong>Gerenciável (2pts)</strong> — Entre 10–20% de esforço extra. Monitore sinais de sobrecarga. Considere remover tarefas não-essenciais.</div>
                 </button>
-                <button class="opt-btn" data-val="3" onclick="select(this)">
+                <button class="opt-btn" data-val="3" onclick="selectFactor(this)">
                   <span class="opt-num">3</span><span class="opt-label">20–40%</span>
                   <div class="tip"><strong>Alto (3pts)</strong> — Entre 20–40% de esforço adicional. Remova responsabilidades discricionárias ou use trabalhadores temporários.</div>
                 </button>
-                <button class="opt-btn" data-val="4" onclick="select(this)">
+                <button class="opt-btn" data-val="4" onclick="selectFactor(this)">
                   <span class="opt-num">4</span><span class="opt-label">&gt; 40%</span>
                   <div class="tip"><strong>Insustentável (4pts)</strong> — Mais de 40% de carga adicional. Alto risco de burnout, queda de qualidade e abandono do projeto.</div>
                 </button>
@@ -2382,7 +2382,7 @@ const COMMENTS = {
 };
 
 // Funções de seleção
-function select(btn) {
+function selectFactor(btn) {
   const group = btn.closest('[data-factor]');
   const factor = group.dataset.factor;
   
@@ -3257,3 +3257,31 @@ html,body{background:#fff;color:#1a1a2e;font-family:'Inter',sans-serif;font-size
 
   showToast('Abrindo relatório para impressão/PDF...');
 }
+
+
+// ── Wagner Signature Cursor ──
+(function(){
+  const co=document.getElementById('co'),ci=document.getElementById('ci'),cdot=document.getElementById('cdot');
+  if(!co)return;
+  let mx=0,my=0,ox=0,oy=0,ix=0,iy=0;
+  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY});
+  document.querySelectorAll('a,button,[onclick],input,textarea').forEach(el=>{
+    el.addEventListener('mouseenter',()=>document.body.classList.add('ch'));
+    el.addEventListener('mouseleave',()=>document.body.classList.remove('ch'));
+  });
+  function loop(){
+    ox+=(mx-22-ox)*.08;oy+=(my-22-oy)*.08;
+    ix+=(mx-8-ix)*.18;iy+=(my-8-iy)*.18;
+    co.style.transform=`translate3d(${ox}px,${oy}px,0)`;
+    ci.style.transform=`translate3d(${ix}px,${iy}px,0)`;
+    cdot.style.transform=`translate3d(${mx-1.5}px,${my-1.5}px,0)`;
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+
+// Inicialização
+update();
+</script>
+</body>
+</html>
