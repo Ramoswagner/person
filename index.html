@@ -1,659 +1,785 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>+10 slides • água & inovação • tendências 2026</title>
-  <!-- Font Awesome 6 -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <!-- Google Fonts: Inter + Outfit (fresco) -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wagner Ramos — PMO · Projetos · Business Intelligence</title>
 
-    body {
-      background: #0a0c15;
-      font-family: 'Inter', sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem 1rem;
-    }
+<!-- ✅ FIX 4: Meta description para SEO -->
+<meta name="description" content="Wagner Ramos — PMO e Analista de Projetos com formação em Engenharia Civil. Governança de portfólios estratégicos, automação de dados e Business Intelligence em ambientes regulados. Belo Horizonte, MG.">
 
-    .container {
-      max-width: 1300px;
-      width: 100%;
-    }
+<!-- ✅ FIX 4: Open Graph — preview no LinkedIn, WhatsApp, etc. -->
+<meta property="og:type"        content="website">
+<meta property="og:title"       content="Wagner Ramos — PMO · Projetos · Business Intelligence">
+<meta property="og:description" content="PMO e Analista de Projetos com formação em Engenharia Civil. Governança de portfólios estratégicos, automação e BI em ambientes regulados.">
+<meta property="og:image"       content="assets/og-cover.jpg">
+<meta property="og:url"         content="https://ramoswagner.github.io/">
+<meta property="og:locale"      content="pt_BR">
 
-    .header {
-      text-align: center;
-      margin-bottom: 3rem;
-      color: #eef2fb;
-    }
-    .header h1 {
-      font-size: 3.5rem;
-      font-weight: 600;
-      letter-spacing: -0.02em;
-      background: linear-gradient(145deg, #6cd4ff, #b7b1ff, #8fdcb0);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 0.5rem;
-    }
-    .header .sub {
-      font-size: 1.2rem;
-      color: #9aa7c9;
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-    .header .sub span {
-      background: rgba(255,255,255,0.03);
-      padding: 0.3rem 1.2rem;
-      border-radius: 40px;
-      border: 1px solid rgba(255,255,255,0.1);
-    }
+<!-- ✅ FIX 4: Twitter Card -->
+<meta name="twitter:card"        content="summary_large_image">
+<meta name="twitter:title"       content="Wagner Ramos — PMO · Projetos · BI">
+<meta name="twitter:description" content="PMO e Analista de Projetos — Belo Horizonte, MG.">
+<meta name="twitter:image"       content="assets/og-cover.jpg">
 
-    .slide-page {
-      margin-bottom: 4rem;
-      border-radius: 2.5rem;
-      overflow: hidden;
-      box-shadow: 0 30px 50px -20px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255,255,255,0.08) inset;
-      transition: transform 0.25s ease, box-shadow 0.3s;
-      background-color: #111522;
-    }
-    .slide-page:hover {
-      transform: scale(1.015);
-      box-shadow: 0 40px 70px -10px #000000ee, 0 0 0 2px rgba(255,255,255,0.15) inset;
-    }
+<!-- ✅ FIX 10: Theme color — barra do navegador mobile -->
+<meta name="theme-color" content="#0B1E33">
 
-    .slide {
-      aspect-ratio: 16 / 9;
-      width: 100%;
-      position: relative;
-      padding: 2rem 2.8rem;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
+<!-- ✅ FIX 7: Favicon inline SVG — sem arquivo externo necessário -->
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%230B1E33'/><text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' font-family='Georgia,serif' font-size='18' font-weight='700' fill='%23C4A35A'>W</text></svg>">
 
-    .slide-number {
-      position: absolute;
-      top: 1.2rem;
-      right: 1.8rem;
-      font-size: 0.9rem;
-      font-weight: 500;
-      background: rgba(0,0,0,0.3);
-      backdrop-filter: blur(8px);
-      padding: 0.4rem 1.2rem;
-      border-radius: 40px;
-      color: rgba(255,255,255,0.9);
-      border: 1px solid rgba(255,255,255,0.2);
-      z-index: 30;
-      font-family: 'Outfit', sans-serif;
-    }
+<!-- ✅ FIX 5: preconnect gstatic obrigatório para Google Fonts performático -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 
-    .slide-title {
-      font-size: 3rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      line-height: 1.1;
-      margin-bottom: 0.5rem;
-      max-width: 70%;
-      z-index: 10;
-    }
-    .slide-sub {
-      font-size: 1.1rem;
-      opacity: 0.8;
-      max-width: 60%;
-      margin-bottom: 2rem;
-      z-index: 10;
-    }
-    .row {
-      display: flex;
-      gap: 2rem;
-      flex: 1;
-      align-items: flex-end;
-      justify-content: space-between;
-      z-index: 10;
-    }
-    .bullet-list {
-      list-style: none;
-      font-size: 1.1rem;
-      font-weight: 400;
-      z-index: 10;
-    }
-    .bullet-list li {
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-    }
-    .bullet-list i {
-      width: 1.6rem;
-      color: inherit;
-    }
+<!-- ✅ FIX 4: JSON-LD Person — sinal de autoridade para buscadores -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Wagner Douglas Ramos da Silva",
+  "jobTitle": "Analista de Projetos · PMO",
+  "url": "https://ramoswagner.github.io/",
+  "email": "wagnerramoseng@gmail.com",
+  "sameAs": [
+    "https://www.linkedin.com/in/engwagnerramos/",
+    "https://github.com/Ramoswagner",
+    "https://www.instagram.com/engwagnerramos"
+  ],
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Belo Horizonte",
+    "addressRegion": "MG",
+    "addressCountry": "BR"
+  },
+  "alumniOf": [
+    { "@type": "CollegeOrUniversity", "name": "Centro Universitário de Belo Horizonte — UniBH" },
+    { "@type": "CollegeOrUniversity", "name": "Fundace FEARP · USP" }
+  ]
+}
+</script>
 
-    .graphic-block {
-      background: rgba(255,255,255,0.1);
-      backdrop-filter: blur(4px);
-      border-radius: 2rem;
-      padding: 1.2rem 1.8rem;
-      border: 1px solid rgba(255,255,255,0.15);
-      display: flex;
-      gap: 1rem;
-      align-items: flex-end;
-      height: 140px;
-    }
-    .bar {
-      width: 38px;
-      background: white;
-      border-radius: 20px 20px 8px 8px;
-      opacity: 0.9;
-    }
+<!-- ✅ FIX 2: noscript fallback — página visível sem JS -->
+<noscript><style>.r{opacity:1 !important;transform:none !important}</style></noscript>
 
-    .slide-footer {
-      display: flex;
-      justify-content: flex-end;
-      gap: 1rem;
-      margin-top: 1rem;
-      z-index: 30;
-      position: relative;
-    }
-    .btn-slide {
-      background: rgba(0,0,0,0.3);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255,255,255,0.25);
-      color: white;
-      padding: 0.6rem 1.5rem;
-      border-radius: 3rem;
-      font-size: 0.95rem;
-      font-weight: 500;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.6rem;
-      transition: 0.2s;
-    }
-    .btn-slide:hover {
-      background: white;
-      color: #0a0c15;
-      border-color: white;
-    }
+<style>
+/* ══════════════════════════════════════════════
+   WAGNER RAMOS v7 — NAVY × GOLD (refinado)
+   #0B1E33 / #C4A35A · Ouro consultoria · McKinsey / A&M
+══════════════════════════════════════════════ */
+:root {
+  --bg:    #0B1E33;
+  --bg2:   #0F2A40;
+  --bg3:   #153450;
+  --bg4:   #1A3E5A;
 
-    /* ------- ESTILOS ESPECÍFICOS PARA CADA SLIDE (ÁGUA & INOVAÇÃO) ------- */
+  --text:  #F0F4FA;
+  --mid:   #A0B3CC;
+  --low:   #62748C;
 
-    /* 1. Oceano profundo (deep) */
-    .deep-ocean {
-      background: radial-gradient(ellipse at 20% 40%, #023b4b, #00111c);
-      color: #caf0f8;
-    }
-    .deep-ocean::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: repeating-linear-gradient(45deg, rgba(0,255,255,0.02) 0px, rgba(0,255,255,0.02) 20px, transparent 20px, transparent 40px);
-      pointer-events: none;
-    }
-    .bubbles {
-      position: absolute;
-      inset: 0;
-      background-image: radial-gradient(circle at 10% 70%, rgba(255,255,255,0.15) 2px, transparent 2px),
-                        radial-gradient(circle at 90% 30%, rgba(200,255,255,0.2) 4px, transparent 4px),
-                        radial-gradient(circle at 40% 85%, rgba(255,255,255,0.1) 6px, transparent 6px),
-                        radial-gradient(circle at 70% 55%, rgba(200,240,255,0.12) 3px, transparent 3px);
-      background-size: 120px 120px;
-      animation: bubbleMove 18s infinite alternate;
-    }
-    @keyframes bubbleMove {
-      0% { background-position: 0 0; }
-      100% { background-position: 60px 60px; }
-    }
+  --gold:  #C4A35A;
+  --glt:   #D8B87A;
+  --gdim:  rgba(196,163,90,0.12);
 
-    /* 2. Água cristalina (claro, translúcido) */
-    .crystal-water {
-      background: linear-gradient(145deg, #d4f4ff, #a9e5ff, #e0f2fe);
-      color: #024e6b;
-    }
-    .crystal-water .slide-title, .crystal-water .slide-sub { color: #015c7c; }
-    .crystal-water .bullet-list i { color: #0284a5; }
-    .water-shimmer {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.5) 50%, transparent 70%);
-      mix-blend-mode: overlay;
-      animation: shimmer 6s infinite;
-    }
-    @keyframes shimmer {
-      0% { transform: translateX(-100%); }
-      20% { transform: translateX(100%); }
-      100% { transform: translateX(200%); }
-    }
+  --line:  rgba(255,255,255,.08);
+  --line2: rgba(255,255,255,.04);
+  --lineg: rgba(196,163,90,.25);
 
-    /* 3. Aqua tech (água + circuitos) */
-    .aqua-tech {
-      background: #0d1b2a;
-      color: #9efff0;
-    }
-    .aqua-grid {
-      position: absolute;
-      inset: 0;
-      background-image: 
-        linear-gradient(rgba(0,255,200,0.15) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,255,200,0.12) 1px, transparent 1px);
-      background-size: 30px 30px;
-    }
-    .aqua-neon {
-      position: absolute;
-      width: 300px;
-      height: 300px;
-      background: radial-gradient(circle, #00ffe1, #0066ff);
-      opacity: 0.3;
-      filter: blur(70px);
-      border-radius: 50%;
-      top: -50px;
-      right: -50px;
-    }
-    .aqua-wave {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 80px;
-      background: repeating-linear-gradient( transparent 0px, transparent 25px, rgba(0,255,200,0.2) 25px, rgba(0,255,200,0.2) 30px);
-    }
+  --serif: 'Cormorant Garamond', Georgia, serif;
+  --sans:  'Inter', system-ui, sans-serif;
+  --nav-h: 72px;
+  --px:    clamp(20px,5.5vw,88px);
+  --py:    clamp(72px,10vw,128px);
+  --ease:  cubic-bezier(0.16,1,0.3,1);
+  --ease2: cubic-bezier(0.76,0,0.24,1);
+}
 
-    /* 4. Minimalist drop (água minimalista) */
-    .minimal-drop {
-      background: #f7f9fc;
-      color: #1d3557;
-    }
-    .drop-shape {
-      position: absolute;
-      bottom: 2rem;
-      right: 2rem;
-      width: 200px;
-      height: 200px;
-      background: #c1d3fe;
-      border-radius: 42% 58% 70% 30% / 44% 30% 70% 56%;
-      opacity: 0.5;
-      filter: blur(2px);
-    }
-    .minimal-drop .bullet-list i { color: #457b9d; }
+html {
+  scroll-padding-top: var(--nav-h);
+  scroll-behavior: smooth;
+}
 
-    /* 5. Ondas geométricas */
-    .geo-waves {
-      background: #0e2738;
-      color: #f0f7fa;
-    }
-    .geo-wave-bg {
-      position: absolute;
-      inset: 0;
-      background: repeating-linear-gradient(45deg, #1e4b62 0px, #1e4b62 2px, transparent 2px, transparent 20px);
-      opacity: 0.2;
-    }
-    .wave-poly {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 40%;
-      background: linear-gradient(transparent, #278ea5);
-      clip-path: polygon(0 60%, 20% 30%, 40% 70%, 60% 20%, 80% 50%, 100% 10%, 100% 100%, 0 100%);
-      opacity: 0.5;
-    }
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-weight:300;overflow-x:hidden;-webkit-font-smoothing:antialiased;cursor:none}
+a{color:inherit;text-decoration:none}
+::-webkit-scrollbar{width:2px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:linear-gradient(to bottom,var(--glt),var(--gold))}
 
-    /* 6. Frosted water (glass + água) */
-    .frosted-water {
-      background: linear-gradient(125deg, #92c9ff, #c0b7ff, #a6e2fa);
-    }
-    .frost-card {
-      background: rgba(255,255,255,0.2);
-      backdrop-filter: blur(16px);
-      border-radius: 3rem;
-      padding: 2rem;
-      border: 1px solid rgba(255,255,255,0.3);
-      height: 80%;
-      display: flex;
-      flex-direction: column;
-      color: #022b40;
-    }
-    .frost-card .slide-title, .frost-card .slide-sub { color: #022b40; }
+/* ── CURSOR ── */
+.co,.ci,.cdot{display:none;position:fixed;border-radius:50%;pointer-events:none;z-index:9999;will-change:transform}
+@media(pointer:fine){.co,.ci,.cdot{display:block}}
+.co{width:48px;height:48px;border:1px solid var(--gdim);transition:width .65s var(--ease),height .65s var(--ease),border-color .5s}
+.ci{width:18px;height:18px;border:1.5px solid rgba(196,163,90,.65);transition:width .35s var(--ease),height .35s var(--ease),border-color .3s,background .3s}
+.cdot{width:4px;height:4px;background:var(--glt);mix-blend-mode:screen}
+body.ch  .co{width:62px;height:62px;border-color:rgba(196,163,90,.18)}
+body.ch  .ci{width:11px;height:11px;border-color:var(--glt);background:rgba(221,184,74,.1)}
+body.chl .co{width:88px;height:88px;border-color:rgba(196,163,90,.12)}
+body.chl .ci{width:5px;height:5px;background:var(--glt);border-color:var(--glt)}
+body.chl .cdot{width:6px;height:6px}
 
-    /* 7. Fluid art (aquarela digital) */
-    .fluid-art {
-      background: #fff5e6;
-      color: #3a2618;
-    }
-    .fluid-blob {
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle at 30% 40%, #ffb3aa, transparent 40%),
-                  radial-gradient(circle at 80% 70%, #aad0ff, transparent 50%),
-                  radial-gradient(circle at 20% 80%, #b0e0c0, transparent 50%);
-      filter: blur(30px);
-      opacity: 0.5;
-    }
+/* ── LOADER ── */
+.loader{position:fixed;inset:0;z-index:10000;background:var(--bg);display:flex;align-items:center;justify-content:center;transition:opacity 1.1s var(--ease2)}
+.loader.away{opacity:0;pointer-events:none}
+.ld-wrap{text-align:center}
+.ld-eyebrow{font-size:.57rem;letter-spacing:.32em;text-transform:uppercase;color:var(--low);margin-bottom:28px;opacity:0;transition:opacity .5s .1s}
+.loader.go .ld-eyebrow{opacity:1}
+.ld-name{font-family:var(--serif);font-size:clamp(44px,9vw,108px);font-weight:300;letter-spacing:.05em;line-height:1;color:var(--text);clip-path:inset(0 100% 0 0);transition:clip-path 1.3s var(--ease) .25s}
+.loader.go .ld-name{clip-path:inset(0 0% 0 0)}
+.ld-bar{position:relative;width:100%;height:1px;background:var(--line);margin:22px 0;overflow:hidden}
+.ld-bar::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(to right,transparent,var(--gold),var(--glt),var(--gold),transparent);transition:left 1.1s var(--ease) .5s}
+.loader.go .ld-bar::after{left:100%}
+.ld-sub{font-size:.62rem;letter-spacing:.28em;text-transform:uppercase;color:var(--mid);opacity:0;transition:opacity .6s 1.2s}
+.loader.go .ld-sub{opacity:1}
 
-    /* 8. Night tide (água noturna) */
-    .night-tide {
-      background: linear-gradient(145deg, #021526, #123456, #1a3a5e);
-      color: #e0f2ff;
-    }
-    .stars {
-      position: absolute;
-      inset: 0;
-      background-image: radial-gradient(2px 2px at 10px 20px, #fff, rgba(0,0,0,0)),
-                        radial-gradient(2px 2px at 90px 150px, #fff, rgba(0,0,0,0)),
-                        radial-gradient(3px 3px at 200px 80px, #fffb, rgba(0,0,0,0)),
-                        radial-gradient(1px 1px at 300px 200px, #fff, rgba(0,0,0,0));
-      background-size: 400px 400px;
-    }
+/* ── NAV ── */
+nav{position:fixed;inset:0 0 auto 0;z-index:500;height:var(--nav-h);display:flex;align-items:center;justify-content:space-between;padding:0 var(--px);border-bottom:1px solid transparent;transition:background .5s,border-color .5s,backdrop-filter .5s}
+nav.over{background:rgba(11,30,51,.94);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border-color:var(--line)}
+.nav-logo{font-family:var(--serif);font-size:1.1rem;font-weight:600;letter-spacing:.04em;color:var(--text);flex-shrink:0;z-index:1}
+.nav-mid{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;gap:36px;list-style:none}
+.nav-mid a{font-size:.64rem;letter-spacing:.15em;text-transform:uppercase;color:var(--mid);position:relative;transition:color .2s}
+.nav-mid a::after{content:'';position:absolute;bottom:-4px;left:0;right:100%;height:1px;background:linear-gradient(to right,var(--gold),var(--glt));transition:right .35s var(--ease)}
+.nav-mid a:hover{color:var(--text)}
+.nav-mid a:hover::after{right:0}
+.nav-end{display:flex;align-items:center;gap:24px;z-index:1;flex-shrink:0}
+.nav-dl{font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);border-bottom:1px solid rgba(196,163,90,.35);padding-bottom:1px;transition:opacity .2s}
+.nav-dl:hover{opacity:.65}
+.ham{display:none;flex-direction:column;justify-content:center;gap:5px;width:32px;height:32px;background:none;border:none;cursor:pointer;padding:0}
+.ham span{display:block;width:22px;height:1px;background:var(--text);transition:all .35s var(--ease);transform-origin:center}
+.ham.open span:nth-child(1){transform:translateY(6px) rotate(45deg)}
+.ham.open span:nth-child(2){opacity:0;transform:scaleX(0)}
+.ham.open span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
+.mob{position:fixed;inset:0;z-index:480;background:var(--bg);display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:0 var(--px);pointer-events:none;opacity:0;transition:opacity .4s var(--ease)}
+.mob.open{pointer-events:all;opacity:1}
+.mlink{font-family:var(--serif);font-size:clamp(2rem,8vw,3.4rem);font-weight:300;letter-spacing:.02em;color:var(--low);padding:13px 0;border-bottom:1px solid var(--line2);width:100%;display:block;transform:translateX(-16px);opacity:0;transition:color .25s,transform .45s var(--ease),opacity .45s var(--ease)}
+.mob.open .mlink{transform:none;opacity:1;color:var(--text)}
+.mob.open .mlink:nth-child(1){transition-delay:.05s}
+.mob.open .mlink:nth-child(2){transition-delay:.10s}
+.mob.open .mlink:nth-child(3){transition-delay:.15s}
+.mob.open .mlink:nth-child(4){transition-delay:.20s}
+.mob.open .mlink:nth-child(5){transition-delay:.25s}
+.mob.open .mlink:nth-child(6){transition-delay:.28s}
+.mob.open .mlink:nth-child(7){transition-delay:.31s}
+.mob.open .mlink:nth-child(8){transition-delay:.34s}
+.mlink:hover{color:var(--glt)}
+.mcv{margin-top:36px;font-family:var(--sans) !important;font-size:.65rem !important;letter-spacing:.18em;text-transform:uppercase;color:var(--gold) !important;border-bottom:none !important;transition-delay:.30s !important}
 
-    /* 9. Prism water (gradiente extremo + água) */
-    .prism-water {
-      background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #ffe66d, #c084fc);
-      background-size: 200% 200%;
-      animation: prismFlow 12s infinite alternate;
-      color: white;
-    }
-    @keyframes prismFlow {
-      0% { background-position: 0% 0%; }
-      100% { background-position: 100% 100%; }
-    }
-    .prism-water .slide-title { text-shadow: 2px 2px 10px rgba(0,0,0,0.3); }
+/* ── HERO ── */
+.hero{min-height:100svh;padding-top:var(--nav-h);padding-left:var(--px);padding-right:var(--px);padding-bottom:clamp(60px,8vw,96px);display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-20%;right:-5%;width:80vw;height:80vw;background:radial-gradient(ellipse at 60% 35%,rgba(26,62,90,.8) 0%,rgba(11,30,51,0) 65%);pointer-events:none;}
+.hero::after{content:'';position:absolute;bottom:-15%;left:10%;width:40vw;height:40vw;background:radial-gradient(ellipse,rgba(196,163,90,.07) 0%,transparent 70%);pointer-events:none;}
 
-    /* 10. Liquid flow (orgânico) */
-    .liquid-flow {
-      background: #d0efff;
-      color: #004d66;
-    }
-    .flow-line {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 150px;
-      background: repeating-linear-gradient( transparent 0px, transparent 25px, #00a6c0 25px, #00a6c0 30px);
-      mask-image: linear-gradient(to top, black, transparent);
-      opacity: 0.4;
-    }
+.hghost{display:none;position:absolute;right:-1%;bottom:-12%;font-family:var(--serif);font-weight:700;font-size:clamp(180px,23vw,380px);line-height:1;letter-spacing:-.04em;color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.05);user-select:none;pointer-events:none;white-space:nowrap}
+@media(min-width:900px){.hghost{display:block}}
 
-    /* rodapé */
-    .footer-note {
-      color: #6b7a9c;
-      text-align: center;
-      margin-top: 2rem;
-      padding: 2rem;
-      border-top: 1px solid #202433;
-    }
-  </style>
+.hvline{display:none;position:absolute;left:var(--px);top:18%;bottom:18%;width:1px;background:linear-gradient(to bottom,transparent,rgba(196,163,90,.2),transparent)}
+@media(min-width:900px){.hvline{display:block}}
+
+.hcoord{display:none;position:absolute;top:calc(var(--nav-h) + 28px);right:var(--px);font-size:.52rem;letter-spacing:.14em;color:var(--low);writing-mode:vertical-rl}
+@media(min-width:900px){.hcoord{display:block}}
+
+.hbody{position:relative;z-index:2}
+.eyebrow{display:flex;align-items:center;gap:12px;margin-bottom:clamp(28px,4vw,48px)}
+.edot{width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0;animation:blink 3s ease-in-out infinite}
+.etxt{font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:var(--mid)}
+.esep{width:24px;height:1px;background:var(--line);flex-shrink:0}
+.eyr{font-size:.62rem;letter-spacing:.16em;color:var(--low)}
+
+.hname{font-family:var(--serif);font-size:clamp(62px,12.5vw,180px);font-weight:300;line-height:.88;letter-spacing:-.035em;color:var(--text);margin-bottom:clamp(36px,5vw,60px)}
+.hname .n2{display:block;font-style:italic;font-weight:300;color:var(--mid);padding-left:clamp(32px,7vw,120px)}
+.hname .n3{display:block;font-weight:700}
+
+.hdiv{width:100%;height:1px;background:linear-gradient(to right,var(--lineg),var(--line),transparent);margin-bottom:clamp(24px,4vw,40px)}
+
+.hbot{display:grid;grid-template-columns:1fr auto;gap:clamp(20px,4vw,60px);align-items:end}
+.hdesc{font-size:clamp(.9rem,1.4vw,1.05rem);line-height:1.82;color:var(--mid);font-weight:300;max-width:440px}
+.hdesc strong{color:var(--text);font-weight:400}
+.hstats{display:flex;gap:clamp(20px,3.5vw,44px);align-items:flex-end;flex-shrink:0}
+.hst{text-align:right}
+.hstn{font-family:var(--serif);font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:600;line-height:1;color:var(--text);margin-bottom:5px}
+.hstn .u{font-size:.48em;color:var(--gold);font-weight:300}
+.hstl{font-size:.57rem;letter-spacing:.1em;text-transform:uppercase;color:var(--low);line-height:1.4}
+.hacts{display:flex;gap:12px;flex-wrap:wrap;margin-top:clamp(24px,4vw,44px)}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--sans);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;font-weight:400;padding:14px 28px;border:none;white-space:nowrap;transition:all .35s var(--ease);cursor:pointer}
+.bf{background:linear-gradient(135deg,var(--gold),var(--glt));color:var(--bg)}
+.bf:hover{background:linear-gradient(135deg,var(--glt),var(--gold));transform:translateY(-2px);box-shadow:0 8px 32px rgba(196,163,90,.28)}
+.bo{background:transparent;color:var(--mid);border:1px solid var(--line);padding:13px 28px}
+.bo:hover{border-color:var(--lineg);color:var(--text);transform:translateY(-2px)}
+
+/* Scroll hint */
+.shint{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;z-index:2;pointer-events:none}
+.sbar{width:1px;height:52px;background:linear-gradient(to bottom,var(--gold),transparent);animation:sh 2.6s var(--ease) infinite;transform-origin:top}
+.slbl{font-size:.5rem;letter-spacing:.26em;text-transform:uppercase;color:var(--low);writing-mode:vertical-rl}
+
+/* ── SECTION ── */
+.sec{padding:var(--py) var(--px)}
+.sec.s2{background:var(--bg2)}
+.stag{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.sn{font-size:.57rem;letter-spacing:.2em;color:var(--gold)}
+.sb{width:28px;height:1px;background:var(--gold);opacity:.4}
+.sl{font-size:.57rem;letter-spacing:.2em;text-transform:uppercase;color:var(--low)}
+.stitle{font-family:var(--serif);font-size:clamp(36px,5.5vw,72px);font-weight:300;line-height:1.06;letter-spacing:-.025em;color:var(--text);margin-bottom:clamp(40px,6vw,76px)}
+.stitle em{font-style:italic;color:var(--gold)}
+
+/* ── SOBRE ── */
+.sgrid{display:grid;grid-template-columns:1fr 340px;gap:clamp(36px,7vw,96px);align-items:start}
+.stxt p{font-size:clamp(.93rem,1.4vw,1.06rem);line-height:1.85;color:var(--mid);margin-bottom:20px;font-weight:300}
+.stxt p:first-child{font-size:clamp(1rem,1.6vw,1.14rem)}
+.stxt p strong{color:var(--text);font-weight:400}
+.icard{background:var(--bg4);border:1px solid var(--line);border-top:2px solid var(--gold);padding:clamp(24px,3.5vw,40px)}
+@media(min-width:960px){.icard{position:sticky;top:calc(var(--nav-h)+16px)}}
+.icn{font-family:var(--serif);font-size:1.4rem;font-weight:400;letter-spacing:.02em;margin-bottom:2px}
+.icr{font-size:.57rem;letter-spacing:.16em;text-transform:uppercase;color:var(--low);padding-bottom:22px;margin-bottom:22px;border-bottom:1px solid var(--line)}
+.irow{margin-bottom:16px}
+.irow:last-child{margin-bottom:0}
+.ilbl{font-size:.53rem;letter-spacing:.16em;text-transform:uppercase;color:var(--low);margin-bottom:3px}
+.ival{font-size:.84rem;color:var(--mid);line-height:1.5}
+.ival a{color:var(--glt);transition:opacity .2s}
+.ival a:hover{opacity:.65}
+
+/* ── IMPACTO ── */
+.igrid{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line)}
+.imp{padding:clamp(28px,4vw,52px) clamp(20px,3vw,40px);border-right:1px solid var(--line);position:relative;overflow:hidden;transition:background .4s var(--ease)}
+.imp:last-child{border-right:none}
+.imp::before{content:'';position:absolute;top:0;left:0;right:100%;height:2px;background:linear-gradient(to right,var(--gold),var(--glt));transition:right .7s var(--ease)}
+.imp:hover::before{right:0}
+.imp:hover{background:var(--bg3)}
+.imp::after{content:'';position:absolute;top:-40%;right:-40%;width:80%;height:80%;background:radial-gradient(circle,rgba(196,163,90,.07) 0%,transparent 70%);opacity:0;transition:opacity .5s}
+.imp:hover::after{opacity:1}
+.iidx{display:block;font-size:.53rem;letter-spacing:.16em;color:var(--low);margin-bottom:clamp(14px,2.5vw,26px)}
+.inum{font-family:var(--serif);font-size:clamp(34px,4.5vw,60px);font-weight:600;line-height:1;color:var(--text);margin-bottom:8px}
+.inum .u{font-size:.46em;color:var(--gold);font-weight:300;vertical-align:super}
+.ilb{display:block;font-size:.57rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+.idsc{font-size:.84rem;color:var(--mid);line-height:1.65}
+
+/* ── COMPETÊNCIAS ── */
+.cbox{display:grid;grid-template-columns:210px 1fr;border:1px solid var(--line)}
+.ctabs{border-right:1px solid var(--line);display:flex;flex-direction:column}
+.ctab{padding:20px 22px;border:none;border-bottom:1px solid var(--line);background:transparent;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:background .22s;-webkit-tap-highlight-color:transparent}
+.ctab:last-child{border-bottom:none}
+.ctab:hover{background:var(--bg3)}
+.ctab.on{background:var(--bg3);border-left:2px solid var(--gold)}
+.ctabl{font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--low);transition:color .22s;text-align:left}
+.ctab.on .ctabl{color:var(--text)}
+.ctaba{font-size:.78rem;color:var(--low);transition:all .22s}
+.ctab.on .ctaba{color:var(--gold);transform:rotate(90deg)}
+.cbody{padding:clamp(20px,4vw,48px) clamp(16px,4vw,52px)}
+.cpanel{display:none}
+.cpanel.on{display:block;animation:up .3s var(--ease)}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{font-size:.69rem;letter-spacing:.06em;padding:7px 14px;border:1px solid var(--line);color:var(--mid);transition:all .2s;cursor:default}
+.chip:hover{border-color:rgba(255,255,255,.2);color:var(--text);background:var(--bg4)}
+.chip.hi{border-color:rgba(196,163,90,.4);color:var(--gold)}
+.sgrd{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.sc{border:1px solid var(--line);padding:22px 24px;transition:border-color .22s,background .22s}
+.sc:hover{border-color:rgba(196,163,90,.3);background:var(--bg3)}
+.sct{font-size:.61rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+.sc p{font-size:.84rem;color:var(--mid);line-height:1.62}
+
+/* ── EXPERIÊNCIA ── */
+.eitem{display:grid;grid-template-columns:196px 1fr;border-top:1px solid var(--line);padding:clamp(32px,5vw,60px) 0;gap:0}
+.eitem:last-child{border-bottom:1px solid var(--line)}
+.emeta{padding-right:clamp(16px,3vw,40px);padding-top:4px}
+.eper{font-size:.61rem;letter-spacing:.1em;text-transform:uppercase;color:var(--low);margin-bottom:10px}
+.elive{display:inline-flex;align-items:center;gap:6px;font-size:.57rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+.elivd{width:5px;height:5px;border-radius:50%;background:var(--gold);animation:blink 2s infinite}
+.eco{font-family:var(--serif);font-size:clamp(1.45rem,3vw,2rem);font-weight:400;letter-spacing:-.02em;color:var(--text);margin-bottom:4px;line-height:1.1}
+.erol{font-size:.61rem;letter-spacing:.13em;text-transform:uppercase;color:var(--gold);margin-bottom:22px;padding-bottom:22px;border-bottom:1px solid var(--line)}
+.etags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px}
+.etag{font-size:.57rem;letter-spacing:.07em;padding:4px 11px;border:1px solid var(--line);color:var(--low)}
+.etag.g{border-color:rgba(196,163,90,.35);color:var(--gold);background:rgba(196,163,90,.05)}
+.eul{list-style:none;display:flex;flex-direction:column;gap:11px}
+.eul li{font-size:.88rem;color:var(--mid);line-height:1.72;padding-left:18px;position:relative}
+.eul li::before{content:'↳';position:absolute;left:0;top:1px;color:var(--gold);font-size:.72rem}
+.eul li strong{color:var(--text);font-weight:400}
+.estk{margin-top:22px;padding-top:14px;border-top:1px solid var(--line);font-size:.61rem;letter-spacing:.07em;color:var(--low);line-height:1.7}
+
+/* ── FORMAÇÃO ── */
+.fitem{display:grid;grid-template-columns:196px 1fr auto;align-items:center;gap:0;border-top:1px solid var(--line);padding:clamp(20px,3vw,32px) 0;transition:background .22s}
+.fitem:last-child{border-bottom:1px solid var(--line)}
+.fitem:hover{background:var(--bg3)}
+.fyr{font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--low);padding-right:clamp(14px,2.5vw,40px)}
+.fdeg{font-family:var(--serif);font-size:clamp(1.05rem,2vw,1.28rem);font-weight:400;color:var(--text);margin-bottom:3px;line-height:1.2}
+.fsch{font-size:.61rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+.fbadge{font-size:.53rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(196,163,90,.35);padding:4px 12px;white-space:nowrap;margin-left:16px}
+
+/* ── PROJETOS ── */
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
+.pcard{background:var(--bg2);padding:clamp(24px,3.5vw,40px) clamp(20px,3vw,36px);display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;transition:background .3s var(--ease);cursor:pointer}
+.pcard::before{content:'';position:absolute;bottom:0;left:0;right:100%;height:2px;background:linear-gradient(to right,var(--gold),var(--glt));transition:right .55s var(--ease)}
+.pcard::after{content:'↗';position:absolute;top:22px;right:22px;color:var(--low);font-size:.82rem;transition:color .3s,transform .3s var(--ease)}
+.pcard:hover{background:var(--bg3)}
+.pcard:hover::before{right:0}
+.pcard:hover::after{color:var(--gold);transform:translate(3px,-3px)}
+.pn{font-size:.53rem;letter-spacing:.16em;color:var(--low)}
+.pt{font-family:var(--serif);font-size:1.15rem;font-weight:400;color:var(--text);line-height:1.2}
+.pd{font-size:.82rem;color:var(--mid);line-height:1.62;flex:1}
+.pchips{display:flex;flex-wrap:wrap;gap:5px;margin-top:auto}
+.pc{font-size:.53rem;letter-spacing:.07em;padding:3px 9px;border:1px solid var(--line);color:var(--low)}
+
+/* ── CERTIFICAÇÕES ── */
+.cgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(24px,4vw,52px)}
+.ch2{font-size:.57rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.cul{list-style:none;display:flex;flex-direction:column;gap:11px}
+.cul li{font-size:.81rem;color:var(--mid);line-height:1.45;padding-left:12px;position:relative}
+.cul li::before{content:'';position:absolute;left:0;top:7px;width:4px;height:1px;background:var(--gold);opacity:.5}
+
+/* ── CONTATO ── */
+.clayout{display:grid;grid-template-columns:1fr 360px;gap:clamp(36px,7vw,96px);align-items:start}
+.chead{font-family:var(--serif);font-size:clamp(34px,5vw,64px);font-weight:300;line-height:1.1;letter-spacing:-.025em;color:var(--text);margin-bottom:clamp(32px,5vw,52px)}
+.chead em{font-style:italic;color:var(--glt)}
+.clinks{display:flex;flex-direction:column}
+.clink{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:17px 0;border-top:1px solid var(--line);transition:padding-left .25s var(--ease);cursor:pointer}
+.clink:last-child{border-bottom:1px solid var(--line)}
+.clink:hover{padding-left:8px}
+.ctype{font-size:.53rem;letter-spacing:.16em;text-transform:uppercase;color:var(--low);margin-bottom:2px}
+.cval{font-size:.86rem;color:var(--mid);transition:color .2s}
+.clink:hover .cval{color:var(--text)}
+.carr{color:var(--low);transition:all .25s;flex-shrink:0}
+.clink:hover .carr{color:var(--glt);transform:translateX(4px)}
+.ccrd{background:var(--bg4);border:1px solid var(--line);border-top:2px solid var(--gold);padding:clamp(24px,4vw,44px)}
+.cctit{font-family:var(--serif);font-size:1.1rem;font-weight:400;margin-bottom:20px;color:var(--text)}
+.ccrow{margin-bottom:16px}
+.ccrow:last-of-type{margin-bottom:0}
+.ccl{font-size:.53rem;letter-spacing:.16em;text-transform:uppercase;color:var(--low);margin-bottom:3px}
+.ccv{font-size:.88rem;color:var(--mid);line-height:1.5}
+.cdl{display:inline-flex;align-items:center;gap:6px;margin-top:22px;font-size:.63rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);border-bottom:1px solid rgba(196,163,90,.35);padding-bottom:2px;transition:opacity .2s}
+.cdl:hover{opacity:.65}
+
+/* ── FOOTER ── */
+footer{padding:clamp(18px,2.5vw,26px) var(--px);border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.ft{font-size:.57rem;letter-spacing:.08em;color:var(--low)}
+.ftg{color:var(--gold)}
+
+/* ── REVEAL ── */
+.r{opacity:0;transform:translateY(18px);transition:opacity .88s var(--ease),transform .88s var(--ease)}
+.r.in{opacity:1;transform:none}
+.r.d1{transition-delay:.1s}.r.d2{transition-delay:.2s}.r.d3{transition-delay:.3s}.r.d4{transition-delay:.4s}
+
+/* ✅ FIX 6: prefers-reduced-motion — respeita configuração do sistema */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+    scroll-behavior:auto !important;
+  }
+  .r{opacity:1;transform:none;transition:none}
+  html{scroll-behavior:auto}
+}
+
+/* ── KEYFRAMES ── */
+@keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.2;transform:scale(1.7)}}
+@keyframes sh{0%{transform:scaleY(0);opacity:0}45%{opacity:1}100%{transform:scaleY(1);opacity:0}}
+@keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1200px){
+  .cgrid{grid-template-columns:repeat(2,1fr)}
+  .igrid{grid-template-columns:repeat(2,1fr)}
+  .imp{border-bottom:1px solid var(--line)}
+  .imp:nth-child(2n){border-right:none}
+  .imp:nth-child(2n+1){border-right:1px solid var(--line)}
+  .imp:nth-last-child(-n+2){border-bottom:none}
+}
+@media(max-width:1060px){
+  .sgrid{grid-template-columns:1fr;gap:clamp(32px,5vw,56px)}
+  .icard{position:static}
+  .clayout{grid-template-columns:1fr;gap:clamp(32px,5vw,56px)}
+  .pgrid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:900px){
+  .nav-mid,.nav-dl{display:none}
+  .ham{display:flex}
+  .eitem{grid-template-columns:1fr;gap:14px}
+  .emeta{padding-right:0}
+  .fitem{grid-template-columns:1fr;align-items:flex-start;gap:4px}
+  .fyr{padding-right:0}
+  .fbadge{margin-left:0;margin-top:6px;display:inline-block}
+  .sgrd{grid-template-columns:1fr}
+  .cbox{grid-template-columns:1fr}
+  .ctabs{border-right:none;border-bottom:1px solid var(--line);flex-direction:row;flex-wrap:wrap}
+  .ctab{flex:1 1 50%;border-right:1px solid var(--line);border-bottom:1px solid var(--line);border-left:none}
+  .ctab.on{border-left:none;border-bottom:2px solid var(--gold)}
+  .ctab:nth-child(even){border-right:none}
+  .ctab:nth-last-child(-n+2){border-bottom:none}
+  .ctab.on:nth-last-child(-n+2){border-bottom:2px solid var(--gold)}
+}
+@media(max-width:640px){
+  .hbot{grid-template-columns:1fr;gap:24px}
+  .hstats{justify-content:flex-start}
+  .hst{text-align:left}
+  .hacts{flex-direction:column;align-items:stretch}
+  .btn{justify-content:center}
+  .igrid{grid-template-columns:1fr}
+  .imp{border-right:none !important;border-bottom:1px solid var(--line) !important}
+  .imp:last-child{border-bottom:none !important}
+  .pgrid{grid-template-columns:1fr}
+  .cgrid{grid-template-columns:1fr}
+  .ctab{flex:1 1 100%;border-right:none !important}
+  .shint{display:none}
+  .esep,.eyr{display:none}
+}
+@media(max-width:420px){
+  .hname{font-size:clamp(50px,16vw,80px)}
+  .hstats{gap:18px;flex-wrap:wrap}
+}
+@media(pointer:coarse){
+  body{cursor:auto}
+  .co,.ci,.cdot{display:none !important}
+  .btn,.ctab,.pcard,.clink,.ham,.imp,.fitem{cursor:pointer}
+}
+</style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>águas criativas • 10 slides premium</h1>
-      <div class="sub">
-        <span>oceano profundo</span>
-        <span>cristalino</span>
-        <span>aqua tech</span>
-        <span>minimal drop</span>
-        <span>ondas geométricas</span>
-        <span>frosted</span>
-        <span>fluid art</span>
-        <span>night tide</span>
-        <span>prisma</span>
-        <span>liquid flow</span>
-      </div>
-    </div>
 
-    <!-- SLIDE 1 – Oceano profundo -->
-    <div class="slide-page">
-      <div class="slide deep-ocean">
-        <div class="bubbles"></div>
-        <span class="slide-number">01/10 — deep ocean</span>
-        <div class="slide-title">abismo<br>azul</div>
-        <div class="slide-sub">profundidade e mistério • 2026</div>
-        <div class="row">
-          <ul class="bullet-list">
-            <li><i class="fa-regular fa-water"></i> textura abissal</li>
-            <li><i class="fa-regular fa-fish"></i> vida marinha digital</li>
-            <li><i class="fa-regular fa-gem"></i> reflexos líquidos</li>
-          </ul>
-          <div class="graphic-block" style="background: #023b4b80;">
-            <div style="height: 50px; width: 38px; background: #60e0e0;"></div>
-            <div style="height: 110px; width: 38px; background: #90f0f0;"></div>
-            <div style="height: 70px; width: 38px; background: #b0ffff;"></div>
-          </div>
-        </div>
-        <div class="slide-footer">
-          <a href="#" class="btn-slide"><i class="fa-regular fa-eye"></i> visualizar</a>
-          <a href="#" class="btn-slide"><i class="fa-regular fa-circle-down"></i> exportar pptx</a>
-        </div>
-      </div>
-    </div>
+<div class="co"   id="co"   aria-hidden="true"></div>
+<div class="ci"   id="ci"   aria-hidden="true"></div>
+<div class="cdot" id="cdot" aria-hidden="true"></div>
 
-    <!-- SLIDE 2 – Água cristalina (claro) -->
-    <div class="slide-page">
-      <div class="slide crystal-water">
-        <div class="water-shimmer"></div>
-        <span class="slide-number">02/10 — cristalino</span>
-        <div class="slide-title">transparência<br>pura</div>
-        <div class="slide-sub">luz e água • fresh 2026</div>
-        <div class="row">
-          <ul class="bullet-list">
-            <li><i class="fa-regular fa-droplet"></i> brilho aquático</li>
-            <li><i class="fa-regular fa-sun"></i> reflexos suaves</li>
-            <li><i class="fa-regular fa-leaf"></i> frescor visual</li>
-          </ul>
-          <div class="graphic-block" style="background: #ffffff50; border-color: #fff;">
-            <div style="height: 70px; background: #0284a5;"></div>
-            <div style="height: 120px; background: #026c8a;"></div>
-            <div style="height: 40px; background: #0284a5;"></div>
-          </div>
-        </div>
-        <div class="slide-footer">
-          <a href="#" class="btn-slide"><i class="fa-regular fa-eye"></i> visualizar</a>
-          <a href="#" class="btn-slide"><i class="fa-regular fa-circle-down"></i> exportar pptx</a>
-        </div>
-      </div>
-    </div>
+<div class="loader" id="loader" aria-hidden="true">
+  <div class="ld-wrap">
+    <div class="ld-eyebrow">Portfólio · 2026</div>
+    <div class="ld-name">Wagner Ramos</div>
+    <div class="ld-bar"></div>
+    <div class="ld-sub">PMO · Projetos · Business Intelligence</div>
+  </div>
+</div>
 
-    <!-- SLIDE 3 – Aqua tech -->
-    <div class="slide-page">
-      <div class="slide aqua-tech">
-        <div class="aqua-grid"></div>
-        <div class="aqua-neon"></div>
-        <div class="aqua-wave"></div>
-        <span class="slide-number">03/10 — aqua tech</span>
-        <div class="slide-title">cyber<br>ocean</div>
-        <div class="slide-sub">tecnologia líquida • dados fluidos</div>
-        <div class="row">
-          <ul class="bullet-list">
-            <li><i class="fa-regular fa-microchip"></i> circuitos aquáticos</li>
-            <li><i class="fa-regular fa-chart-scatter"></i> visualização dinâmica</li>
-            <li><i class="fa-regular fa-wifi"></i> conectividade azul</li>
-          </ul>
-          <div class="graphic-block" style="background: #0d1b2a; border: 1px solid #0ff;">
-            <div style="height: 80px; background: #0ff; box-shadow: 0 0 20px #0ff;"></div>
-            <div style="height: 130px; background: #f0f; box-shadow: 0 0 20px #f0f;"></div>
-            <div style="height: 40px; background: #0ff;"></div>
-          </div>
-        </div>
-        <div class="slide-footer">
-          <a href="#" class="btn-slide"><i class="fa-regular fa-eye"></i> visualizar</a>
-          <a href="#" class="btn-slide"><i class="fa-regular fa-circle-down"></i> exportar pptx</a>
+<!-- ✅ FIX 8: Menu mobile com todos os itens + focus trap via JS -->
+<div class="mob" id="mob" role="dialog" aria-modal="true" aria-label="Navegação principal">
+  <a class="mlink" href="#sobre"        onclick="closeMob()">Sobre</a>
+  <a class="mlink" href="#impacto"      onclick="closeMob()">Impacto</a>
+  <a class="mlink" href="#competencias" onclick="closeMob()">Competências</a>
+  <a class="mlink" href="#experiencia"  onclick="closeMob()">Experiência</a>
+  <!-- ✅ FIX 1: seções que faltavam no menu mobile -->
+  <a class="mlink" href="#formacao"     onclick="closeMob()">Formação</a>
+  <a class="mlink" href="#projetos"     onclick="closeMob()">Projetos</a>
+  <a class="mlink" href="#certificacoes" onclick="closeMob()">Certificações</a>
+  <a class="mlink" href="#contato"      onclick="closeMob()">Contato</a>
+  <a class="mlink mcv" href="assets/curriculo-wagner-ramos.pdf" download onclick="closeMob()">Baixar Currículo</a>
+</div>
+
+<nav id="nav">
+  <a class="nav-logo" href="#home">W. Ramos</a>
+  <!-- ✅ FIX 1: seções adicionadas ao menu desktop -->
+  <ul class="nav-mid">
+    <li><a href="#sobre">Sobre</a></li>
+    <li><a href="#impacto">Impacto</a></li>
+    <li><a href="#competencias">Competências</a></li>
+    <li><a href="#experiencia">Experiência</a></li>
+    <li><a href="#formacao">Formação</a></li>
+    <li><a href="#projetos">Projetos</a></li>
+    <li><a href="#certificacoes">Certificações</a></li>
+    <li><a href="#contato">Contato</a></li>
+  </ul>
+  <div class="nav-end">
+    <a class="nav-dl" href="assets/curriculo-wagner-ramos.pdf" download>Currículo PDF</a>
+    <button class="ham" id="ham" aria-label="Abrir menu" aria-expanded="false" aria-controls="mob">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<section class="hero" id="home">
+  <div class="hghost"  aria-hidden="true">PMO</div>
+  <div class="hvline"  aria-hidden="true"></div>
+  <div class="hcoord"  aria-hidden="true">19°55'S · 43°56'W</div>
+  <div class="hbody">
+    <div class="eyebrow">
+      <span class="edot" aria-hidden="true"></span>
+      <span class="etxt">Portfólio Profissional</span>
+      <span class="esep" aria-hidden="true"></span>
+      <span class="eyr">2026</span>
+    </div>
+    <h1 class="hname">Wagner<span class="n2">Douglas</span><span class="n3">Ramos</span></h1>
+    <div class="hdiv" aria-hidden="true"></div>
+    <div class="hbot">
+      <div>
+        <p class="hdesc"><strong>PMO e Gestão de Projetos</strong> com formação em Engenharia Civil. Governança de portfólios estratégicos, automação de dados e decisão em ambientes regulados de alta complexidade. Belo Horizonte, MG.</p>
+        <div class="hacts">
+          <a href="#experiencia" class="btn bf">Ver Experiência</a>
+          <a href="assets/curriculo-wagner-ramos.pdf" class="btn bo" download>Baixar Currículo</a>
         </div>
       </div>
-    </div>
-
-    <!-- SLIDE 4 – Minimalist drop (água minimalista) -->
-    <div class="slide-page">
-      <div class="slide minimal-drop">
-        <div class="drop-shape"></div>
-        <span class="slide-number">04/10 — minimal drop</span>
-        <div class="slide-title">gota<br>essencial</div>
-        <div class="slide-sub">a forma da água • silêncio</div>
-        <div class="row">
-          <ul class="bullet-list">
-            <li><i class="fa-regular fa-circle"></i> uma única gota</li>
-            <li><i class="fa-regular fa-wave-square"></i> linha d'água</li>
-            <li><i class="fa-regular fa-eye"></i> foco absoluto</li>
-          </ul>
-          <div style="width: 100px; height: 100px; border-radius: 50%; background: #a3cef1; opacity: 0.6;"></div>
-        </div>
-        <div class="slide-footer">
-          <a href="#" class="btn-slide" style="background: #d4e2f0; color: #1d3557;"><i class="fa-regular fa-eye"></i> visualizar</a>
-          <a href="#" class="btn-slide" style="background: #d4e2f0; color: #1d3557;"><i class="fa-regular fa-circle-down"></i> exportar pptx</a>
-        </div>
+      <!-- ✅ FIX 9: aria-label nos contadores para leitores de tela -->
+      <div class="hstats">
+        <div class="hst" aria-label="R$500k em recursos viabilizados"><div class="hstn">R$<span class="cnt" data-to="500">0</span><span class="u">k</span></div><div class="hstl" aria-hidden="true">Recursos<br>viabilizados</div></div>
+        <div class="hst" aria-label="75% de redução no tempo de análise"><div class="hstn">−<span class="cnt" data-to="75">0</span><span class="u">%</span></div><div class="hstl" aria-hidden="true">Tempo de<br>análise</div></div>
+        <div class="hst" aria-label="Mais de 17 projetos simultâneos"><div class="hstn"><span class="cnt" data-to="17">0</span><span class="u">+</span></div><div class="hstl" aria-hidden="true">Projetos<br>simultâneos</div></div>
       </div>
-    </div>
-
-    <!-- SLIDE 5 – Ondas geométricas -->
-    <div class="slide-page">
-      <div class="slide geo-waves">
-        <div class="geo-wave-bg"></div>
-        <div class="wave-poly"></div>
-        <span class="slide-number">05/10 — geometric waves</span>
-        <div class="slide-title">ondas<br>estruturadas</div>
-        <div class="slide-sub">padrões e movimento</div>
-        <div class="row">
-          <ul class="bullet-list">
-            <li><i class="fa-regular fa-triangle"></i> triângulos líquidos</li>
-            <li><i class="fa-regular fa-chart-line"></i> linhas de quebra</li>
-            <li><i class="fa-regular fa-cubes"></i> profundidade angular</li>
-          </ul>
-          <div style="display: flex; gap: 10px;">
-            <div style="width: 40px; height: 90px; background: #00b8b8; clip-path: polygon(0 0, 100% 20%, 100% 100%, 0 80%);"></div>
-            <div style="width: 40px; height: 130px; background: #00e0e0; clip-path: polygon(0 20%, 100% 0, 100% 80%, 0 100%);"></div>
-          </div>
-        </div>
-        <div class="slide-footer">
-          <a href="#" class="btn-slide"><i class="fa-regular fa-eye"></i> visualizar</a>
-          <a href="#" class="btn-slide"><i class="fa-regular fa-circle-down"></i> exportar pptx</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- SLIDE 6 – Frosted water (glass + água) -->
-    <div class="slide-page">
-      <div class="slide frosted-water">
-        <span class="slide-number">06/10 — frosted water</span>
-        <div class="frost-card">
-          <div class="slide-title">gelo<br>líquido</div>
-          <div class="slide-sub">camadas translúcidas</div>
-          <ul class="bullet-list" style="margin-top: 1rem;">
-            <li><i class="fa-regular fa-snowflake"></i> vidro aquático</li>
-            <li><i class="fa-regular fa-droplet"></i> fusão gelo/água</li>
-          </ul>
-          <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-            <i class="fa-regular fa-gem" style="font-size: 3rem;"></i>
-            <i class="fa-regular fa-star" style="font-size: 3rem;"></i>
-          </div>
-          <div class="slide-footer" style="margin-top: 1rem;">
-            <a href="#" class="btn-slide" style="background: rgba(0,0,0,0.2);"><i class="fa-regular fa-eye"></i> visualizar</a>
-            <a href="#" class="btn-slide" style="background: rgba(0,0,0,0.2);"><i class="fa-regular fa-circle-down"></i> exportar pptx</a>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SLIDE 7 – Fluid art (aquarela digital) -->
-    <div class="slide-page">
-      <div class="slide fluid-art">
-        <div class="fluid-blob"></div>
-        <span class="slide-number">07/10 — fluid art</span>
-        <div class="slide-title">aquarela<br>digital</div>
-        <div class="slide-sub">manchas e fluidez</div>
-        <div class="row">
-          <ul class="bullet-list">
-            <li><i class="fa-regular fa-paintbrush"></i> pinceladas líquidas</li>
-            <li><i class="fa-regular fa-droplet"></i> tinta na água</li>
-            <li><i class="fa-regular fa-palette"></i> cores orgânicas</li>
-          </ul>
-          <div style="width: 120px; height: 120px; border-radius: 60% 40% 70% 30%; background: #ff9f7c;"></div>
-        </div>
-        <div class="slide-footer">
-          <a href="#" class="btn-slide" style="background: #ccb6a0; color: #3a2618;"><i class="fa-regular fa-eye"></i> visualizar</a>
-          <a href="#" class="btn-slide" style="background: #ccb6a0; color: #3a2618;"><i class="fa-regular fa-circle-down"></i> exportar pptx</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- SLIDE 8 – Night tide (água noturna) -->
-    <div class="slide-page">
-      <div class="slide night-tide">
-        <div class="stars"></div>
-        <span class="slide-number">08/10 — night tide</span>
-        <div class="slide-title">maré<br>noturna</div>
-        <div class="slide-sub">estrelas refletidas</div>
-        <div class="row">
-          <ul class="bullet-list">
-            <li><i class="fa-regular fa-moon"></i> luar na água</li>
-            <li><i class="fa-regular fa-star"></i> brilho noturno</li>
-            <li><i class="fa-regular fa-wave"></i> ondas escuras</li>
-          </ul>
-          <div style="width: 80px; height: 80px; border-radius: 50%; background: #ffecaa30; box-shadow: 0 0 40px #ffecaa;"></div>
-        </div>
-        <div class="slide-footer">
-          <a href="#" class="btn-slide"><i class="fa-regular fa-eye"></i> visualizar</a>
-          <a href="#" class="btn-slide"><i class="fa-regular fa-circle-down"></i> exportar pptx</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- SLIDE 9 – Prism water (gradiente extremo + água) -->
-    <div class="slide-page">
-      <div class="slide prism-water">
-        <span class="slide-number">09/10 — prism water</span>
-        <div class="slide-title">prisma<br>líquido</div>
-        <div class="slide-sub">espectro aquático</div>
-        <div class="row">
-          <ul class="bullet-list">
-            <li><i class="fa-regular fa-sun"></i> refração da luz</li>
-            <li><i class="fa-regular fa-diamond"></i> cores extremas</li>
-            <li><i class="fa-regular fa-water"></i> fluidez cromática</li>
-          </ul>
-          <div style="width: 150px; height: 100px; background: rgba(255,255,255,0.2); backdrop-filter: blur(6px); border-radius: 30px;"></div>
-        </div>
-        <div class="slide-footer">
-          <a href="#" class="btn-slide"><i class="fa-regular fa-eye"></i> visualizar</a>
-          <a href="#" class="btn-slide"><i class="fa-regular fa-circle-down"></i> exportar pptx</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- SLIDE 10 – Liquid flow (orgânico) -->
-    <div class="slide-page">
-      <div class="slide liquid-flow">
-        <div class="flow-line"></div>
-        <span class="slide-number">10/10 — liquid flow</span>
-        <div class="slide-title">fluxo<br>orgânico</div>
-        <div class="slide-sub">movimento perpétuo</div>
-        <div class="row">
-          <ul class="bullet-list">
-            <li><i class="fa-regular fa-wind"></i> correnteza</li>
-            <li><i class="fa-regular fa-leaf"></i> formas vivas</li>
-            <li><i class="fa-regular fa-circle-nodes"></i> conexões fluidas</li>
-          </ul>
-          <div style="width: 150px; height: 100px; background: repeating-linear-gradient(45deg, #008b9f 0px, #008b9f 4px, transparent 4px, transparent 12px);"></div>
-        </div>
-        <div class="slide-footer">
-          <a href="#" class="btn-slide" style="background: #c2e9fb; color: #004d66;"><i class="fa-regular fa-eye"></i> visualizar</a>
-          <a href="#" class="btn-slide" style="background: #c2e9fb; color: #004d66;"><i class="fa-regular fa-circle-down"></i> exportar pptx</a>
-        </div>
-      </div>
-    </div>
-
-    <div class="footer-note">
-      <i class="fa-regular fa-copyright"></i> 2026 • 10 slides inspirados na água — inovação e fluidez para apresentações premiadas.
     </div>
   </div>
-  <!-- botões ilustrativos, sem download real -->
+  <div class="shint" aria-hidden="true"><div class="sbar"></div><span class="slbl">Scroll</span></div>
+</section>
+
+<section class="sec s2" id="sobre">
+  <div class="stag"><span class="sn">01</span><span class="sb"></span><span class="sl">Sobre</span></div>
+  <h2 class="stitle r">Engenharia que<br><em>pensa em sistemas.</em></h2>
+  <div class="sgrid">
+    <div class="stxt">
+      <p class="r d1">Profissional de <strong>PMO e Gestão de Projetos</strong> com formação em Engenharia Civil e especialização em dados. Atuo na <strong>governança de portfólios estratégicos</strong>, integrando áreas de negócio, tecnologia e finanças para viabilizar entregas complexas em ambientes regulados.</p>
+      <p class="r d2">Combino <strong>visão executiva com capacidade técnica</strong> em automação — Python, Power BI — para transformar dados em decisões, garantindo conformidade, rastreabilidade e eficiência operacional. Experiência consolidada em gestão de verbas públicas, reporting para C-level e estruturação de PMO em ambiente hospitalar de alta complexidade.</p>
+      <p class="r d3">Minha diferenciação está na <strong>confluência rara</strong> entre a precisão da Engenharia Civil, a linguagem dos dados e a disciplina do PMO — combinação que permite atuar da estratégia à execução com consistência.</p>
+    </div>
+    <div class="icard r d2">
+      <div class="icn">Wagner Ramos</div>
+      <div class="icr">PMO · Projetos · BI · Eng. Civil</div>
+      <div class="irow"><div class="ilbl">Localização</div><div class="ival">Belo Horizonte, MG — Brasil</div></div>
+      <div class="irow"><div class="ilbl">Formação base</div><div class="ival">Engenharia Civil · UniBH · 2017</div></div>
+      <div class="irow"><div class="ilbl">MBA em curso</div><div class="ival">Gestão de Projetos · Fundace FEARP · USP</div></div>
+      <div class="irow"><div class="ilbl">E-mail</div><div class="ival"><a href="mailto:wagnerramoseng@gmail.com">wagnerramoseng@gmail.com</a></div></div>
+      <div class="irow"><div class="ilbl">LinkedIn</div><div class="ival"><a href="https://linkedin.com/in/engwagnerramos" target="_blank" rel="noopener">engwagnerramos</a></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="impacto">
+  <div class="stag"><span class="sn">02</span><span class="sb"></span><span class="sl">Entregas Estratégicas</span></div>
+  <h2 class="stitle r">Resultados que<br><em>ficam no registro.</em></h2>
+  <div class="igrid">
+    <div class="imp r"><span class="iidx">A — Impacto Financeiro</span><div class="inum">R$<span class="u">500k</span></div><span class="ilb">Recursos viabilizados</span><p class="idsc">Automação em Python e Excel para gestão de verbas públicas — emendas e convênios — com conformidade e agilidade na liberação.</p></div>
+    <div class="imp r d1"><span class="iidx">B — Eficiência Operacional</span><div class="inum">−75<span class="u">%</span></div><span class="ilb">Redução no tempo de análise</span><p class="idsc">Processos ETL em Python integrados a dashboards Power BI para tomada de decisão executiva em tempo real.</p></div>
+    <div class="imp r d2"><span class="iidx">C — Governança</span><div class="inum">4<span class="u">eixos</span></div><span class="ilb">Portfólio Estratégico</span><p class="idsc">Programa "Navega Baleia" — Eficiência, Pessoas, Qualidade Assistencial e Crescimento monitorados em tempo real.</p></div>
+    <div class="imp r d3"><span class="iidx">D — Escala</span><div class="inum">17<span class="u">+</span></div><span class="ilb">Projetos simultâneos</span><p class="idsc">Gestão de projetos de alta complexidade em ambiente hospitalar regulado, do licenciamento à usina fotovoltaica.</p></div>
+  </div>
+</section>
+
+<section class="sec s2" id="competencias">
+  <div class="stag"><span class="sn">03</span><span class="sb"></span><span class="sl">Competências</span></div>
+  <h2 class="stitle r">O que eu sei<br><em>fazer de verdade.</em></h2>
+  <div class="cbox r">
+    <div class="ctabs" role="tablist">
+      <button class="ctab on" data-p="gov"   role="tab" aria-selected="true"  aria-controls="p-gov">  <span class="ctabl">Governança &amp; PMO</span><span class="ctaba" aria-hidden="true">›</span></button>
+      <button class="ctab"    data-p="dados" role="tab" aria-selected="false" aria-controls="p-dados"><span class="ctabl">Dados &amp; Automação</span><span class="ctaba" aria-hidden="true">›</span></button>
+      <button class="ctab"    data-p="tools" role="tab" aria-selected="false" aria-controls="p-tools"><span class="ctabl">Ferramentas</span><span class="ctaba" aria-hidden="true">›</span></button>
+      <button class="ctab"    data-p="soft"  role="tab" aria-selected="false" aria-controls="p-soft"> <span class="ctabl">Soft Skills</span><span class="ctaba" aria-hidden="true">›</span></button>
+    </div>
+    <div class="cbody">
+      <div class="cpanel on" id="p-gov"   role="tabpanel"><div class="chips"><span class="chip hi">Gestão de Portfólio</span><span class="chip hi">PMBOK</span><span class="chip">Governança de PMO</span><span class="chip hi">Controle Físico-Financeiro</span><span class="chip">Compliance</span><span class="chip">Gestão de Riscos</span><span class="chip hi">Reporting Executivo</span><span class="chip">BPMN</span><span class="chip">Verbas Públicas</span><span class="chip">Convênios &amp; Emendas</span><span class="chip">Prestação de Contas</span><span class="chip">Ambiente Regulado</span><span class="chip">Gestão da Mudança</span></div></div>
+      <div class="cpanel"    id="p-dados" role="tabpanel"><div class="chips"><span class="chip hi">Power BI — DAX · ETL</span><span class="chip hi">Python — Pandas</span><span class="chip">Excel Avançado</span><span class="chip">VBA</span><span class="chip">Power Query</span><span class="chip hi">Pipelines ETL</span><span class="chip">Dashboards Executivos</span><span class="chip">R</span><span class="chip">Ciência de Dados</span></div></div>
+      <div class="cpanel"    id="p-tools" role="tabpanel"><div class="chips"><span class="chip hi">Microsoft Project</span><span class="chip">Visio</span><span class="chip">Jira</span><span class="chip">Teams</span><span class="chip">SharePoint</span><span class="chip">Microsoft Access</span><span class="chip">GitHub</span><span class="chip">KivyMD</span></div></div>
+      <div class="cpanel"    id="p-soft"  role="tabpanel"><div class="sgrd"><div class="sc"><div class="sct">Negociação &amp; Influência</div><p>Articulação entre áreas técnicas, administrativas e liderança executiva — resultados sem autoridade hierárquica direta.</p></div><div class="sc"><div class="sct">Visão Estratégica</div><p>Alinhamento do portfólio de projetos aos objetivos institucionais com reporting para C-level e diretoria.</p></div><div class="sc"><div class="sct">Pensamento Analítico</div><p>Estruturação de problemas complexos em dados e decisões — 75% de redução entregue no tempo de análise.</p></div><div class="sc"><div class="sct">Comunicação Executiva</div><p>Tradução de análises técnicas em linguagem estratégica. Relatórios e apresentações para C-level.</p></div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="experiencia">
+  <div class="stag"><span class="sn">04</span><span class="sb"></span><span class="sl">Experiência Profissional</span></div>
+  <h2 class="stitle r">Onde isso<br><em>foi aplicado.</em></h2>
+  <div class="eitem r">
+    <div class="emeta"><div class="eper">out/2024 — atual</div><div class="elive"><span class="elivd" aria-hidden="true"></span>Em andamento</div></div>
+    <div>
+      <div class="eco">Hospital da Baleia</div>
+      <div class="erol">Analista de Projetos · PMO · Belo Horizonte, MG</div>
+      <div class="etags"><span class="etag g">R$ 500k viabilizados</span><span class="etag g">−75% tempo análise</span><span class="etag g">8+ projetos</span><span class="etag">PMO Hospitalar</span><span class="etag">Power BI</span><span class="etag">Verbas Públicas</span><span class="etag">PMBOK</span></div>
+      <ul class="eul">
+        <li><strong>Governança do portfólio "Navega Baleia"</strong> — programa com 4 eixos estratégicos monitorados em tempo real via Power BI, com reporting para C-level.</li>
+        <li><strong>Liderança de projetos de alta complexidade</strong> em ambiente hospitalar regulado: licenciamento ambiental, usina fotovoltaica, Lean, gestão de riscos e reformas assistenciais.</li>
+        <li><strong>Reestruturação do fluxo de verbas públicas</strong> — automação em Python e Power BI, viabilizando R$ 500k com conformidade e rastreabilidade total.</li>
+        <li><strong>Implantação de sistema integrado de controle de obras</strong> em Power BI com visibilidade em tempo real para gestão e diretoria.</li>
+        <li><strong>Articulação com liderança executiva</strong> via kick-off, follow-up, reporting e gestão de mudança sem autoridade hierárquica direta.</li>
+      </ul>
+      <div class="estk">Governança de Portfólio · PMBOK · KPIs · BPMN · Gestão da Mudança · Power BI · Python · Pandas · Excel Avançado</div>
+    </div>
+  </div>
+  <div class="eitem r">
+    <div class="emeta"><div class="eper">mar/2018 — dez/2024</div></div>
+    <div>
+      <div class="eco">Eng. Wagner Ramos</div>
+      <div class="erol">Engenheiro · Consultor de Projetos · Belo Horizonte, MG</div>
+      <ul class="eul">
+        <li><strong>Consultoria e gestão de projetos</strong> de engenharia — do levantamento de requisitos à entrega final, com boas práticas PMBOK.</li>
+        <li><strong>Automações em Python e Excel</strong> para controle de prazos, organização de dados e geração de relatórios de projeto.</li>
+        <li><strong>Planejamento e controle de cronograma</strong> com Microsoft Project em projetos de média e alta complexidade.</li>
+      </ul>
+      <div class="estk">Planejamento · Controle de Projetos · Python · Excel · MS Project · PMBOK</div>
+    </div>
+  </div>
+  <div class="eitem r">
+    <div class="emeta"><div class="eper">ago/2016 — jul/2017</div></div>
+    <div>
+      <div class="eco">Araujo Projeto</div>
+      <div class="erol">Estagiário de Engenharia · Belo Horizonte, MG</div>
+      <ul class="eul">
+        <li>Desenvolvimento de projetos técnicos com foco em conformidade normativa e controle de qualidade.</li>
+        <li>Organização de dados em Microsoft Access e Excel para suporte à tomada de decisão gerencial.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="sec s2" id="formacao">
+  <div class="stag"><span class="sn">05</span><span class="sb"></span><span class="sl">Formação Acadêmica</span></div>
+  <h2 class="stitle r">Base<br><em>sólida.</em></h2>
+  <div>
+    <div class="fitem r"><div class="fyr">Em curso</div><div><div class="fdeg">MBA em Gestão de Projetos</div><div class="fsch">Fundace FEARP · USP</div></div><span class="fbadge">Em andamento</span></div>
+    <div class="fitem r"><div class="fyr">2023</div><div><div class="fdeg">Pós-graduação em Gestão de Projetos</div><div class="fsch">Descomplica Faculdade Digital</div></div><span></span></div>
+    <div class="fitem r"><div class="fyr">2017</div><div><div class="fdeg">Bacharelado em Engenharia Civil</div><div class="fsch">Centro Universitário de Belo Horizonte · UniBH</div></div><span></span></div>
+  </div>
+</section>
+
+<section class="sec" id="projetos">
+  <div class="stag"><span class="sn">06</span><span class="sb"></span><span class="sl">Aplicações Práticas</span></div>
+  <h2 class="stitle r">Código que<br><em>resolve.</em></h2>
+  <div class="pgrid">
+    <a class="pcard r"    href="assets/projetos/dash-financeiro.jpg"  target="_blank" rel="noopener"><span class="pn">001 — Power BI</span><div class="pt">Dashboard Financeiro</div><p class="pd">KPIs financeiros para diretoria — fluxo de caixa, despesas e projeções em tempo real.</p><div class="pchips"><span class="pc">Power BI</span><span class="pc">DAX</span><span class="pc">ETL</span></div></a>
+    <a class="pcard r d1" href="https://ramoswagner.github.io/gestaodecronograma/"   target="_blank" rel="noopener"><span class="pn">002 — Business Intelligence</span><div class="pt">Dashboard de Portfólio</div><p class="pd">Monitoramento em tempo real de 20+ projetos — status, prazos e riscos consolidados.</p><div class="pchips"><span class="pc">Power BI</span><span class="pc">PMO</span><span class="pc">ETL</span></div></a>
+    <a class="pcard r d2" href="https://www.linkedin.com/posts/engwagnerramos_python-poo-kivymd-activity-7166114326922182657-kq71" target="_blank" rel="noopener"><span class="pn">003 — Python</span><div class="pt">App Android — Minha Lista</div><p class="pd">Aplicativo mobile de lista de compras com Python e KivyMD.</p><div class="pchips"><span class="pc">Python</span><span class="pc">KivyMD</span><span class="pc">JSON</span></div></a>
+    <a class="pcard r d3" href="https://ramoswagner.github.io/flashcards/" target="_blank" rel="noopener"><span class="pn">004 — Web</span><div class="pt">Flashcards de Português</div><p class="pd">Ferramenta de estudo com flashcards interativos em HTML e JavaScript.</p><div class="pchips"><span class="pc">HTML</span><span class="pc">JS</span><span class="pc">JSON</span></div></a>
+    <a class="pcard r"    href="https://ramoswagner.github.io/dice/" target="_blank" rel="noopener"><span class="pn">005 — Gestão</span><div class="pt">DICE Model Analyzer</div><p class="pd">Análise de risco e probabilidade de sucesso baseada no modelo BCG/EESC-USP.</p><div class="pchips"><span class="pc">PMBOK</span><span class="pc">Risco</span><span class="pc">HTML/JS</span></div></a>
+    <a class="pcard r d1" href="https://github.com/Ramoswagner" target="_blank" rel="noopener"><span class="pn">006 — PMO</span><div class="pt">Case: PMO Hospitalar</div><p class="pd">Estruturação do PMO no Hospital da Baleia — programa "Navega Baleia".</p><div class="pchips"><span class="pc">PMO</span><span class="pc">Case</span><span class="pc">Hospital</span></div></a>
+  </div>
+</section>
+
+<section class="sec s2" id="certificacoes">
+  <div class="stag"><span class="sn">07</span><span class="sb"></span><span class="sl">Certificações</span></div>
+  <h2 class="stitle r">Aprendizado<br><em>contínuo.</em></h2>
+  <div class="cgrid">
+    <div class="r"><div class="ch2">Dados &amp; Analytics</div><ul class="cul"><li>Ciência de Dados — Python e R · Udemy 2023</li><li>Microsoft Power BI Profissional · Udemy 2023</li><li>Técnicas Avançadas Power BI · LinkedIn Learning 2023</li><li>Excel · FAPEMG 2017</li></ul></div>
+    <div class="r d1"><div class="ch2">Gestão de Projetos</div><ul class="cul"><li>Microsoft Project — Básico ao Avançado · Udemy 2023</li><li>Execução e Controle com MS Project · LinkedIn 2023</li><li>Gerenciamento de Cronogramas · LinkedIn 2023</li><li>Lean Six Sigma · Escola DNC 2023</li></ul></div>
+    <div class="r d2"><div class="ch2">Agilidade &amp; Métodos</div><ul class="cul"><li>OKR na Prática · Udemy 2023</li><li>Gestão Ágil com Scrum · Udemy 2023</li><li>Kanban de A a Z · Udemy 2023</li><li>Gestão Ágil com MS Project · LinkedIn 2023</li></ul></div>
+    <div class="r d3"><div class="ch2">Estratégia &amp; Liderança</div><ul class="cul"><li>Comunicação e Oratória · Escola Conquer 2023</li><li>Liderança com Int. Emocional · LinkedIn 2023</li><li>Pensamento Crítico · LinkedIn Learning 2023</li></ul></div>
+  </div>
+</section>
+
+<section class="sec" id="contato">
+  <div class="stag"><span class="sn" style="color:var(--gold); opacity:.65">08</span><span class="sb" style="background:var(--gold); opacity:.3"></span><span class="sl">Contato</span></div>
+  <div class="clayout">
+    <div>
+      <h2 class="chead r">Vamos construir<br>algo <em>relevante</em><br>juntos?</h2>
+      <div class="clinks r d1">
+        <a class="clink" href="mailto:wagnerramoseng@gmail.com"><div><div class="ctype">E-mail</div><div class="cval">wagnerramoseng@gmail.com</div></div><span class="carr" aria-hidden="true">→</span></a>
+        <a class="clink" href="https://www.linkedin.com/in/engwagnerramos/" target="_blank" rel="noopener"><div><div class="ctype">LinkedIn</div><div class="cval">linkedin.com/in/engwagnerramos</div></div><span class="carr" aria-hidden="true">→</span></a>
+        <a class="clink" href="https://github.com/Ramoswagner" target="_blank" rel="noopener"><div><div class="ctype">GitHub</div><div class="cval">github.com/Ramoswagner</div></div><span class="carr" aria-hidden="true">→</span></a>
+        <a class="clink" href="https://www.instagram.com/engwagnerramos" target="_blank" rel="noopener"><div><div class="ctype">Instagram</div><div class="cval">@engwagnerramos</div></div><span class="carr" aria-hidden="true">→</span></a>
+      </div>
+    </div>
+    <div class="ccrd r d2">
+      <div class="cctit">Disponibilidade</div>
+      <div class="ccrow"><div class="ccl">Status</div><div class="ccv">Aberto a oportunidades</div></div>
+      <div class="ccrow"><div class="ccl">Localização</div><div class="ccv">Belo Horizonte, MG<br>Disponível para remoto e híbrido</div></div>
+      <div class="ccrow"><div class="ccl">Áreas de interesse</div><div class="ccv">PMO · Gestão de Projetos<br>Business Intelligence · Consultoria</div></div>
+      <a class="cdl" href="assets/curriculo-wagner-ramos.pdf" download>Baixar Currículo PDF ↓</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span class="ft">© 2026 <span class="ftg">Wagner Douglas Ramos da Silva</span></span>
+  <span class="ft">PMO · Gestão de Projetos · Business Intelligence</span>
+</footer>
+
+<script>
+// ── LOADER ──
+const loader = document.getElementById('loader');
+window.addEventListener('load', () => {
+  loader.classList.add('go');
+  setTimeout(() => loader.classList.add('away'), 2800);
+  setTimeout(() => loader.remove(), 4000);
+});
+
+// ── CURSOR ──
+(function(){
+  if (!window.matchMedia('(pointer:fine)').matches) return;
+  const co=document.getElementById('co'),ci=document.getElementById('ci'),cd=document.getElementById('cdot');
+  let mx=0,my=0,ox=0,oy=0,ix=0,iy=0;
+  document.addEventListener('mousemove',e=>{
+    mx=e.clientX;my=e.clientY;
+    cd.style.transform=`translate(calc(${mx}px - 50%),calc(${my}px - 50%))`;
+  },{passive:true});
+  (function loop(){
+    ox+=(mx-ox)*.075;oy+=(my-oy)*.075;
+    ix+=(mx-ix)*.17;iy+=(my-iy)*.17;
+    co.style.transform=`translate(calc(${ox}px - 50%),calc(${oy}px - 50%))`;
+    ci.style.transform=`translate(calc(${ix}px - 50%),calc(${iy}px - 50%))`;
+    requestAnimationFrame(loop);
+  })();
+  document.querySelectorAll('.ctab,.imp,.fitem,.nav-logo,.nav-mid a').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{document.body.classList.add('ch');document.body.classList.remove('chl')});
+    el.addEventListener('mouseleave',()=>document.body.classList.remove('ch','chl'));
+  });
+  document.querySelectorAll('.btn,.pcard,.clink,.nav-dl').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{document.body.classList.remove('ch');document.body.classList.add('chl')});
+    el.addEventListener('mouseleave',()=>document.body.classList.remove('ch','chl'));
+  });
+})();
+
+// ── NAV SCROLL ──
+const nav=document.getElementById('nav');
+const tk=()=>nav.classList.toggle('over',window.scrollY>20);
+window.addEventListener('scroll',tk,{passive:true});tk();
+
+// ── MENU MOBILE com focus trap ──
+const ham=document.getElementById('ham'),mob=document.getElementById('mob');
+
+function closeMob(){
+  ham.classList.remove('open');
+  ham.setAttribute('aria-expanded','false');
+  ham.setAttribute('aria-label','Abrir menu');
+  mob.classList.remove('open');
+  document.body.style.overflow='';
+  ham.focus();
+}
+
+// ✅ FIX 8: Focus trap — foco não escapa do menu enquanto aberto
+function trapFocus(e){
+  if(!mob.classList.contains('open')) return;
+  const focusable = mob.querySelectorAll('a[href], button:not([disabled])');
+  const first = focusable[0], last = focusable[focusable.length-1];
+  if(e.key === 'Tab'){
+    if(e.shiftKey){
+      if(document.activeElement === first){e.preventDefault();last.focus();}
+    } else {
+      if(document.activeElement === last){e.preventDefault();first.focus();}
+    }
+  }
+}
+
+ham.addEventListener('click',()=>{
+  const o=ham.classList.toggle('open');
+  ham.setAttribute('aria-expanded',String(o));
+  ham.setAttribute('aria-label', o ? 'Fechar menu' : 'Abrir menu');
+  mob.classList.toggle('open',o);
+  document.body.style.overflow=o?'hidden':'';
+  if(o){
+    // Foca no primeiro link do menu ao abrir
+    setTimeout(()=>{
+      const firstLink = mob.querySelector('a');
+      if(firstLink) firstLink.focus();
+    }, 50);
+  }
+});
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') closeMob();
+  trapFocus(e);
+});
+
+// ── REVEAL ──
+const ro=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');ro.unobserve(e.target);}});},{threshold:.07,rootMargin:'0px 0px -28px 0px'});
+document.querySelectorAll('.r').forEach(el=>ro.observe(el));
+
+// ── CONTADORES ──
+function ac(el){
+  const to=parseInt(el.dataset.to,10),dur=1900,t0=performance.now();
+  (function f(n){const p=Math.min((n-t0)/dur,1);el.textContent=Math.round((1-Math.pow(1-p,3))*to);if(p<1)requestAnimationFrame(f);})(t0);
+}
+const cobs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){ac(e.target);cobs.unobserve(e.target);}});},{threshold:.5});
+document.querySelectorAll('.cnt').forEach(el=>cobs.observe(el));
+
+// ── TABS COMPETÊNCIAS ──
+document.querySelectorAll('.ctab').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.ctab').forEach(x=>{x.classList.remove('on');x.setAttribute('aria-selected','false');});
+    document.querySelectorAll('.cpanel').forEach(p=>p.classList.remove('on'));
+    b.classList.add('on');b.setAttribute('aria-selected','true');
+    const p=document.getElementById('p-'+b.dataset.p);if(p)p.classList.add('on');
+  });
+});
+</script>
 </body>
 </html>
