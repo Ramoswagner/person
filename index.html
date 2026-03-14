@@ -3050,18 +3050,20 @@ html,body{font-family:'Inter',sans-serif;font-size:13px;line-height:1.6;backgrou
 /* Content pages — padding only, no fixed height */
 .page{
   width:210mm;
-  padding:12mm 13mm 20mm;
+  padding:12mm 13mm 16mm;
   position:relative;
-  page-break-after:always;
+  display:block;
 }
-.page:last-child{page-break-after:auto}
-
-/* Page footer — in-flow, pushed to bottom via page padding */
+/* Footer: in-flow, always after all content */
 .pfooter{
-  position:absolute;bottom:6mm;left:13mm;right:13mm;
+  margin-top:6mm;
   display:flex;justify-content:space-between;align-items:center;
   border-top:1px solid #e9ecef;padding-top:2mm;
+  position:static;
 }
+
+/* Page footer — in-flow, pushed to bottom via page padding */
+/* pfooter is now in-flow inside .page */
 .pfooter-l{font-size:7px;color:#9ca3af;letter-spacing:.05em}
 .pfooter-r{font-family:'Cormorant Garamond',serif;font-size:9pt;font-weight:700;color:#C4A35A;letter-spacing:.12em}
 
@@ -3120,8 +3122,8 @@ html,body{font-family:'Inter',sans-serif;font-size:13px;line-height:1.6;backgrou
     </div>
   </div>
 
-  <!-- MID BLOCK: pinned at 130mm from top (vertical center region) -->
-  <div style="position:absolute;top:128mm;left:14mm;right:14mm;z-index:1">
+  <!-- MID BLOCK: score + bars -->
+  <div style="position:absolute;top:95mm;left:14mm;right:14mm;z-index:1">
     <div style="display:flex;align-items:flex-end;gap:7mm;margin-bottom:6mm">
       <div style="font-family:'Cormorant Garamond',serif;font-size:80pt;font-weight:700;line-height:1;color:#F0F4FA">${s}</div>
       <div style="padding-bottom:3mm">
@@ -3147,7 +3149,7 @@ html,body{font-family:'Inter',sans-serif;font-size:13px;line-height:1.6;backgrou
 </div>
 
 <!-- ═══ PÁG 2 — RESUMO EXECUTIVO + ANÁLISE POR FATOR ═══ -->
-<div class="page">
+<div class="page" style="page-break-before:always">
   <div class="pheader">
     <div>
       <div class="ph-title">${projectName}</div>
@@ -3200,7 +3202,7 @@ html,body{font-family:'Inter',sans-serif;font-size:13px;line-height:1.6;backgrou
 </div>
 
 <!-- ═══ PÁG 3 — RECOMENDAÇÕES + REFERÊNCIA ═══ -->
-<div class="page">
+<div class="page" style="page-break-before:always">
   <div class="pheader">
     <div>
       <div class="ph-title">Plano de Ação Recomendado</div>
