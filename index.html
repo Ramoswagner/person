@@ -3055,11 +3055,9 @@ html,body{font-family:'Inter',sans-serif;font-size:13px;line-height:1.6;backgrou
 }
 /* Running footer — fixed in print context = repeats on every physical page */
 .pfooter{
-  position:fixed;
-  bottom:4mm;left:0;right:0;
+  margin-top:6mm;
   display:flex;justify-content:space-between;align-items:center;
   border-top:1px solid #e9ecef;padding-top:2mm;
-  background:white;
 }
 /* pfooter is now a running element */
 .pfooter-l{font-size:7px;color:#9ca3af;letter-spacing:.05em}
@@ -3100,11 +3098,9 @@ html,body{font-family:'Inter',sans-serif;font-size:13px;line-height:1.6;backgrou
 @media print{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   .cover{page-break-inside:avoid}
-  .pfooter{position:fixed!important;bottom:4mm!important;left:0!important;right:0!important;display:flex!important;background:white!important}
+  .pfooter{display:flex!important}
 }
-@media screen{
-  .pfooter{display:none}
-}
+
 </style>
 </head>
 <body>
@@ -3197,6 +3193,10 @@ html,body{font-family:'Inter',sans-serif;font-size:13px;line-height:1.6;backgrou
   <div class="sec">Análise por Fator — com justificativa do gestor</div>
   ${factorRows}
 
+  <div class="pfooter">
+    <div class="pfooter-l">DICE Framework &nbsp;·&nbsp; ${projectName} &nbsp;·&nbsp; ${nowShort} &nbsp;·&nbsp; ID: ${reportId}</div>
+    <div class="pfooter-r">WR</div>
+  </div>
 </div>
 
 <!-- ═══ PÁG 3 — RECOMENDAÇÕES + REFERÊNCIA ═══ -->
@@ -3222,12 +3222,10 @@ html,body{font-family:'Inter',sans-serif;font-size:13px;line-height:1.6;backgrou
     </div>
   </div>
 
-</div>
-
-<!-- Running footer: position:fixed in @media print = appears on every printed page -->
-<div class="pfooter">
-  <div class="pfooter-l">DICE Framework &nbsp;·&nbsp; ${projectName} &nbsp;·&nbsp; ${nowShort} &nbsp;·&nbsp; Wagner Ramos — PMO &amp; BI &nbsp;·&nbsp; ID: ${reportId}</div>
-  <div class="pfooter-r">WR</div>
+  <div class="pfooter">
+    <div class="pfooter-l">DICE Framework &nbsp;·&nbsp; ${projectName} &nbsp;·&nbsp; ${nowShort} &nbsp;·&nbsp; Wagner Ramos — PMO &amp; BI</div>
+    <div class="pfooter-r">WR</div>
+  </div>
 </div>
 
 <script>
